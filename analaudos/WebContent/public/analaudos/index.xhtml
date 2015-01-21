@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<ui:composition template="/public/basic/templates/simpleProcess.xhtml">
+	<ui:param name="title" value="Analaudos - Analisador semântico de laudos médicos" />
+	<ui:param name="icon" value="http://ssl.gstatic.com/codesite/ph/images/defaultlogo.png" />
+	<ui:param name="description" value="O Analaudos é um sistema de análise semântica de laudos médicos e outros documentos." />
+	<ui:define name="content">
+		<script src="./js/springy.js"/>
+		<script src="./js/springyui.js"/>
+		<script src="./js/utils.js"/>
+		<script src="./js/analaudos.js"/>
+
+		<a href="teste.html">Teste individual</a>
+		<a href="dados.php">Resultados enviados</a>
+		
+		<p:accordionPanel multiple="true" activeIndex="0" >
+			<p:tab title="Conteúdo do laudo">
+		
+
+		<h1>Analisador de laudos</h1>
+			Digite aqui o conteúdo do laudo:<br />
+		<textarea id="sourceReport" rows="6" style="width: 100%">
+			ULTRASSONOGRAFIA TRANSVAGINAL Bexiga vazia. Útero visualizado (histerectomia sub-total). O colo mede: 3,1 x 3,0 x 1,8 cm. Ovário direito: Medindo 3,1 x 2,2 x 2,3 cm nos seus maiores eixos. Volume de 3,4 cm³. Aprsentando uma imagem cistica, de aspecto simples, medindo 21 mm (funcional?). Ovário esquerdo: nao visualizado (grande interposicao gasosa). Ausência de líquido livre na escavação retro uterina. Não evidenciam-se massas ou tumores nas regiões anexiais. CONCLUSÃO Cisto em ovario direito.
+		</textarea>
+		<br />Texto desformatado:<br />
+		<textarea id="targetReport" rows="6"
+			style="width: 100%; background: lightgray;"
+			ondblclick="addNode(this.value.substring(this.selectionStart, this.selectionEnd))"></textarea>
+		<button onclick="buildGraph(jQuery('#sourceReport')[0], jQuery('#targetReport')[0], jQuery('#graph')); return false;">
+			Analizar o laudo</button>
+		<button onclick="arrange(); return false;">Re-arranjar</button>
+		<button onclick="removeOrphans(); return false;">Remover órfãos</button>
+		<input id="newNode" type="text"></input>
+		<button onclick="addNode(jQuery('#newNode')[0].value); return false;">
+			Adicionar novo nó</button>
+		<button onclick="document.getElementById('chl').value = createDot(); return false;">Copiar .dot</button>
+		<hr />
+		<table>
+			<tr>
+				<td><h1>Grafo Conceitual</h1></td>
+				<td>Ctrl: Seleciona um nó para iniciar uma ligação <br /> Shift:
+					Cria uma ligação entre o nó pré-selecionado e o atual nó clicado.
+				</td>
+			</tr>
+		</table>
+		<canvas id="graph" height="480" width="1024"></canvas>
+		<br />
+
+			</p:tab>
+
+
+			<p:tab title=".dot">
+						<h2>.dot</h2>
+				<button onclick="createImage(document.getElementById('chl').value, document.getElementById('graphDot')); return false;">Atualizar imagem</button>
+				<textarea id="chl" name="chl" rows="6" style="width: 100%; background: lightgray;"></textarea>
+				<div style="min-height: 200px; max-height: 100%; overflow: scroll; border: 1px solid black;">
+					<img id="graphDot" width="100%"	src="https://developers.google.com/_static/f5b389b587/images/developers-logo.svg" />
+				</div>
+			</p:tab>
+		</p:accordionPanel>
+	</ui:define>
+	<ui:define name="actions">
+
+	</ui:define>
+</ui:composition>
+</html>

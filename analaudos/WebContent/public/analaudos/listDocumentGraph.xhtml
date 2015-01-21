@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<ui:composition template="/public/basic/templates/simpleProcess.xhtml">
+	<ui:param name="title" value="Analaudos - Analisador semântico de laudos médicos" />
+	<ui:param name="icon" value="http://ssl.gstatic.com/codesite/ph/images/defaultlogo.png" />
+	<ui:param name="description" value="Visualiza todos os grafo gerados pelos pesquisadores." />
+	<ui:define name="content">
+		Documento Origem (Id): <p:inputText value="#{listDocumentGraphBean.documentId}" style="text-align: right;"/>
+		Autor do grafo: <p:inputText value="#{listDocumentGraphBean.author}"/>
+		<p:commandButton actionListener="#{listDocumentGraphBean.doList}" update="result" value="Listar"/>
+		<p:dataTable id="result" value="#{listDocumentGraphBean.getDocuments().getList()}" var="item">
+			<p:column headerText="Grafos" style="text-align:center;">
+				
+				(<h:outputLabel value="#{item.object.timeStamp.time}"><f:convertDateTime/></h:outputLabel>) Autor: #{item.object.author}<br/>
+				<img src="https://chart.googleapis.com/chart?cht=gv&amp;chl=#{item.object.sourceEncoded}"/>
+			</p:column>
+		
+		</p:dataTable>
+		
+	</ui:define>
+	<ui:define name="actions">
+	</ui:define>
+</ui:composition>
+</html>
+

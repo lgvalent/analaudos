@@ -1,0 +1,50 @@
+<!DOCTYPE XHTML>
+<html>
+<head>
+	<title>ANALAUDOS - Protótipo de modelagem interativa - v0.3b</title>
+	<meta charset="UTF-8">
+</head>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script src="springy.js"></script>
+<script src="springyui.js"></script>
+<script src="utils.js"></script>
+<script src="analaudos.js"></script>
+<script src="paint.js"></script>
+<body>
+<h1>Analisador de laudos</h1>
+Digite aqui o conteúdo do laudo:<br/>
+<textarea id="sourceReport" rows="6" style="width:100%" >
+ULTRASSONOGRAFIA TRANSVAGINAL Bexiga vazia. Útero visualizado (histerectomia sub-total). O colo mede: 3,1 x 3,0 x 1,8 cm. Ovário direito: Medindo 3,1 x 2,2 x 2,3 cm nos seus maiores eixos. Volume de 3,4 cm³. Aprsentando uma imagem cistica, de aspecto simples, medindo 21 mm (funcional?). Ovário esquerdo: nao visualizado (grande interposicao gasosa). Ausência de líquido livre na escavação retro uterina. Não evidenciam-se massas ou tumores nas regiões anexiais. CONCLUSÃO Cisto em ovario direito.
+</textarea>
+<br/>Texto desformatado:<br/>
+<textarea id="targetReport" rows="6" style="width:100%; background: lightgray;" ondblclick="addNode(this.value.substring(this.selectionStart, this.selectionEnd))"></textarea>
+<button onclick="buildGraph(jQuery('#sourceReport')[0], jQuery('#targetReport')[0], jQuery('#graph'))"> Analizar o laudo </button>
+<button onclick="arrange()"> Re-arranjar </button>
+<button onclick="removeOrphans()"> Remover órfãos </button>
+<input id="newNode" type="text"></input>
+<button onclick="addNode(jQuery('#newNode')[0].value)"> Adicionar novo nó </button>
+<button onclick="createDot()"> Copiar .dot </button>
+<button onclick="sendGraph()">Enviar grafo </button>
+<hr/>
+<table><tr>
+<td><h1>Grafo Conceitual</h1></td>
+<td>
+Ctrl: Seleciona um nó para iniciar uma ligação<br/>
+Shift: Cria uma ligação entre o nó pré-selecionado e o atual nó clicado.
+</td>
+<tr></table>
+<canvas id="graph" height="480" width="1024" style="border:solid 1px #333; cursor:pointer;"></canvas>
+<br/>
+<h2>.dot</h2>
+<button onclick="createImage()"> Atualizar imagem </button>
+<form id="graphImageForm">
+	<textarea id="chl"  name="chl" rows="6" style="width:100%; background: lightgray;"></textarea>
+	<input type="hidden" name="cht" value="gv"></input>
+</form>
+<div style="min-height:200px; max-height:100%; overflow:scroll; border:1px solid black;">
+	<img id="graphDot" width="100%" src="https://developers.google.com/_static/f5b389b587/images/developers-logo.svg">
+</div>
+</body>
+
+</html>

@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<ui:composition template="/public/basic/templates/simpleProcess.xhtml">
+	<ui:param name="title" value="Analaudos - Analisador semântico de laudos médicos" />
+	<ui:param name="icon" value="http://ssl.gstatic.com/codesite/ph/images/defaultlogo.png" />
+	<ui:param name="description" value="O Analaudos é um sistema de análise semântica de laudos médicos e outros documentos." />
+	<ui:define name="content">
+		<script src="./js/springy.js"/>
+		<script src="./js/springyui.js"/>
+		<script src="./js/utils.js"/>
+		<script src="./js/analaudos.js"/>
+
+		<b>Laudo {id=#{createDocumentGraphBean.documentId}}</b><br/>
+		<table width="100%">
+			<tr>
+				<td>Original:<br/>
+					<h:inputTextarea id="sourceReport" value="#{createDocumentGraphBean.document}" rows="10" style="width: 100%"/>
+				</td>
+				<td>Tratado:<br/>
+					<h:inputTextarea id="targetReport" rows="10" style="width: 100%; background: lightgray;" ondblclick="addNode(this.value.substring(this.selectionStart, this.selectionEnd))"/>
+				</td>
+			</tr>
+		</table>
+		
+		<table>
+			<tr>
+				<td><b>Grafo Conceitual</b><h:inputText id="author" value="#{createDocumentGraphBean.author}" title="Nome do autor do grafo"/><br/>
+					Ctrl: Seleciona um nó para iniciar uma ligação <br /> Shift:
+					Cria uma ligação entre o nó pré-selecionado e o atual nó clicado.
+				</td>
+				<td>
+					<p:button onclick="buildGraph(jQuery('#form\\:sourceReport')[0], jQuery('#form\\:targetReport')[0], jQuery('#graph')); return false;" value="Gerar grafo"/>
+					<p:button onclick="arrange(); return false;" value="Re-arranjar" />
+					<p:button onclick="removeOrphans(); return false;" value="Remover órfãos"/>
+					<input id="newNode" type="text"></input>
+					<p:button onclick="addNode(jQuery('#newNode')[0].value); return false;" value="Adicionar novo nó"/>
+					<p:button onclick="document.getElementById('form:panel:dotSource').value = createDot(); return false;" value="Copiar .dot"/>
+					<p:commandButton actionListener="#{createDocumentGraphBean.doSave}" icon ="ui-icon-check" value="Salvar relações" update="growl" />
+				</td>
+			</tr>
+		</table>
+		<canvas id="graph" height="10" width="10" />
+		
+		<p:accordionPanel id="panel" multiple="true" activeIndex="-1">
+			<p:tab title="Gráfico">
+				<h:inputTextarea id="dotSource" value="#{createDocumentGraphBean.graphSource}" rows="6" style="width: 100%; background: lightgray;"/>
+				<button onclick="createImage(document.getElementById('form:panel:dotSource').value, document.getElementById('graphDot')); return false;">Atualizar imagem</button>
+				<div style="min-height: 200px; max-height: 100%; overflow: scroll; border: 1px solid black;">
+					<img id="graphDot" width="100%"	src="https://developers.google.com/_static/f5b389b587/images/developers-logo.svg" />
+				</div>
+			</p:tab>
+		</p:accordionPanel>
+	</ui:define>
+	<ui:define name="actions">
+	</ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,171 @@
+<html>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script src="springy.js"></script>
+<script src="springyui.js"></script>
+<script>
+
+
+var graph = new Springy.Graph();
+
+graph.addNode(new Springy.Node('ultrassonografia', {label:'ultrassonografia'}));
+graph.addNode(new Springy.Node('transvaginal', {label:'transvaginal'}));
+graph.addNode(new Springy.Node('bexiga', {label:'bexiga'}));
+graph.addNode(new Springy.Node('vazia', {label:'vazia'}));
+graph.addNode(new Springy.Node('utero', {label:'utero'}));
+graph.addNode(new Springy.Node('visualizado', {label:'visualizado'}));
+graph.addNode(new Springy.Node('(histerectomia', {label:'(histerectomia'}));
+graph.addNode(new Springy.Node('sub-total)', {label:'sub-total)'}));
+graph.addNode(new Springy.Node('o', {label:'o'}));
+graph.addNode(new Springy.Node('colo', {label:'colo'}));
+graph.addNode(new Springy.Node('mede:', {label:'mede:'}));
+graph.addNode(new Springy.Node('3,1', {label:'3,1'}));
+graph.addNode(new Springy.Node('x', {label:'x'}));
+graph.addNode(new Springy.Node('3,0', {label:'3,0'}));
+graph.addNode(new Springy.Node('x', {label:'x'}));
+graph.addNode(new Springy.Node('1,8', {label:'1,8'}));
+graph.addNode(new Springy.Node('cm', {label:'cm'}));
+graph.addNode(new Springy.Node('ovario', {label:'ovario'}));
+graph.addNode(new Springy.Node('direito:', {label:'direito:'}));
+graph.addNode(new Springy.Node('medindo', {label:'medindo'}));
+graph.addNode(new Springy.Node('3,1', {label:'3,1'}));
+graph.addNode(new Springy.Node('x', {label:'x'}));
+graph.addNode(new Springy.Node('2,2', {label:'2,2'}));
+graph.addNode(new Springy.Node('x', {label:'x'}));
+graph.addNode(new Springy.Node('2,3', {label:'2,3'}));
+graph.addNode(new Springy.Node('cm', {label:'cm'}));
+graph.addNode(new Springy.Node('nos', {label:'nos'}));
+graph.addNode(new Springy.Node('seus', {label:'seus'}));
+graph.addNode(new Springy.Node('maiores', {label:'maiores'}));
+graph.addNode(new Springy.Node('eixos', {label:'eixos'}));
+graph.addNode(new Springy.Node('volume', {label:'volume'}));
+graph.addNode(new Springy.Node('de', {label:'de'}));
+graph.addNode(new Springy.Node('3,4', {label:'3,4'}));
+graph.addNode(new Springy.Node('cm3', {label:'cm3'}));
+graph.addNode(new Springy.Node('aprsentando', {label:'aprsentando'}));
+graph.addNode(new Springy.Node('uma', {label:'uma'}));
+graph.addNode(new Springy.Node('imagem', {label:'imagem'}));
+graph.addNode(new Springy.Node('cistica,', {label:'cistica,'}));
+graph.addNode(new Springy.Node('de', {label:'de'}));
+graph.addNode(new Springy.Node('aspecto', {label:'aspecto'}));
+graph.addNode(new Springy.Node('simples,', {label:'simples,'}));
+graph.addNode(new Springy.Node('medindo', {label:'medindo'}));
+graph.addNode(new Springy.Node('21', {label:'21'}));
+graph.addNode(new Springy.Node('mm', {label:'mm'}));
+graph.addNode(new Springy.Node('(funcional?)', {label:'(funcional?)'}));
+graph.addNode(new Springy.Node('ovario', {label:'ovario'}));
+graph.addNode(new Springy.Node('esquerdo:', {label:'esquerdo:'}));
+graph.addNode(new Springy.Node('nao', {label:'nao'}));
+graph.addNode(new Springy.Node('visualizado', {label:'visualizado'}));
+graph.addNode(new Springy.Node('(grande', {label:'(grande'}));
+graph.addNode(new Springy.Node('interposicao', {label:'interposicao'}));
+graph.addNode(new Springy.Node('gasosa)', {label:'gasosa)'}));
+graph.addNode(new Springy.Node('ausencia', {label:'ausencia'}));
+graph.addNode(new Springy.Node('de', {label:'de'}));
+graph.addNode(new Springy.Node('liquido', {label:'liquido'}));
+graph.addNode(new Springy.Node('livre', {label:'livre'}));
+graph.addNode(new Springy.Node('na', {label:'na'}));
+graph.addNode(new Springy.Node('escavacao', {label:'escavacao'}));
+graph.addNode(new Springy.Node('retro', {label:'retro'}));
+graph.addNode(new Springy.Node('uterina', {label:'uterina'}));
+graph.addNode(new Springy.Node('nao', {label:'nao'}));
+graph.addNode(new Springy.Node('evidenciam-se', {label:'evidenciam-se'}));
+graph.addNode(new Springy.Node('massas', {label:'massas'}));
+graph.addNode(new Springy.Node('ou', {label:'ou'}));
+graph.addNode(new Springy.Node('tumores', {label:'tumores'}));
+graph.addNode(new Springy.Node('nas', {label:'nas'}));
+graph.addNode(new Springy.Node('regioes', {label:'regioes'}));
+graph.addNode(new Springy.Node('anexiais', {label:'anexiais'}));
+graph.addNode(new Springy.Node('conclusao', {label:'conclusao'}));
+graph.addNode(new Springy.Node('cisto', {label:'cisto'}));
+graph.addNode(new Springy.Node('em', {label:'em'}));
+graph.addNode(new Springy.Node('ovario', {label:'ovario'}));
+graph.addNode(new Springy.Node('direito', {label:'direito'}));
+graph.newEdge(graph.nodeSet['ultrassonografia'], graph.nodeSet['transvaginal'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['transvaginal'], graph.nodeSet['bexiga'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['bexiga'], graph.nodeSet['vazia'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['vazia'], graph.nodeSet['utero'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['utero'], graph.nodeSet['visualizado'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['visualizado'], graph.nodeSet['(histerectomia'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['(histerectomia'], graph.nodeSet['sub-total)'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['sub-total)'], graph.nodeSet['o'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['o'], graph.nodeSet['colo'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['colo'], graph.nodeSet['mede:'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['mede:'], graph.nodeSet['3,1'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['3,1'], graph.nodeSet['x'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['x'], graph.nodeSet['3,0'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['3,0'], graph.nodeSet['x'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['x'], graph.nodeSet['1,8'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['1,8'], graph.nodeSet['cm'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['cm'], graph.nodeSet['ovario'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['ovario'], graph.nodeSet['direito:'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['direito:'], graph.nodeSet['medindo'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['medindo'], graph.nodeSet['3,1'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['3,1'], graph.nodeSet['x'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['x'], graph.nodeSet['2,2'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['2,2'], graph.nodeSet['x'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['x'], graph.nodeSet['2,3'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['2,3'], graph.nodeSet['cm'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['cm'], graph.nodeSet['nos'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['nos'], graph.nodeSet['seus'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['seus'], graph.nodeSet['maiores'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['maiores'], graph.nodeSet['eixos'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['eixos'], graph.nodeSet['volume'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['volume'], graph.nodeSet['de'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['de'], graph.nodeSet['3,4'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['3,4'], graph.nodeSet['cm3'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['cm3'], graph.nodeSet['aprsentando'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['aprsentando'], graph.nodeSet['uma'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['uma'], graph.nodeSet['imagem'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['imagem'], graph.nodeSet['cistica,'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['cistica,'], graph.nodeSet['de'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['de'], graph.nodeSet['aspecto'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['aspecto'], graph.nodeSet['simples,'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['simples,'], graph.nodeSet['medindo'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['medindo'], graph.nodeSet['21'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['21'], graph.nodeSet['mm'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['mm'], graph.nodeSet['(funcional?)'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['(funcional?)'], graph.nodeSet['ovario'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['ovario'], graph.nodeSet['esquerdo:'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['esquerdo:'], graph.nodeSet['nao'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['nao'], graph.nodeSet['visualizado'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['visualizado'], graph.nodeSet['(grande'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['(grande'], graph.nodeSet['interposicao'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['interposicao'], graph.nodeSet['gasosa)'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['gasosa)'], graph.nodeSet['ausencia'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['ausencia'], graph.nodeSet['de'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['de'], graph.nodeSet['liquido'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['liquido'], graph.nodeSet['livre'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['livre'], graph.nodeSet['na'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['na'], graph.nodeSet['escavacao'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['escavacao'], graph.nodeSet['retro'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['retro'], graph.nodeSet['uterina'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['uterina'], graph.nodeSet['nao'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['nao'], graph.nodeSet['evidenciam-se'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['evidenciam-se'], graph.nodeSet['massas'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['massas'], graph.nodeSet['ou'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['ou'], graph.nodeSet['tumores'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['tumores'], graph.nodeSet['nas'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['nas'], graph.nodeSet['regioes'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['regioes'], graph.nodeSet['anexiais'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['anexiais'], graph.nodeSet['conclusao'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['conclusao'], graph.nodeSet['cisto'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['cisto'], graph.nodeSet['em'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['em'], graph.nodeSet['ovario'], {color: '#00A0B0', label: ''});
+graph.newEdge(graph.nodeSet['ovario'], graph.nodeSet['direito'], {color: '#00A0B0', label: ''});
+
+
+jQuery(function(){
+  var springy = jQuery('#springydemo').springy({
+    graph: graph
+  });
+});
+
+</script>
+<body>
+<hr/>
+	Laudo: ultrassonografia transvaginal bexiga vazia utero visualizado (histerectomia sub-total) o colo mede: 3,1 x 3,0 x 1,8 cm ovario direito: medindo 3,1 x 2,2 x 2,3 cm nos seus maiores eixos volume de 3,4 cm3 aprsentando uma imagem cistica, de aspecto simples, medindo 21 mm (funcional?) ovario esquerdo: nao visualizado (grande interposicao gasosa) ausencia de liquido livre na escavacao retro uterina nao evidenciam-se massas ou tumores nas regioes anexiais conclusao cisto em ovario direito
+
+<hr/>
+<canvas id="springydemo" width="640" height="480" />
+</body>
+</html>

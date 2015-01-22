@@ -1,9 +1,5 @@
 package br.com.valentin.analaudos.web;
 
-import java.util.Calendar;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 

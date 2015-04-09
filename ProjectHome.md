@@ -1,0 +1,1 @@
+The Analaudos is a system for creation and manipulation of conceptual structures involving medical reports.

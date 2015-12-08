@@ -1,7 +1,6 @@
 package br.com.valentin.analaudos.web;
 
 import java.util.Calendar;
-import java.util.List;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
@@ -11,6 +10,7 @@ import br.com.orionsoft.monstrengo.crud.entity.dao.IDAO;
 import br.com.orionsoft.monstrengo.crud.services.UtilsCrud;
 import br.com.orionsoft.monstrengo.view.jsf.bean.BeanSessionBasic;
 import br.com.orionsoft.monstrengo.view.jsf.util.FacesUtils;
+import br.com.valentin.analaudos.entities.DocumentContent;
 import br.com.valentin.analaudos.entities.DocumentGraph;
 
 @ManagedBean
@@ -22,14 +22,18 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 	public static final String VIEW_NAME = "createDocumentGraphBean";
 	public static final String FACES_VIEW_1 = "/public/analaudos/createDocumentGraph?faces-redirect=true";
 		
+	public static final String REQUEST_PARAM_DOCUMENT_ID = "documentId";
+	public static final String REQUEST_PARAM_AUTHOR = "author";
+
 	private long documentId = IDAO.ENTITY_UNSAVED;
 	private String author;
 
-	private String document = "ULTRASSONOGRAFIA TRANSVAGINAL Bexiga vazia. Útero visualizado (histerectomia sub-total). O colo mede: 3,1 x 3,0 x 1,8 cm. Ovário direito: Medindo 3,1 x 2,2 x 2,3 cm nos seus maiores eixos. Volume de 3,4 cm³. Aprsentando uma imagem cistica, de aspecto simples, medindo 21 mm (funcional?). Ovário esquerdo: nao visualizado (grande interposicao gasosa). Ausência de líquido livre na escavação retro uterina. Não evidenciam-se massas ou tumores nas regiões anexiais. CONCLUSÃO Cisto em ovario direito.";
-	private String documentNormalized;
+	private DocumentContent documentContent = null;
+	private String text = "ULTRASSONOGRAFIA TRANSVAGINAL Bexiga vazia. Útero visualizado (histerectomia sub-total). O colo mede: 3,1 x 3,0 x 1,8 cm. Ovário direito: Medindo 3,1 x 2,2 x 2,3 cm nos seus maiores eixos. Volume de 3,4 cm³. Aprsentando uma imagem cistica, de aspecto simples, medindo 21 mm (funcional?). Ovário esquerdo: nao visualizado (grande interposicao gasosa). Ausência de líquido livre na escavação retro uterina. Não evidenciam-se massas ou tumores nas regiões anexiais. CONCLUSÃO Cisto em ovario direito.";
+	private String textNormalized;
 	private String graphSource;
 	
-	
+
 	public long getDocumentId() {
 		return documentId;
 	}
@@ -46,20 +50,28 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 		this.author = author;
 	}
 
-	public String getDocument() {
-		return document;
+	public DocumentContent getDocumentContent() {
+		return documentContent;
 	}
 
-	public void setDocument(String document) {
-		this.document = document;
+	public void setDocumentContent(DocumentContent documentContent) {
+		this.documentContent = documentContent;
 	}
 
-	public String getDocumentNormalized() {
-		return documentNormalized;
+	public String getText() {
+		return text;
 	}
 
-	public void setDocumentNormalized(String documentNormalized) {
-		this.documentNormalized = documentNormalized;
+	public void setText(String document) {
+		this.text = document;
+	}
+
+	public String getTextNormalized() {
+		return textNormalized;
+	}
+
+	public void setTextNormalized(String documentNormalized) {
+		this.textNormalized = documentNormalized;
 	}
 
 	public String getGraphSource() {
@@ -74,16 +86,27 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 		// Limpa os dados antigos se houver
 		System.out.println("==============================================START");
 		// Pesquisa o documentId e prepara a visão para aprimeira execução
-		this.documentId = -1;
-		this.document = "START()";
-		this.author = "Lucio";
+		if(FacesUtils.getRequestParams().containsKey(REQUEST_PARAM_DOCUMENT_ID))
+			this.documentId = Integer.parseInt(FacesUtils.getRequestParam(REQUEST_PARAM_DOCUMENT_ID));
+		if(FacesUtils.getRequestParams().containsKey(REQUEST_PARAM_AUTHOR))
+			this.author = FacesUtils.getRequestParam(REQUEST_PARAM_AUTHOR);
 		
+		if(this.documentId > 0){
+			try {
+				this.documentContent = UtilsCrud.objectRetrieve(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentContent.class, this.documentId, null);
+			} catch (BusinessException e) {
+				this.text = "Error loading document:\n" + e.getMessage();
+				e.printStackTrace();
+			}
+		}
+
 		return FACES_VIEW_1;
 	};
 	
 	public void doSave(){
 		DocumentGraph doc = new DocumentGraph();
 		doc.setAuthor(this.author);
+		doc.setDocumentContent(this.documentContent);
 		doc.setSource(this.graphSource);
 		doc.setTimeStamp(Calendar.getInstance());
 		

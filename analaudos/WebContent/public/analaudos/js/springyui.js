@@ -280,7 +280,7 @@ jQuery.fn.springy = function(params) {
 
 			// label
 			if (edge.data.label !== undefined) {
-				text = edge.data.label
+				text = edge.data.label;
 				ctx.save();
 				ctx.textAlign = "center";
 				ctx.textBaseline = "top";
@@ -318,11 +318,17 @@ jQuery.fn.springy = function(params) {
 			// clear background
 			ctx.clearRect(s.x - boxWidth/2, s.y - boxHeight/2, boxWidth, boxHeight);
 
+			// Draw border
+			if(node.data.border){
+				ctx.fillStyle = "#000000";
+				ctx.fillRect(s.x - boxWidth/2, s.y - boxHeight/2, boxWidth+2, boxHeight+2);
+			}
+
 			// fill background
 			if (selected !== null && selected.node !== null && selected.node.id === node.id) {
 				ctx.fillStyle = "#FFFFE0";
 			} else if (nearest !== null && nearest.node !== null && nearest.node.id === node.id) {
-				ctx.fillStyle = "#EEEEEE";
+				ctx.fillStyle = "#AAAAAA";
 			} else {
 				ctx.fillStyle = "#FFFFFF";
 			}

@@ -25,15 +25,19 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var sourceNodeFontColor = "blue";
-var targetNodeFontColor = "#008000";
+var sourceNodeFontColor = "#008000";
+var targetNodeFontColor = "blue";
+var rootNodeFontColor = "red";
 var orphanNodeFontColor = "#000000";
 var nodeFont = "16px Verdana, sans-serif";
 
 var wordsCount = 0;
 var gui = null;
+var canvas = null;
+var sourceNode = null;
+
 function buildGraph(inputText, outputText, outputCanvas){
-	/* Clear previous graph */
+	/* Clear sourceNodeious graph */
 	var graph = new Springy.Graph();
 
 	var s = inputText.value;
@@ -46,7 +50,7 @@ function buildGraph(inputText, outputText, outputCanvas){
 		/* Create a node */
 		graph.addNode(new Springy.Node('w'+i, {label:words[i]}));
 
-		/* Link current node to previous node */
+		/* Link current node to sourceNodeious node */
 //		if(i!=0) graph.newEdge(graph.nodeSet['w'+ (i-1)], graph.nodeSet['w'+i], {color: '#AA0000', label: ''});
 	}
 	wordsCount = words.length;
@@ -54,9 +58,10 @@ function buildGraph(inputText, outputText, outputCanvas){
 	outputText.value = s;
 
 	if(gui == null){
-		gui = outputCanvas.springy({graph: graph, nodeSelected: graph.nodeSet['w0']});
+		gui = outputCanvas.springy({graph: graph, nodeSelected: graph.nodeSet['w1']});
+		selectSource();
 		
-		var canvas = outputCanvas[0]; 
+		canvas = outputCanvas[0]; 
 
 		/* Resize canvas */
 		canvas.width = canvas.parentNode.clientWidth - canvas.offsetLeft;
@@ -65,54 +70,95 @@ function buildGraph(inputText, outputText, outputCanvas){
 		/* Borders and cursor */
 		canvas.style.border = "solid 1px #333";
 		canvas.style.cursor = "pointer";
+		
 	}
 
-	/* Edit edges CONTROLS */
-	var prev = gui.getNodeSelected();
-gui.dblclick(function(e) {
-		prev.data.font = nodeFont;
-		prev = gui.getNodeSelected();
-		prev.data.font = "bold " + nodeFont;
-		gui.renderer.start(); // Force a update
-	});
-	gui.click(function(e) {
-		if(e.shiftKey){
-			var now = gui.getNodeSelected();
-			if(prev != now){
-				/* Check previous edge to add ou remove */
-				var edges = graph.getEdges(prev, now);
-				if(edges.length > 0) for(var i in edges) graph.removeEdge(edges[i]);
-				else graph.newEdge(prev, now, {color: '#00A0B0', label: ''});
-				
-				/* Check edges in/out to colorize */
-				if(prev.id in graph.adjacency){ 
-					prev.data.fontColor = sourceNodeFontColor;
-				}else{
-					prev.data.fontColor = targetNodeFontColor;
-				}
-				if(now.id in graph.adjacency){
-					now.data.fontColor = sourceNodeFontColor;
-				}else{
-					now.data.fontColor = targetNodeFontColor;
-				}
-			}
+	canvas.ondblclick =function(e) {
+		selectSource();
+	};
+	
+	canvas.onclick = function(e) {
+		// De-select actual source
+		if(gui.getNodeSelected()==sourceNode){
+			unselectSource();
+		}else if(sourceNode == null)
+			selectSource();
+		else{
+			createEdge(gui.getNodeSelected());
+			unselectSource();
 		}
-		if(e.ctrlKey){
-			prev.data.font = nodeFont;
-			prev = gui.getNodeSelected();
-			prev.data.font = "bold " + nodeFont;
-			gui.renderer.start(); // Force a update
-		}
-	});
+	};
 	
 	arrange();
+
+	/* Activate first selection */
+//	sourceNode = gui.getNodeSelected();
+//	selectRoot();
+}
+
+/* Edit edges CONTROLS */
+function selectSource(){
+	console.log("selectSource:" + gui.getNodeSelected().data.label);
+	/* Unformat actual root node*/
+	if(sourceNode != null){
+		sourceNode.data.font = nodeFont;
+		sourceNode.data.border = false;
+	}
+
+	/* Format actual root node*/
+	sourceNode = gui.getNodeSelected();
+//	sourceNode.data.font = "bold " + nodeFont;
+	sourceNode.data.fontColor = rootNodeFontColor;
+	sourceNode.data.border = true;
+	gui.renderer.start(); // Force a update
+}
+
+function unselectSource(){
+	console.log("unselectSource:" + gui.getNodeSelected().data.label);
+
+	colorizeEdge(sourceNode);
+	sourceNode.data.border = false;
+	sourceNode = null;
 }
 
 function activateSource(){
-	prev.data.font = nodeFont;
-	prev = gui.getNodeSelected();
-	prev.data.font = "bold " + nodeFont;
+	sourceNode.data.font = nodeFont;
+	sourceNode = gui.getNodeSelected();
+//	sourceNode.data.font = "bold " + nodeFont;
+	sourceNode.data.border = true;
 	gui.renderer.start(); // Force a update
+}
+
+function colorizeEdge(target){
+	target.data.fontColor = orphanNodeFontColor;
+
+	if(target.id in gui.graph.adjacency)
+		target.data.fontColor = sourceNodeFontColor;
+	
+	var isTouched = false;
+	gui.graph.edges.forEach(function(e) {   // in target edges
+			if (e.target.id == target.id) isTouched = true;
+	});
+
+	if(isTouched) target.data.fontColor = targetNodeFontColor;
+	
+}
+
+function createEdge(target){
+	console.log("createEdge: s=" + sourceNode.data.label + " t=" + target.data.label);
+
+	if(sourceNode != target){
+		/* Check sourceNodeious edge to add ou remove */
+		var edges = gui.graph.getEdges(sourceNode, target);
+		if(edges.length > 0) for(var i in edges) gui.graph.removeEdge(edges[i]);
+		else gui.graph.newEdge(sourceNode, target, {color: '#00A0B0', label: ''});
+		
+		/* Check edges in/out to colorize */
+		colorizeEdge(sourceNode);
+		colorizeEdge(target);
+		sourceNode.data.border = false;
+
+	}		
 }
 
 function arrange(){
@@ -204,21 +250,16 @@ function createImage(dotSource, imgTarget){
 function sendGraph()
 {
 	var xmlhttp;
-	if (window.XMLHttpRequest)
-	  {// code for IE7+, Firefox, Chrome, Opera, Safari
+	if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
 	  xmlhttp=new XMLHttpRequest();
-	  }
-	else
-	  {// code for IE6, IE5
-	  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-	  }
-	xmlhttp.onreadystatechange=function()
-	  {
-	  if (xmlhttp.readyState==4 && xmlhttp.status==200)
-	    {
+	} else  {// code for IE6, IE5
+		  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	xmlhttp.onreadystatechange=function(){
+	  if (xmlhttp.readyState==4 && xmlhttp.status==200){
 	       alert(xmlhttp.responseText);
-	    }
-	  }
+	   }
+	 };
 	xmlhttp.open("POST","analaudos.php",true);
 	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 	xmlhttp.send("owner=Silva&graph="+dotGraph);

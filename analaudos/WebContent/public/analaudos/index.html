@@ -1,24 +1,21 @@
-<?xml version='1.0' encoding='UTF-8' ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:ui="http://java.sun.com/jsf/facelets">
+<html>
+<head>
+	<script src="./js/springy.js"/>
+	<script src="./js/springyui.js"/>
+	<script src="./js/utils.js"/>
+	<script src="./js/analaudos.js"/>
+</head>
+
 <ui:composition template="/public/basic/templates/simpleProcess.xhtml">
 	<ui:param name="title" value="Analaudos - Analisador semântico de laudos médicos" />
 	<ui:param name="icon" value="http://ssl.gstatic.com/codesite/ph/images/defaultlogo.png" />
-	<ui:param name="description" value="Olá &lt;b&gt;#{createDocumentGraphBean.author}&lt;/b&gt;, &lt;br/&gt; Obrigado por participar da pesquisa. Sua contribuição será muito importante para entendermos os processos de criação de estruturas conceituais e desenvolver ferramentas que melhorem e agilizem a aplicação de tais métodos na busca de informações em grandes bases de dados sobre laudos médicos.&lt;br/&gt; Analise o texto original e no painel do grafo, realize as ligações entre os termos que possuem alguma relação." />
+	<ui:param name="description" value="Olá &lt;b&gt;#{createDocumentGraphBean.author}&lt;/b&gt;, &lt;br/&gt; Obrigado por participar da pesquisa. Sua contribuição será muito importante para entendermos os processos de criação de estruturas conceituais e desenvolver ferramentas que melhorem e agilizem a aplicação de tais métodos na busca de informações em grandes bases de dados.&lt;br/&gt; Analise o texto original e no painel do grafo, realize as ligações entre os termos que possuem alguma relação." />
 	<ui:define name="content">
 	<f:metadata>
 		<f:viewParam name="documentId" value="#{createDocumentGraphBean.documentId}"/>
 		<f:viewParam name="author" value="#{createDocumentGraphBean.author}"/>
 	</f:metadata>
 
-		<script src="./js/springy.js"/>
-		<script src="./js/springyui.js"/>
-		<script src="./js/utils.js"/>
-		<script src="./js/analaudos.js"/>
 		
 		<p:accordionPanel id="panel" multiple="true" activeIndex="-1" >
 			<p:tab title="Tutorial">

@@ -42,8 +42,9 @@ function buildGraph(inputText, outputText, outputCanvas){
 
 	var s = inputText.value;
 	s = s.toLowerCase();
-//	s = s.replace(/[:.()?!]/g, '');
 	s = removeAccents(s);
+	s = s.replace(/[:;()\[\]?!]/g, '');
+	s = s.replace(/[\.,]\ /g, ' ');
 	var words = s.split(' ');
 
 	for(var i in words){
@@ -221,7 +222,7 @@ function createDot(){
 
 	for(var sourceId in gui.graph.adjacency){
 		for(var targetId in gui.graph.adjacency[sourceId]){
-			dotGraph += sourceId +"->" + targetId + ";";
+			dotGraph += targetId + "->" + sourceId + ";";
 		}
 	}
 

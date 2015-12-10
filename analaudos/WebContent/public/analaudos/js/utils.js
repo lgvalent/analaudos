@@ -132,6 +132,11 @@ function removeAccents (str) {
     });
 }
 
+
+//
+function removeSymbols (str) {
+	return string.replace(/[^a-zA-Z0-9\-]/g,'');
+}
 /* Copy to Clipboard
  * http://stackoverflow.com/questions/13795342/javascript-copy-clipboard-function-which-works-perfectly-on-all-latest-browsers
  */

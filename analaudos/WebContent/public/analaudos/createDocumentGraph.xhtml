@@ -19,12 +19,15 @@
 		<script src="./js/springyui.js"/>
 		<script src="./js/utils.js"/>
 		<script src="./js/analaudos.js"/>
+		<script src="./js/jquery.growl.js"/>
+		<script src='https://code.responsivevoice.org/responsivevoice.js'/>
+		<link href="css/jquery.growl.css" rel="stylesheet" type="text/css" />
 		
 		<p:accordionPanel id="panel" multiple="true" activeIndex="-1" >
 			<p:tab title="Tutorial">
 				<iframe width="560" height="315" src="//www.youtube.com/embed/lHpxFLj2hGA" frameborder="0" allowfullscreen="true"></iframe>
 			</p:tab>
-			<p:tab title="Gráfico">
+			<p:tab title="Gráfico" rendered="#{createDocumentGraphBean.author != null}">
 				<h:inputTextarea id="dotSource" value="#{createDocumentGraphBean.graphSource}" rows="6" style="width: 100%; background: lightgray;"/>
 				<button onclick="createImage(document.getElementById('form:panel:dotSource').value, document.getElementById('graphDot')); return false;">Atualizar imagem</button>
 				<div style="min-height: 200px; max-height: 100%; overflow: scroll; border: 1px solid black;">
@@ -48,7 +51,8 @@
 		
 		<table>
 			<tr>
-				<td><b>Grafo Conceitual</b><h:inputText id="author" value="#{createDocumentGraphBean.author}" title="Nome do autor do grafo"/><br/>
+				<td>
+					<b>Grafo Conceitual</b>
 					Ctrl: Seleciona um nó para iniciar uma ligação <br /> Shift:
 					Cria uma ligação entre o nó pré-selecionado e o atual nó clicado.
 				</td>
@@ -66,6 +70,8 @@
 		<canvas id="graph" height="10" width="10" />
 		<script type="text/javascript">
 			buildGraph(jQuery('#form\\:sourceText')[0], jQuery('#form\\:targetText')[0], jQuery('#graph'));
+			
+			setLogOut(jQuery('#form\\:targetText')[0]);
 		</script>
 	</ui:define>
 </ui:composition>

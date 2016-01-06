@@ -99,7 +99,8 @@ function buildGraph(inputText, outputText, outputCanvas){
 
 /* Edit edges CONTROLS */
 function selectSource(){
-	console.log("selectSource:" + gui.getNodeSelected().data.label);
+	log("selectSource:" + gui.getNodeSelected().data.label);
+	toast("Indique o contexto de <b>" + gui.getNodeSelected().data.label + "</b>");
 	/* Unformat actual root node*/
 	if(sourceNode != null){
 		sourceNode.data.font = nodeFont;
@@ -115,7 +116,7 @@ function selectSource(){
 }
 
 function unselectSource(){
-	console.log("unselectSource:" + gui.getNodeSelected().data.label);
+	log("unselectSource:" + gui.getNodeSelected().data.label);
 
 	colorizeEdge(sourceNode);
 	sourceNode.data.border = false;
@@ -146,7 +147,9 @@ function colorizeEdge(target){
 }
 
 function createEdge(target){
-	console.log("createEdge: s=" + sourceNode.data.label + " t=" + target.data.label);
+	log("createEdge: s=" + sourceNode.data.label + " t=" + target.data.label);
+//	toast("O termo <b>" + sourceNode.data.label + "</b> esta para <b>" + target.data.label + "</b>.");
+	toast(target.data.label);
 
 	if(sourceNode != target){
 		/* Check sourceNodeious edge to add ou remove */

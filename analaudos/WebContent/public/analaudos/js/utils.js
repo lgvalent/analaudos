@@ -180,3 +180,25 @@ function copyToClipboard(s)
             clip.setData(trans,null,clipid.kGlobalClipboard);      
         }
 }
+
+var logBuffer = "";
+var logOut = null;
+function setLogOut(component){
+	logOut = component;
+}
+function log(text){
+  logBuffer += text + "/n";	
+  console.log(text);
+  if(logOut != null){
+	  if(logOut.value)logOut.value += text + "/n";
+	  else if(logOut.textContent)logOut.textContent += text + "/n";
+  }
+}
+
+function toast(text){
+	$.growl({title:"", message:text});
+	/* Remove <TAGs>*/
+	text = text.replace(/<(?:.|\n)*?>/gm, '');
+	responsiveVoice.speak(text, "Portuguese Female", {rate: 1.5});
+
+}

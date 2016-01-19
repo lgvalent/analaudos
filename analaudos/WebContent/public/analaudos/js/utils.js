@@ -166,9 +166,6 @@ function copyToClipboard(s)
             trans.addDataFlavor('text/unicode');
 
             // To get the data from the transferable we need two new objects
-            var str = new Object();
-            var len = new Object();
-
             var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
 
             str.data= s;        
@@ -187,18 +184,16 @@ function setLogOut(component){
 	logOut = component;
 }
 function log(text){
-  logBuffer += text + "/n";	
+  logBuffer += text + "\n";	
   console.log(text);
   if(logOut != null){
-	  if(logOut.value)logOut.value += text + "/n";
-	  else if(logOut.textContent)logOut.textContent += text + "/n";
+	  if(logOut.textContent != "undefined"){
+		  logOut.textContent += text + "\n";
+		  logOut.scrollTop = logOut.scrollHeight;
+	  }else
+		  if (logOut.value != "undefined")logOut.value += text + "\n";
   }
 }
 
-function toast(text){
-	$.growl({title:"", message:text});
-	/* Remove <TAGs>*/
-	text = text.replace(/<(?:.|\n)*?>/gm, '');
-	responsiveVoice.speak(text, "Portuguese Female", {rate: 1.5});
 
-}
+

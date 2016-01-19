@@ -25,247 +25,284 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var sourceNodeFontColor = "#008000";
-var targetNodeFontColor = "blue";
-var rootNodeFontColor = "red";
-var orphanNodeFontColor = "#000000";
-var nodeFont = "16px Verdana, sans-serif";
-
-var wordsCount = 0;
-var gui = null;
-var canvas = null;
-var sourceNode = null;
-
-function buildGraph(inputText, outputText, outputCanvas){
-	/* Clear sourceNodeious graph */
-	var graph = new Springy.Graph();
-
-	var s = inputText.value;
-	s = s.toLowerCase();
-	s = removeAccents(s);
-	s = s.replace(/[:;()\[\]?!]/g, '');
-	s = s.replace(/[\.,]\ /g, ' ');
-	var words = s.split(' ');
-
-	for(var i in words){
-		/* Create a node */
-		graph.addNode(new Springy.Node('w'+i, {label:words[i]}));
-
-		/* Link current node to sourceNodeious node */
-//		if(i!=0) graph.newEdge(graph.nodeSet['w'+ (i-1)], graph.nodeSet['w'+i], {color: '#AA0000', label: ''});
-	}
-	wordsCount = words.length;
-
-	outputText.value = s;
-
-	if(gui == null){
-		gui = outputCanvas.springy({graph: graph, nodeSelected: graph.nodeSet['w1']});
-		selectSource();
+if("undefined" != typeof analaudos) console.log("Analaudos already defined");
+else{
+	var Analaudos = function(){
+		var a = this;
 		
-		canvas = outputCanvas[0]; 
-
-		/* Resize canvas */
-		canvas.width = canvas.parentNode.clientWidth - canvas.offsetLeft;
-		canvas.height = 500;
+		a.version = "0.1b";
+		a.sourceNodeFontColor = "#008000";
+		a.targetNodeFontColor = "blue";
+		a.rootNodeFontColor = "red";
+		a.orphanNodeFontColor = "#000000";
+		a.nodeFont = "16px Verdana, sans-serif";
 		
-		/* Borders and cursor */
-		canvas.style.border = "solid 1px #333";
-		canvas.style.cursor = "pointer";
 		
-	}
-
-	canvas.ondblclick =function(e) {
-		selectSource();
-	};
-	
-	canvas.onclick = function(e) {
-		// De-select actual source
-		if(gui.getNodeSelected()==sourceNode){
-			unselectSource();
-		}else if(sourceNode == null)
-			selectSource();
-		else{
-			createEdge(gui.getNodeSelected());
-			unselectSource();
-		}
-	};
-	
-	arrange();
-
-	/* Activate first selection */
-//	sourceNode = gui.getNodeSelected();
-//	selectRoot();
-}
-
-/* Edit edges CONTROLS */
-function selectSource(){
-	log("selectSource:" + gui.getNodeSelected().data.label);
-	toast("Indique o contexto de <b>" + gui.getNodeSelected().data.label + "</b>");
-	/* Unformat actual root node*/
-	if(sourceNode != null){
-		sourceNode.data.font = nodeFont;
-		sourceNode.data.border = false;
-	}
-
-	/* Format actual root node*/
-	sourceNode = gui.getNodeSelected();
-//	sourceNode.data.font = "bold " + nodeFont;
-	sourceNode.data.fontColor = rootNodeFontColor;
-	sourceNode.data.border = true;
-	gui.renderer.start(); // Force a update
-}
-
-function unselectSource(){
-	log("unselectSource:" + gui.getNodeSelected().data.label);
-
-	colorizeEdge(sourceNode);
-	sourceNode.data.border = false;
-	sourceNode = null;
-}
-
-function activateSource(){
-	sourceNode.data.font = nodeFont;
-	sourceNode = gui.getNodeSelected();
-//	sourceNode.data.font = "bold " + nodeFont;
-	sourceNode.data.border = true;
-	gui.renderer.start(); // Force a update
-}
-
-function colorizeEdge(target){
-	target.data.fontColor = orphanNodeFontColor;
-
-	if(target.id in gui.graph.adjacency)
-		target.data.fontColor = sourceNodeFontColor;
-	
-	var isTouched = false;
-	gui.graph.edges.forEach(function(e) {   // in target edges
-			if (e.target.id == target.id) isTouched = true;
-	});
-
-	if(isTouched) target.data.fontColor = targetNodeFontColor;
-	
-}
-
-function createEdge(target){
-	log("createEdge: s=" + sourceNode.data.label + " t=" + target.data.label);
-//	toast("O termo <b>" + sourceNode.data.label + "</b> esta para <b>" + target.data.label + "</b>.");
-	toast(target.data.label);
-
-	if(sourceNode != target){
-		/* Check sourceNodeious edge to add ou remove */
-		var edges = gui.graph.getEdges(sourceNode, target);
-		if(edges.length > 0) for(var i in edges) gui.graph.removeEdge(edges[i]);
-		else gui.graph.newEdge(sourceNode, target, {color: '#00A0B0', label: ''});
+		a.wordsCount = 0;
+		a.gui = null;
+		a.canvas = null;
+		a.sourceNode = null;
 		
-		/* Check edges in/out to colorize */
-		colorizeEdge(sourceNode);
-		colorizeEdge(target);
-		sourceNode.data.border = false;
+		a.isMuted = false;
+		a.mute = function(){a.isMuted=true;a.speak("");};
+		a.unmute = function(){a.isMuted=false;};
+		
+		a.actionsHistory = [];
+		a.log = function(action){
+			a.actionsHistory.push(action);
+		};
 
-	}		
-}
+		/* Edit edges CONTROLS */
+		a.selectSource = function(){
+			a.log("selectSource:" + a.gui.getNodeSelected().data.word);
+			a.toast("Indique o contexto de <b>" + a.gui.getNodeSelected().data.label + "</b>");
+			
+			/* Unformat actual root node*/
+			if(a.sourceNode != null){
+				a.sourceNode.data.font = a.nodeFont;
+				a.sourceNode.data.border = false;
+			}
 
-function arrange(){
-	/* First arrange layout*/
-	gui.renderer.stop();
-	gui.layout.damping = 0.0000000001;
-	gui.layout.stiffness = 400;
-	gui.layout.repulsion = 400;
-//	gui.layout.minEnergyThreshold = 0.00001;
+			/* Format actual root node*/
+			a.sourceNode = a.gui.getNodeSelected();
+//			a.sourceNode.data.font = "bold " + nodeFont;
+			a.sourceNode.data.fontColor = a.rootNodeFontColor;
+			a.sourceNode.data.border = true;
+			a.gui.renderer.start(); // Force a update
+		};
 
-	var x = -1.0;
-	var y = -1.0;
-	for(var i in gui.layout.nodePoints){
-		gui.layout.nodePoints[i].p.x = x;
-		gui.layout.nodePoints[i].p.y = y;
-		x += 0.6;
-		if( x > 2){
-			x = -1;
-			y += 0.8;
-		}
-	}
-	gui.renderer.start();
+		a.unselectSource = function(){
+			a.log("unselectSource:" + a.gui.getNodeSelected().data.word);
 
-}
+			a.colorizeEdge(a.sourceNode);
+			a.sourceNode.data.border = false;
+			a.sourceNode = null;
+		};
 
-function removeOrphans(){
-	for(var id in gui.graph.nodeSet){
-		if(!(id in gui.graph.adjacency)){
-			var exists = false;
-			for (var x in gui.graph.adjacency) {
-				if (id in gui.graph.adjacency[x]) {
-					exists = true;
-					break;
+		a.colorizeEdge = function(target){
+			target.data.fontColor = a.orphanNodeFontColor;
+
+			if(target.id in a.gui.graph.adjacency)
+				target.data.fontColor = a.sourceNodeFontColor;
+			
+			var isTouched = false;
+			a.gui.graph.edges.forEach(function(e) {   // in target edges
+					if (e.target.id == target.id) isTouched = true;
+			});
+
+			if(isTouched) target.data.fontColor = a.targetNodeFontColor;
+			
+		};
+
+		a.createEdge = function(target){
+
+			if(a.sourceNode != target){
+				/* Check sourceNode edges to add ou remove */
+				var edges = a.gui.graph.getEdges(a.sourceNode, target);
+				if(edges.length > 0){ 
+					a.log("removeEdge: s=" + a.sourceNode.data.word + " t=" + target.data.word);
+					a.toast("Ligação removida");
+					for(var i in edges) a.gui.graph.removeEdge(edges[i]);
+				}
+				else{
+					/* Check target edges to avoid cyclic link */
+					edges = a.gui.graph.getEdges(target, a.sourceNode);
+					if(edges.length > 0){ 
+						a.log("cyclicLinkAvoided: s=" + a.sourceNode.data.word + " t=" + target.data.word);
+						a.toast("Não é permitida ligação cíclica");
+					} else {
+						a.log("createEdge: s=" + a.sourceNode.data.word + " t=" + target.data.word);
+						a.toast(target.data.label);
+						a.gui.graph.newEdge(a.sourceNode, target, {color: '#00A0B0', label: ''});
+					}
+				}
+				
+				/* Check edges in/out to colorize */
+				a.colorizeEdge(a.sourceNode);
+				a.colorizeEdge(target);
+				a.sourceNode.data.border = false;
+
+			}		
+		};
+
+		a.arrange = function(){
+			/* First arrange layout*/
+			a.gui.renderer.stop();
+			a.gui.layout.damping = 0.0000000001;
+			a.gui.layout.stiffness = 400;
+			a.gui.layout.repulsion = 400;
+//			a.gui.layout.minEnergyThreshold = 0.00001;
+
+			var x = -1.0;
+			var y = -1.0;
+			for(var i in a.gui.layout.nodePoints){
+				a.gui.layout.nodePoints[i].p.x = x;
+				a.gui.layout.nodePoints[i].p.y = y;
+				x += 0.6;
+				if( x > 2){
+					x = -1;
+					y += 0.8;
 				}
 			}
-			if(!exists) gui.graph.removeNode(gui.graph.nodeSet[id]);
-		}
+			a.gui.renderer.start();
+
+		};
+
+		a.removeOrphans = function(){
+			for(var id in a.gui.graph.nodeSet){
+				if(!(id in a.gui.graph.adjacency)){
+					var exists = false;
+					for (var x in a.gui.graph.adjacency) {
+						if (id in a.gui.graph.adjacency[x]) {
+							exists = true;
+							break;
+						}
+					}
+					if(!exists) a.gui.graph.removeNode(a.gui.graph.nodeSet[id]);
+				}
+			};
+		};
+
+		a.addNode = function(str){
+			a.gui.graph.addNode(new Springy.Node('w'+a.wordsCount++, {label:str}));
+		};
+
+		/* Return a .dot format 
+		 */
+		a.createDot = function(){
+			dotGraph = "digraph G {";
+			for(var id in a.gui.graph.nodeSet){
+				// Check for orphan nodes
+				var orphan = a.gui.graph.adjacency[id] == undefined; // in source edges
+				if(orphan) a.gui.graph.edges.forEach(function(e) {   // in target edges
+					if (e.target.id === id) { orphan = false; }
+				});
+				if(!orphan){
+					var node = a.gui.graph.nodeSet[id];
+					dotGraph += id +"[" + (node.data.fontColor !== undefined? "fontcolor=\"" + node.data.fontColor + "\", ":"") + "label=\"" + node.data.word +"\"];";
+				}
+			}
+
+			for(var sourceId in a.gui.graph.adjacency){
+				for(var targetId in a.gui.graph.adjacency[sourceId]){
+					dotGraph += targetId + "->" + sourceId + ";";
+				}
+			}
+
+			dotGraph += "}";
+
+			return dotGraph;
+		};
+		/* dotSource: String
+		 * imgTarget: <img />
+		 * http://sandbox.kidstrythisathome.com/erdos/
+		 */
+		a.createImage = function(dotSource, imgTarget){
+			var form = $("<form/>");
+		    form.append("<textarea name='chl' />");
+		    form.append("<input name='cht' value='gv'/>");
+		    // Fill textarea value
+		    form[0].children[0].value = dotSource;
+
+			var options = form.serialize();
+			imgTarget.src = "https://chart.googleapis.com/chart?"+options;
+		};
+
+		/* @deprecated Usando JSF
+		 * 
+		 */
+		a.sendGraph = function(){
+			var xmlhttp;
+			if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
+			  xmlhttp=new XMLHttpRequest();
+			} else  {// code for IE6, IE5
+				  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+			}
+			xmlhttp.onreadystatechange=function(){
+			  if (xmlhttp.readyState==4 && xmlhttp.status==200){
+			       alert(xmlhttp.responseText);
+			   }
+			 };
+			xmlhttp.open("POST","analaudos.php",true);
+			xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+			xmlhttp.send("owner=Silva&graph="+dotGraph);
+		};
+		
+		a.stemmer = function(word){
+			return removeAccents(word);
+		};
+		
+		a.onNodeClick = function() {
+			// De-select actual source
+			if(a.gui.getNodeSelected()==a.sourceNode){
+				a.unselectSource();
+			}else if(a.sourceNode == null)
+				a.selectSource();
+			else{
+				a.createEdge(a.gui.getNodeSelected());
+				a.unselectSource();
+			}
+		};
+
+		
+		a.init = function(inputText, outputCanvas){
+			/* Clear sourceNodeious graph */
+			var graph = new Springy.Graph();
+
+			var s = inputText.value;
+			s = s.toLowerCase();
+			s = s.replace(/[:;()\[\]?!]/g, '');
+			s = s.replace(/[\.,]\ /g, ' ');
+			var words = s.split(' ');
+
+			for(var i in words){
+				/* Create a node */
+				graph.addNode(new Springy.Node('w'+i, {label:words[i], word:a.stemmer(words[i]), onclick:a.onNodeClick}));
+
+				/* Link current node to sourceNodeious node */
+//				if(i!=0) graph.newEdge(graph.nodeSet['w'+ (i-1)], graph.nodeSet['w'+i], {color: '#AA0000', label: ''});
+			}
+			a.wordsCount = words.length;
+
+			if(a.gui == null){
+				/* Select a start node to avoid null pointer */
+				a.gui = outputCanvas.springy({graph: graph, nodeSelected: graph.nodeSet['w1']});
+				a.selectSource();
+				
+				a.canvas = outputCanvas[0]; 
+
+				/* Resize canvas */
+				a.canvas.width = a.canvas.parentNode.clientWidth - a.canvas.offsetLeft;
+				a.canvas.height = 500;
+				
+				/* Borders and cursor */
+				a.canvas.style.border = "solid 1px #333";
+				a.canvas.style.cursor = "pointer";
+			}
+
+			a.arrange();
+
+			/* Activate first selection */
+//			sourceNode = a.gui.getNodeSelected();
+//			selectRoot();
+		};
+
+		a.toast = function (text){
+				$.growl({title:"", message:text});
+				if(!a.isMuted)a.speak(text);
+
+		};
+		
+		a.speak = function speak(text, rate){
+			/* Remove <TAGs>*/
+			text = text.replace(/<(?:.|\n)*?>/gm, '');
+			responsiveVoice.speak(text, "Portuguese Female", {rate: (typeof rate=="undefined"?1.7:rate)});
+		};
+
 	};
-}
+	analaudos = new Analaudos;
+};
 
-function addNode(str){
-	gui.graph.addNode(new Springy.Node('w'+wordsCount++, {label:str}));
-}
 
-/* Return a .dot format 
- */
-function createDot(){
-	dotGraph = "digraph G {";
-	for(var id in gui.graph.nodeSet){
-		// Check for orphan nodes
-		var orphan = gui.graph.adjacency[id] == undefined; // in source edges
-		if(orphan) gui.graph.edges.forEach(function(e) {   // in target edges
-			if (e.target.id === id) { orphan = false; }
-		});
-		if(!orphan){
-			var node = gui.graph.nodeSet[id];
-			dotGraph += id +"[" + (node.data.fontColor !== undefined? "fontcolor=\"" + node.data.fontColor + "\", ":"") + "label=\"" + node.data.label +"\"];";
-		}
-	}
 
-	for(var sourceId in gui.graph.adjacency){
-		for(var targetId in gui.graph.adjacency[sourceId]){
-			dotGraph += targetId + "->" + sourceId + ";";
-		}
-	}
-
-	dotGraph += "}";
-
-	return dotGraph;
-}
-/* dotSource: String
- * imgTarget: <img />
- * http://sandbox.kidstrythisathome.com/erdos/
- */
-function createImage(dotSource, imgTarget){
-	var form = $("<form/>");
-    form.append("<textarea name='chl' />");
-    form.append("<input name='cht' value='gv'/>");
-    // Fill textarea value
-    form[0].children[0].value = dotSource;
-
-	var options = form.serialize();
-	imgTarget.src = "https://chart.googleapis.com/chart?"+options;
-}
-
-/* @deprecated Usando JSF
- * 
- */
-function sendGraph()
-{
-	var xmlhttp;
-	if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
-	  xmlhttp=new XMLHttpRequest();
-	} else  {// code for IE6, IE5
-		  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-	}
-	xmlhttp.onreadystatechange=function(){
-	  if (xmlhttp.readyState==4 && xmlhttp.status==200){
-	       alert(xmlhttp.responseText);
-	   }
-	 };
-	xmlhttp.open("POST","analaudos.php",true);
-	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-	xmlhttp.send("owner=Silva&graph="+dotGraph);
-}
 

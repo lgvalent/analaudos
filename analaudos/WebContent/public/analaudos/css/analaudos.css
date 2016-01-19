@@ -1,0 +1,9 @@
+#menu {
+	text-align: right;
+	position: fixed;
+	right: 0px;
+	top: 30px;
+
+	z-index:100;
+	opacity: 0.6;
+}

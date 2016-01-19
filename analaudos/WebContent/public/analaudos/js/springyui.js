@@ -86,6 +86,7 @@ jQuery.fn.springy = function(params) {
 	var selected =  {node: nodeSelected, point: null, distance: null};
 	var nearest = null;
 	var dragged = null;
+	var dragging = false;
 
 	jQuery(canvas).mousedown(function(e) {
 		var pos = jQuery(this).offset();
@@ -114,6 +115,19 @@ jQuery.fn.springy = function(params) {
 		}
 	});
 
+	// Basic click handler
+	jQuery(canvas).click(function(e) {
+		if(!dragging){
+			var pos = jQuery(this).offset();
+			var p = fromScreen({x: e.pageX - pos.left, y: e.pageY - pos.top});
+			selected = layout.nearest(p);
+			node = selected.node;
+			if (node && node.data && node.data.onclick) {
+				node.data.onclick();
+			}
+		}else dragging = false;
+	});
+
 	jQuery(canvas).mousemove(function(e) {
 		var pos = jQuery(this).offset();
 		var p = fromScreen({x: e.pageX - pos.left, y: e.pageY - pos.top});
@@ -122,6 +136,7 @@ jQuery.fn.springy = function(params) {
 		if (dragged !== null && dragged.node !== null) {
 			dragged.point.p.x = p.x;
 			dragged.point.p.y = p.y;
+			dragging = true;
 
 		}
 

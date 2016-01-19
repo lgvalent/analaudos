@@ -22,17 +22,24 @@
 		<script src="./js/jquery.growl.js"/>
 		<script src='https://code.responsivevoice.org/responsivevoice.js'/>
 		<link href="css/jquery.growl.css" rel="stylesheet" type="text/css" />
+		<link href="css/analaudos.css" rel="stylesheet" type="text/css" />
 		
 		<p:accordionPanel id="panel" multiple="true" activeIndex="-1" >
 			<p:tab title="Tutorial">
 				<iframe width="560" height="315" src="//www.youtube.com/embed/lHpxFLj2hGA" frameborder="0" allowfullscreen="true"></iframe>
 			</p:tab>
-			<p:tab title="Gráfico" rendered="#{createDocumentGraphBean.author != null}">
+			<p:tab title="Avançado" rendered="#{createDocumentGraphBean.author == ''}">
 				<h:inputTextarea id="dotSource" value="#{createDocumentGraphBean.graphSource}" rows="6" style="width: 100%; background: lightgray;"/>
-				<button onclick="createImage(document.getElementById('form:panel:dotSource').value, document.getElementById('graphDot')); return false;">Atualizar imagem</button>
+				<button onclick="analaudos.createImage(document.getElementById('form:panel:dotSource').value, document.getElementById('graphDot')); return false;">Atualizar imagem</button>
 				<div style="min-height: 200px; max-height: 100%; overflow: scroll; border: 1px solid black;">
 					<img id="graphDot" width="100%"	src="https://developers.google.com/_static/f5b389b587/images/developers-logo.svg" />
 				</div>
+				<p:button onclick="analaudos.init(jQuery('#form\\:sourceText')[0], jQuery('#form\\:targetText')[0], jQuery('#graph')); return false;" value="Gerar grafo"/>
+				<p:button onclick="analaudos.arrange(); return false;" value="Re-arranjar" />
+				<p:button onclick="analaudos.removeOrphans(); return false;" value="Remover órfãos"/>
+				<input id="newNode" type="text"></input>
+				<p:button onclick="analaudos.addNode(jQuery('#newNode')[0].value); return false;" value="Adicionar novo nó"/>
+				<p:button onclick="document.getElementById('form:panel:dotSource').value = analaudos.createDot(); return false;" value="Copiar .dot"/>
 			</p:tab>
 		</p:accordionPanel>
 	</ui:define>
@@ -40,39 +47,39 @@
 		<b>Laudo {id=#{createDocumentGraphBean.documentId}}</b><br/>
 		<table width="100%">
 			<tr>
-				<td>Original:<br/>
-					<h:inputTextarea id="sourceText" value="#{createDocumentGraphBean.text}" rows="10" style="width: 100%"/>
-				</td>
-				<td>Tratado:<br/>
-					<h:inputTextarea id="targetText" rows="10" style="width: 100%; background: lightgray;" ondblclick="addNode(this.value.substring(this.selectionStart, this.selectionEnd))"/>
+				<td>
+					<h:inputTextarea id="sourceText" value="#{createDocumentGraphBean.text}" rows="6" style="width: 100%"/>
 				</td>
 			</tr>
 		</table>
 		
-		<table>
+		<table width="100%">
 			<tr>
 				<td>
-					<b>Grafo Conceitual</b>
-					Ctrl: Seleciona um nó para iniciar uma ligação <br /> Shift:
-					Cria uma ligação entre o nó pré-selecionado e o atual nó clicado.
+					<b>Grafo Conceitual</b><br/>
+					Clique para selecionar as palavras e criar as ligações.
 				</td>
-				<td>
-					<p:button onclick="buildGraph(jQuery('#form\\:sourceText')[0], jQuery('#form\\:targetText')[0], jQuery('#graph')); return false;" value="Gerar grafo"/>
-					<p:button onclick="arrange(); return false;" value="Re-arranjar" />
-					<p:button onclick="removeOrphans(); return false;" value="Remover órfãos"/>
-					<input id="newNode" type="text"></input>
-					<p:button onclick="addNode(jQuery('#newNode')[0].value); return false;" value="Adicionar novo nó"/>
-					<p:button onclick="document.getElementById('form:panel:dotSource').value = createDot(); return false;" value="Copiar .dot"/>
-					<p:commandButton ajax="false" actionListener="#{createDocumentGraphBean.doSave}" icon ="ui-icon-check" value="Salvar relações"/>
+				<td style="text-align:right">
+					<p:commandButton ajax="true" actionListener="#{createDocumentGraphBean.doSave}" icon ="ui-icon-check" value="Concluído"/>
 				</td>
 			</tr>
 		</table>
-		<canvas id="graph" height="10" width="10" />
+		<canvas id="graph" height="100" width="100" />
 		<script type="text/javascript">
-			buildGraph(jQuery('#form\\:sourceText')[0], jQuery('#form\\:targetText')[0], jQuery('#graph'));
-			
+	
 			setLogOut(jQuery('#form\\:targetText')[0]);
+			analaudos.init(jQuery('#form\\:sourceText')[0], jQuery('#graph'));
+			
+			
+			setTimeout(function(){
+			analaudos.speak(document.getElementsByClassName("description")[0].textContent, 1.3);
+			}, 1000);
+			
 		</script>
+		<div id="menu">
+			<img id="unmute" onclick="analaudos.unmute();jQuery('#unmute')[0].style.display='none';jQuery('#mute')[0].style.display='';" src="img/speaker.png" width="40" height="40" title="Ativar a leitura das mensagens" style="display:none"/>
+			<img id="mute" onclick="analaudos.mute();jQuery('#mute')[0].style.display='none';jQuery('#unmute')[0].style.display='';" src="img/mute.png" width="40" height="40" title="Desativar o som" />
+		</div>
 	</ui:define>
 </ui:composition>
 </html>

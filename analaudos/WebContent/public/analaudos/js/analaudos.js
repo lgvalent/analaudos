@@ -128,20 +128,16 @@ else{
 		a.arrange = function(){
 			/* First arrange layout*/
 			a.gui.renderer.stop();
-			a.gui.layout.damping = 0.0000000001;
-			a.gui.layout.stiffness = 400;
-			a.gui.layout.repulsion = 400;
-//			a.gui.layout.minEnergyThreshold = 0.00001;
 
-			var x = -1.0;
-			var y = -1.0;
+			var x = -1.8;
+			var y = -2.0;
 			for(var i in a.gui.layout.nodePoints){
 				a.gui.layout.nodePoints[i].p.x = x;
 				a.gui.layout.nodePoints[i].p.y = y;
-				x += 0.6;
+				x += 0.7;
 				if( x > 2){
-					x = -1;
-					y += 0.8;
+					x = -1.8;
+					y += 0.6;
 				}
 			}
 			a.gui.renderer.start();
@@ -266,7 +262,7 @@ else{
 
 			if(a.gui == null){
 				/* Select a start node to avoid null pointer */
-				a.gui = outputCanvas.springy({graph: graph, nodeSelected: graph.nodeSet['w1']});
+				a.gui = outputCanvas.springy({graph: graph, nodeSelected: graph.nodeSet['w1'], damping:0.00000001, stiffness:400, repulsion:400, minEnergyThreshold:0.0001});
 				a.selectSource();
 				
 				a.canvas = outputCanvas[0]; 
@@ -281,6 +277,8 @@ else{
 			}
 
 			a.arrange();
+			
+			window.setTimeout(a.arrange, 2000); // Refresh first arrange moviment from center
 
 			/* Activate first selection */
 //			sourceNode = a.gui.getNodeSelected();

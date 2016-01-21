@@ -28,7 +28,7 @@
 			<p:tab title="Tutorial">
 				<iframe width="560" height="315" src="//www.youtube.com/embed/lHpxFLj2hGA" frameborder="0" allowfullscreen="true"></iframe>
 			</p:tab>
-			<p:tab title="Avançado" rendered="#{createDocumentGraphBean.author == ''}">
+			<p:tab title="Avançado" rendered="#{createDocumentGraphBean.author == null || createDocumentGraphBean.author.equal('')}">
 				<h:inputTextarea id="dotSource" value="#{createDocumentGraphBean.graphSource}" rows="6" style="width: 100%; background: lightgray;"/>
 				<button onclick="analaudos.createImage(document.getElementById('form:panel:dotSource').value, document.getElementById('graphDot')); return false;">Atualizar imagem</button>
 				<div style="min-height: 200px; max-height: 100%; overflow: scroll; border: 1px solid black;">
@@ -64,7 +64,7 @@
 				</td>
 			</tr>
 		</table>
-		<canvas id="graph" height="100" width="100" />
+		<canvas id="graph" height="100" width="100"/>
 		<script type="text/javascript">
 	
 			setLogOut(jQuery('#form\\:targetText')[0]);

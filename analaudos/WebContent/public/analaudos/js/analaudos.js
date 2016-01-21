@@ -241,6 +241,16 @@ else{
 		};
 
 		
+		a.updateSize = function(){
+			a.gui.renderer.stop();
+			
+			/* Resize canvas */
+			a.canvas.width = a.canvas.parentNode.clientWidth - a.canvas.offsetLeft;
+			a.canvas.height = 500;
+			
+			a.gui.renderer.start();
+		};
+		
 		a.init = function(inputText, outputCanvas){
 			/* Clear sourceNodeious graph */
 			var graph = new Springy.Graph();
@@ -263,23 +273,24 @@ else{
 			if(a.gui == null){
 				/* Select a start node to avoid null pointer */
 				a.gui = outputCanvas.springy({graph: graph, nodeSelected: graph.nodeSet['w1'], damping:0.00000001, stiffness:400, repulsion:400, minEnergyThreshold:0.0001});
-				a.selectSource();
 				
 				a.canvas = outputCanvas[0]; 
 
-				/* Resize canvas */
-				a.canvas.width = a.canvas.parentNode.clientWidth - a.canvas.offsetLeft;
-				a.canvas.height = 500;
-				
+				a.updateSize();
+
 				/* Borders and cursor */
 				a.canvas.style.border = "solid 1px #333";
 				a.canvas.style.cursor = "pointer";
 			}
 
+			/* Organize items */
 			a.arrange();
-			
 			window.setTimeout(a.arrange, 2000); // Refresh first arrange moviment from center
 
+			/* Update graph size while window resizing */
+			window.onresize = a.updateSize;
+			
+			a.selectSource();
 			/* Activate first selection */
 //			sourceNode = a.gui.getNodeSelected();
 //			selectRoot();
@@ -287,7 +298,11 @@ else{
 
 		a.toast = function (text){
 				$.growl({title:"", message:text});
-				if(!a.isMuted)a.speak(text);
+				try{
+					if(!a.isMuted)a.speak(text);
+				}catch(error){
+					console.log(error.message);
+				}
 
 		};
 		

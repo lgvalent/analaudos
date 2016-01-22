@@ -8,7 +8,7 @@
 <ui:composition template="/public/basic/templates/simpleProcess.xhtml">
 	<ui:param name="title" value="Analaudos - Analisador semântico de laudos médicos" />
 	<ui:param name="icon" value="http://ssl.gstatic.com/codesite/ph/images/defaultlogo.png" />
-	<ui:param name="description" value="Olá &lt;b&gt;#{createDocumentGraphBean.author}&lt;/b&gt;, &lt;br/&gt; Obrigado por participar da pesquisa. Sua contribuição será muito importante para entendermos os processos de criação de estruturas conceituais e desenvolver ferramentas que melhorem e agilizem a aplicação de tais métodos na busca de informações em grandes bases de dados sobre laudos médicos.&lt;br/&gt; Analise o texto original e no painel do grafo, realize as ligações entre os termos que possuem alguma relação." />
+	<ui:param name="description" value="Olá &lt;b&gt;#{createDocumentGraphBean.author}&lt;/b&gt;, &lt;br/&gt; Obrigado por participar da pesquisa. Sua contribuição será muito importante para entendermos os processos de criação de estruturas conceituais e desenvolver ferramentas que melhorem e agilizem a aplicação de tais métodos na busca de informações em grandes bases de dados sobre laudos médicos.&lt;br/&gt; Analise o texto original e no painel do grafo. Realize as ligações entre os termos que possuem alguma relação.&lt;br/&gt;Ao terminar, clique no botão &lt;b&gt;Concluído.&lt;b/&gt;" />
 	<ui:define name="content">
 	<f:metadata>
 		<f:viewParam name="documentId" value="#{createDocumentGraphBean.documentId}"/>
@@ -28,9 +28,10 @@
 			<p:tab title="Tutorial">
 				<iframe width="560" height="315" src="//www.youtube.com/embed/lHpxFLj2hGA" frameborder="0" allowfullscreen="true"></iframe>
 			</p:tab>
-			<p:tab title="Avançado" rendered="#{createDocumentGraphBean.author == null || createDocumentGraphBean.author.equal('')}">
-				<h:inputTextarea id="dotSource" value="#{createDocumentGraphBean.graphSource}" rows="6" style="width: 100%; background: lightgray;"/>
-				<button onclick="analaudos.createImage(document.getElementById('form:panel:dotSource').value, document.getElementById('graphDot')); return false;">Atualizar imagem</button>
+			<p:tab title="Avançado" rendered="#{createDocumentGraphBean.hasAuthor}">
+				<h:inputTextarea id="actions" value="#{createDocumentGraphBean.actions}" rows="6" style="width: 100%; background: lightgray;"/>
+				<h:inputTextarea id="graphDot" value="#{createDocumentGraphBean.graphDot}" rows="6" style="width: 100%; background: lightgray;"/>
+				<button onclick="analaudos.createImage(document.getElementById('form:panel:graphDot').value, document.getElementById('graphDot')); return false;">Atualizar imagem</button>
 				<div style="min-height: 200px; max-height: 100%; overflow: scroll; border: 1px solid black;">
 					<img id="graphDot" width="100%"	src="https://developers.google.com/_static/f5b389b587/images/developers-logo.svg" />
 				</div>
@@ -39,7 +40,7 @@
 				<p:button onclick="analaudos.removeOrphans(); return false;" value="Remover órfãos"/>
 				<input id="newNode" type="text"></input>
 				<p:button onclick="analaudos.addNode(jQuery('#newNode')[0].value); return false;" value="Adicionar novo nó"/>
-				<p:button onclick="document.getElementById('form:panel:dotSource').value = analaudos.createDot(); return false;" value="Copiar .dot"/>
+				<p:button onclick="document.getElementById('form:panel:graphDot').value = analaudos.createDot(); return false;" value="Copiar .dot"/>
 			</p:tab>
 		</p:accordionPanel>
 	</ui:define>
@@ -48,7 +49,7 @@
 		<table width="100%">
 			<tr>
 				<td>
-					<h:inputTextarea id="sourceText" value="#{createDocumentGraphBean.text}" rows="6" style="width: 100%"/>
+					<h:inputTextarea id="sourceText" value="#{createDocumentGraphBean.text}" rows="6" style="width: 100%" readonly="#{createDocumentGraphBean.hasAuthor}"/>
 				</td>
 			</tr>
 		</table>
@@ -60,7 +61,7 @@
 					Clique para selecionar as palavras e criar as ligações.
 				</td>
 				<td style="text-align:right">
-					<p:commandButton ajax="true" actionListener="#{createDocumentGraphBean.doSave}" icon ="ui-icon-check" value="Concluído"/>
+					<p:commandButton ajax="false" onclick="beforeSave()" action="#{createDocumentGraphBean.doSave}" icon ="ui-icon-check" value="Concluído"/>
 				</td>
 			</tr>
 		</table>
@@ -70,10 +71,14 @@
 			setLogOut(jQuery('#form\\:targetText')[0]);
 			analaudos.init(jQuery('#form\\:sourceText')[0], jQuery('#graph'));
 			
-			
 			setTimeout(function(){
 			analaudos.speak(document.getElementsByClassName("description")[0].textContent, 1.3);
 			}, 1000);
+			
+			function beforeSave(){
+				document.getElementById('form:panel:graphDot').value = "" + analaudos.createDot();
+				document.getElementById('form:panel:actions').value = "" + analaudos.actionsHistory;
+			}
 			
 		</script>
 		<div id="menu">

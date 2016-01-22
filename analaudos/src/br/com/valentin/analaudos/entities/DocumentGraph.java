@@ -31,7 +31,8 @@ public class DocumentGraph {
 	private long id = IDAO.ENTITY_UNSAVED;
 	private String author;
 	private DocumentContent documentContent;
-	private String source;
+	private String graphDot;
+	private String actions;
 	private Calendar timeStamp = Calendar.getInstance();
 	
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
@@ -61,16 +62,24 @@ public class DocumentGraph {
 	}
 	
 	@Column(length=1024, columnDefinition="TEXT")
-	public String getSource() {
-		return source;
+	public String getGraphDot() {
+		return graphDot;
 	}
-	public void setSource(String source) {
-		this.source = source;
+	public void setGraphDot(String source) {
+		this.graphDot = source;
 	}
+	@Column(length=1024, columnDefinition="TEXT")
+	public String getActions() {
+		return actions;
+	}
+	public void setActions(String actions) {
+		this.actions = actions;
+	}
+
 	@Transient
 	public String getSourceEncoded() {
 		try {
-			return URLEncoder.encode(this.source, "UTF-8");
+			return URLEncoder.encode(this.graphDot, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			return "ERROR: " + e.getMessage();
 		}

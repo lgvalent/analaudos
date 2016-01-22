@@ -31,7 +31,8 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 	private DocumentContent documentContent = null;
 	private String text = "ULTRASSONOGRAFIA TRANSVAGINAL Bexiga vazia. Útero visualizado (histerectomia sub-total). O colo mede: 3,1 x 3,0 x 1,8 cm. Ovário direito: Medindo 3,1 x 2,2 x 2,3 cm nos seus maiores eixos. Volume de 3,4 cm³. Aprsentando uma imagem cistica, de aspecto simples, medindo 21 mm (funcional?). Ovário esquerdo: nao visualizado (grande interposicao gasosa). Ausência de líquido livre na escavação retro uterina. Não evidenciam-se massas ou tumores nas regiões anexiais. CONCLUSÃO Cisto em ovario direito.";
 	private String textNormalized;
-	private String graphSource;
+	private String graphDot;
+	private String actions;
 	
 
 	public long getDocumentId() {
@@ -74,13 +75,23 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 		this.textNormalized = documentNormalized;
 	}
 
-	public String getGraphSource() {
-		return graphSource;
+	public String getGraphDot() {
+		return graphDot;
 	}
 
-	public void setGraphSource(String graphSource) {
-		this.graphSource = graphSource;
+	public void setGraphDot(String graphSource) {
+		this.graphDot = graphSource;
 	}
+	
+	public String getActions() {
+		return actions;
+	}
+
+	public void setActions(String actions) {
+		this.actions = actions;
+	}
+	
+	public boolean isHasAuthor(){ return this.author != null || !this.author.equals("");}
 
 	public String actionStart(){
 		// Limpa os dados antigos se houver
@@ -103,20 +114,24 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 		return FACES_VIEW_1;
 	};
 	
-	public void doSave(){
+	public String doSave(){
 		DocumentGraph doc = new DocumentGraph();
 		doc.setAuthor(this.author);
 		doc.setDocumentContent(this.documentContent);
-		doc.setSource(this.graphSource);
+		doc.setGraphDot(this.graphDot);
+		doc.setActions(this.actions);
 		doc.setTimeStamp(Calendar.getInstance());
 		
 		try {
 			UtilsCrud.objectUpdate(this.getApplicationBean().getProcessManager().getServiceManager(), doc, null);
 			FacesUtils.addInfoMsg("Conexões semânticas salvas com sucesso!");
+			return FacesUtils.FACES_VIEW_SUCCESS;
 		} catch (BusinessException e) {
 			FacesUtils.addErrorMsg("Ocorreu um erro ao salvar!");
 			FacesUtils.addErrorMsgs(e.getErrorList());
+			return FacesUtils.FACES_VIEW_FAILURE;
 		}
+		
 		
 	}
 

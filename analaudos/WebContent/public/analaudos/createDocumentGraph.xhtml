@@ -28,7 +28,7 @@
 			<p:tab title="Tutorial">
 				<iframe width="560" height="315" src="//www.youtube.com/embed/lHpxFLj2hGA" frameborder="0" allowfullscreen="true"></iframe>
 			</p:tab>
-			<p:tab title="Avançado" rendered="#{createDocumentGraphBean.hasAuthor}">
+			<p:tab title="Avançado" rendered="#{!createDocumentGraphBean.hasAuthor}">
 				<h:inputTextarea id="actions" value="#{createDocumentGraphBean.actions}" rows="6" style="width: 100%; background: lightgray;"/>
 				<h:inputTextarea id="graphDot" value="#{createDocumentGraphBean.graphDot}" rows="6" style="width: 100%; background: lightgray;"/>
 				<button onclick="analaudos.createImage(document.getElementById('form:panel:graphDot').value, document.getElementById('graphDot')); return false;">Atualizar imagem</button>

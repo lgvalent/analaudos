@@ -91,7 +91,7 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 		this.actions = actions;
 	}
 	
-	public boolean isHasAuthor(){ return this.author != null || !this.author.equals("");}
+	public boolean isHasAuthor(){ return this.author != null && !this.author.equals("");}
 
 	public String actionStart(){
 		// Limpa os dados antigos se houver

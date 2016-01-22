@@ -40,7 +40,7 @@
 				<p:button onclick="analaudos.removeOrphans(); return false;" value="Remover órfãos"/>
 				<input id="newNode" type="text"></input>
 				<p:button onclick="analaudos.addNode(jQuery('#newNode')[0].value); return false;" value="Adicionar novo nó"/>
-				<p:button onclick="document.getElementById('form:panel:graphDot').value = analaudos.createDot(); return false;" value="Copiar .dot"/>
+				<p:button onclick="document.getElementById('form:panel:graphDot').value = analaudos.createDot(); document.getElementById('form:panel:actions').value = analaudos.actionsHistory.toString(); return false;" value="Copiar .dot"/>
 			</p:tab>
 		</p:accordionPanel>
 	</ui:define>

@@ -166,7 +166,7 @@ else{
 		/* Return a .dot format 
 		 */
 		a.createDot = function(){
-			dotGraph = "digraph G {";
+			var dotGraph = "digraph G {";
 			for(var id in a.gui.graph.nodeSet){
 				// Check for orphan nodes
 				var orphan = a.gui.graph.adjacency[id] == undefined; // in source edges
@@ -189,21 +189,65 @@ else{
 
 			return dotGraph;
 		};
+
+		/* Return a .json format 
+		 */
+		a.createJson = function(){
+			var jsonGraph = "{\"graph\":{\"nodes\":[";
+			var nodes = [];
+			for(var id in a.gui.graph.nodeSet){
+				// Check for orphan nodes
+				var orphan = a.gui.graph.adjacency[id] == undefined; // in source edges
+				if(orphan) a.gui.graph.edges.forEach(function(e) {   // in target edges
+					if (e.target.id === id) { orphan = false; }
+				});
+				if(!orphan){
+					var node = a.gui.graph.nodeSet[id];
+					nodes.push("{\"id\":\""+id+"\"" + (node.data.fontColor !== undefined? ",\"fontcolor\":\"" + node.data.fontColor + "\" ":"") + ", \"label\":\"" + node.data.label +"\", \"word\":\"" + node.data.word+ "\"}");
+				}
+			}
+			jsonGraph += nodes.join(",") + "], \"links\":[";
+			
+			var links = [];
+			for(var sourceId in a.gui.graph.adjacency){
+				for(var targetId in a.gui.graph.adjacency[sourceId]){
+					links.push("{\"source\":\""+targetId +"\", \"target\":\"" + sourceId + "\"}");
+				}
+			}
+
+			jsonGraph += links.join(",") + "]}}";
+
+			return jsonGraph;
+		};
+
 		/* dotSource: String
 		 * imgTarget: <img />
 		 * http://sandbox.kidstrythisathome.com/erdos/
 		 */
-		a.createImage = function(dotSource, imgTarget){
+		a.createImageLocal = function(imgTarget, dotSource){
 			var form = $("<form/>");
 		    form.append("<textarea name='chl' />");
 		    form.append("<input name='cht' value='gv'/>");
 		    // Fill textarea value
-		    form[0].children[0].value = dotSource;
+		    form[0].children[0].value = dotSource ;
 
 			var options = form.serialize();
 			imgTarget.src = "https://chart.googleapis.com/chart?"+options;
 		};
 
+		a.createImagePopup = function(dotSource){
+			var iFrame = $("<iframe/>");
+			iFrame.append("<form action='https://chart.googleapis.com/chart' method='POST' target='_blank'/>");
+			
+			var form = $(iFrame[0].getElementsByTagName('form')[0]);
+		    form.append("<textarea name='chl' />");
+		    form.append("<input name='cht' value='gv'/>");
+		    // Fill textarea value
+		    form[0].children[0].value = dotSource || a.createDot();
+
+			form[0].submit();
+			
+		};
 		/* @deprecated Usando JSF
 		 * 
 		 */
@@ -252,13 +296,13 @@ else{
 		};
 		
 		a.init = function(inputText, outputCanvas){
-			/* Clear sourceNodeious graph */
+			/* Clear sourceNodes graph */
 			var graph = new Springy.Graph();
 
 			var s = inputText.value;
 			s = s.toLowerCase();
 			s = s.replace(/[:;()\[\]?!]/g, '');
-			s = s.replace(/[\.,]\ /g, ' ');
+			s = s.replace(/[\n\r\.,](\ |$)/g, ' '); // Replace dot and comma by a space, or word separator 
 			var words = s.split(' ');
 
 			for(var i in words){

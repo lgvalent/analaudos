@@ -48,13 +48,14 @@ else{
 		a.unmute = function(){a.isMuted=false;};
 		
 		a.actionsHistory = [];
-		a.log = function(action){
-			a.actionsHistory.push(action);
+		a.log = function(action, params){
+			var args = Array.prototype.slice.call(arguments, 1);
+			a.actionsHistory.push(action + "(" + args.join(";")+ ")");
 		};
 
 		/* Edit edges CONTROLS */
 		a.selectSource = function(){
-			a.log("selectSource:" + a.gui.getNodeSelected().data.word);
+			a.log("selectSource", a.gui.getNodeSelected().data.word);
 			a.toast("Indique o contexto de <b>" + a.gui.getNodeSelected().data.label + "</b>");
 			
 			/* Unformat actual root node*/
@@ -72,7 +73,7 @@ else{
 		};
 
 		a.unselectSource = function(){
-			a.log("unselectSource:" + a.gui.getNodeSelected().data.word);
+			a.log("unselectSource", a.gui.getNodeSelected().data.word);
 
 			a.colorizeEdge(a.sourceNode);
 			a.sourceNode.data.border = false;
@@ -100,7 +101,7 @@ else{
 				/* Check sourceNode edges to add ou remove */
 				var edges = a.gui.graph.getEdges(a.sourceNode, target);
 				if(edges.length > 0){ 
-					a.log("removeEdge: s=" + a.sourceNode.data.word + " t=" + target.data.word);
+					a.log("removeEdge", a.sourceNode.data.word,target.data.word);
 					a.toast("Ligação removida");
 					for(var i in edges) a.gui.graph.removeEdge(edges[i]);
 				}
@@ -108,10 +109,10 @@ else{
 					/* Check target edges to avoid cyclic link */
 					edges = a.gui.graph.getEdges(target, a.sourceNode);
 					if(edges.length > 0){ 
-						a.log("cyclicLinkAvoided: s=" + a.sourceNode.data.word + " t=" + target.data.word);
+						a.log("cyclicLinkAvoided", a.sourceNode.data.word, target.data.word);
 						a.toast("Não é permitida ligação cíclica");
 					} else {
-						a.log("createEdge: s=" + a.sourceNode.data.word + " t=" + target.data.word);
+						a.log("createEdge", a.sourceNode.data.word, target.data.word);
 						a.toast(target.data.label);
 						a.gui.graph.newEdge(a.sourceNode, target, {color: '#00A0B0', label: ''});
 					}
@@ -235,6 +236,39 @@ else{
 			imgTarget.src = "https://chart.googleapis.com/chart?"+options;
 		};
 
+		a.createImageIFrame = function(targetIFrame, dotSource){
+			/*
+			 * Uncaught SecurityError: Failed to read the 'contentDocument' property from 'HTMLIFrameElement': 
+			 * Sandbox access violation: Blocked a frame at "http://localhost:8080" 
+			 * from accessing a frame at "http://localhost:8080".  
+			 * The frame being accessed is sandboxed and lacks the "allow-same-origin" flag.
+			 */
+			var frame = targetIFrame;
+			
+			var form = document.createElement("form");
+			form.action = "https://chart.googleapis.com/chart";
+			form.method = "post";
+			
+			var text = document.createElement("textarea");
+			text.namespaceURI = "chl";
+			text.value = dotSource;
+			form.appendChild(text);
+			
+			var input = document.createElement("input");
+			input.name = "cht";
+			input.value = "gv";
+			form.appendChild(input);
+			
+			var btn = document.createElement("input");
+			btn.type = "submit";
+			btn.value = "Ok";
+			form.appendChild(btn);
+
+			frame.contentDocument.body.appendChild(form);
+			
+//			form.submit();
+		};
+		
 		a.createImagePopup = function(dotSource){
 			var iFrame = $("<iframe/>");
 			iFrame.append("<form action='https://chart.googleapis.com/chart' method='POST' target='_blank'/>");

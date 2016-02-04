@@ -52,11 +52,11 @@
 		</p:accordionPanel>
 	</ui:define>
 	<ui:define name="actions">
-		<b>Laudo {id=#{createDocumentGraphBean.documentId}}</b><br/>
+		<b>1º: <span title="id=#{createDocumentGraphBean.documentId}">Leia o laudo original</span></b><br/>
 		<table width="100%">
 			<tr>
 				<td>
-					<h:inputTextarea id="sourceText" value="#{createDocumentGraphBean.text}" rows="6" style="width: 100%" readonly="#{createDocumentGraphBean.hasAuthor}"/>
+					<h:inputTextarea id="sourceText" value="#{createDocumentGraphBean.text}" rows="6" style="width: 100%; font-size: 16px; font-style: italic" readonly="#{createDocumentGraphBean.hasAuthor}"/>
 				</td>
 			</tr>
 		</table>
@@ -64,11 +64,11 @@
 		<table width="100%">
 			<tr>
 				<td>
-					<b>Grafo Conceitual</b><br/>
+					<b>2º: Crie o grafo</b><br/>
 					Clique para selecionar as palavras e criar as ligações.
 				</td>
 				<td style="text-align:right">
-					<p:commandButton ajax="false" onclick="beforeSave()" action="#{createDocumentGraphBean.actionSave}" icon ="ui-icon-check" value="Concluído"/>
+					<p:commandButton ajax="false" onclick="beforeSave()" action="#{createDocumentGraphBean.actionSave}" icon ="ui-icon-check" value="3º: Concluído"/>
 				</td>
 			</tr>
 		</table>

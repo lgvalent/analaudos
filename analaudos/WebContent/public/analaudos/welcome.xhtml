@@ -13,13 +13,16 @@
 		Selecione sua especialidade:<br/>
 		<p:selectOneRadio value="#{createDocumentGraphBean.documentId}">
 			<f:selectItem itemValue="1" itemLabel="Obstetrícia"/>
-			<f:selectItem itemValue="1" itemLabel="Ortopedia"/>
-			<f:selectItem itemValue="1" itemLabel="Outra"/>
+			<f:selectItem itemValue="2" itemLabel="Ortopedia"/>
+			<f:selectItem itemValue="3" itemLabel="Outra"/>
 		</p:selectOneRadio><br/>
 		Informe seu nome, se preferir:<br/>
 		<p:inputText value="#{createDocumentGraphBean.author}"/><br/><br/>
 		Escolha como deseja iniciar a pesquisa:<br/>
-		<p:selectBooleanButton value="#{createDocumentGraphBean.soundOn}" offLabel="Silêncio" onLabel="Com assistente" offIcon="ui-icon-volume-off" onIcon="ui-icon-volume-on" />
+		<p:selectOneButton value="#{createDocumentGraphBean.soundOn}"  onIcon="ui-icon-volume-on">
+			<f:selectItem itemLabel="Sem som" itemValue="false" styleClass="ui-icon-volume-off"/>
+            <f:selectItem itemLabel="Com assistente sonoro" itemValue="true" />
+		</p:selectOneButton>
 	</ui:define>
 	<ui:define name="actions">
 		<p:commandButton action="#{createDocumentGraphBean.actionStart}" value="Iniciar" icon="ui-icon-play"/>

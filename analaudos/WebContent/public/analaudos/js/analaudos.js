@@ -333,15 +333,16 @@ else{
 			/* Clear sourceNodes graph */
 			var graph = new Springy.Graph();
 
-			var s = inputText.value;
-			s = s.toLowerCase();
-			s = s.replace(/[:;()\[\]?!]/g, '');
-			s = s.replace(/[\n\r\.,](\ |$)/g, ' '); // Replace dot and comma by a space, or word separator 
-			var words = s.split(' ');
+			var words = inputText.value.split(' ');
 
 			for(var i in words){
+				var word = words[i].toLowerCase();
+				word = word.replace(/[:;()\[\]?!]/g, '');
+				word = word.replace(/[\n\r\.,](\ |$)/g, ' '); // Replace dot and comma by a space, or word separator
+				word = a.stemmer(word);
+				
 				/* Create a node */
-				graph.addNode(new Springy.Node('w'+i, {label:words[i], word:a.stemmer(words[i]), onclick:a.onNodeClick}));
+				graph.addNode(new Springy.Node('w'+i, {label:words[i], word: word, onclick:a.onNodeClick}));
 
 				/* Link current node to sourceNodeious node */
 //				if(i!=0) graph.newEdge(graph.nodeSet['w'+ (i-1)], graph.nodeSet['w'+i], {color: '#AA0000', label: ''});

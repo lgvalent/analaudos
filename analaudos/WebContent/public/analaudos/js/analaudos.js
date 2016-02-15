@@ -48,14 +48,15 @@ else{
 		a.unmute = function(){a.isMuted=false;};
 		
 		a.actionsHistory = [];
+		a.startTime = null; // filled on a.init();
 		a.log = function(action, params){
 			var args = Array.prototype.slice.call(arguments, 1);
-			a.actionsHistory.push(action + "(" + args.join(";")+ ")");
+			a.actionsHistory.push(new Date() - a.startTime + ":" + action + "(" + args.join(";")+ ")");
 		};
 
 		/* Edit edges CONTROLS */
 		a.selectSource = function(){
-			a.log("selectSource", a.gui.getNodeSelected().data.word);
+			a.log("selectSource", a.gui.getNodeSelected().id);
 			a.toast("Indique o contexto de <b>" + a.gui.getNodeSelected().data.label + "</b>");
 			
 			/* Unformat actual root node*/
@@ -73,7 +74,7 @@ else{
 		};
 
 		a.unselectSource = function(){
-			a.log("unselectSource", a.gui.getNodeSelected().data.word);
+			a.log("unselectSource", a.gui.getNodeSelected().id);
 
 			a.colorizeEdge(a.sourceNode);
 			a.sourceNode.data.border = false;
@@ -101,7 +102,7 @@ else{
 				/* Check sourceNode edges to add ou remove */
 				var edges = a.gui.graph.getEdges(a.sourceNode, target);
 				if(edges.length > 0){ 
-					a.log("removeEdge", a.sourceNode.data.word,target.data.word);
+					a.log("removeEdge", a.sourceNode.id, target.id);
 					a.toast("Ligação removida");
 					for(var i in edges) a.gui.graph.removeEdge(edges[i]);
 				}
@@ -109,10 +110,10 @@ else{
 					/* Check target edges to avoid cyclic link */
 					edges = a.gui.graph.getEdges(target, a.sourceNode);
 					if(edges.length > 0){ 
-						a.log("cyclicLinkAvoided", a.sourceNode.data.word, target.data.word);
+						a.log("cyclicLinkAvoided", a.sourceNode.id, target.id);
 						a.toast("Não é permitida ligação cíclica");
 					} else {
-						a.log("createEdge", a.sourceNode.data.word, target.data.word);
+						a.log("createEdge", a.sourceNode.id, target.id);
 						a.toast(target.data.label);
 						a.gui.graph.newEdge(a.sourceNode, target, {color: '#00A0B0', label: ''});
 					}
@@ -330,6 +331,8 @@ else{
 		};
 		
 		a.init = function(inputText, outputCanvas){
+			a.startTime = new Date();
+			a.log("start");
 			/* Clear sourceNodes graph */
 			var graph = new Springy.Graph();
 

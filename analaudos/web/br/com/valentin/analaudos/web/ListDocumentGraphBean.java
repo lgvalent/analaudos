@@ -23,8 +23,17 @@ public class ListDocumentGraphBean extends BeanSessionBasic{
 	private Long documentId = IDAO.ENTITY_UNSAVED;
 	private String author;
 	
+
 	private IEntityList<DocumentGraph> documents;
 
+	public String getGraphDot(Long documentId){
+		try {
+			return UtilsCrud.retrieve(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentGraph.class, documentId, null).getObject().getGraphDot();
+		} catch (BusinessException e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
 
 	public Long getDocumentId() {
 		return documentId;

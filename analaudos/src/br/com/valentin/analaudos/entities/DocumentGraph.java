@@ -25,14 +25,17 @@ import br.com.orionsoft.monstrengo.crud.entity.dao.IDAO;
 public class DocumentGraph {
 	public static final String AUTHOR = "autor";
 	public static final String DOCUMENT_CONTENT = "documentContent";
-	public static final String SOURCE = "source";
+	public static final String GRAPH_DOT= "graphDot";
+	public static final String GRAPH_JSON= "graphJson";
 	public static final String TIME_STAMP = "timeStamp";
 	
 	private long id = IDAO.ENTITY_UNSAVED;
 	private String author;
 	private DocumentContent documentContent;
 	private String graphDot;
+	private String graphJson;
 	private String actions;
+	private String suggestions;
 	private Calendar timeStamp = Calendar.getInstance();
 	
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
@@ -61,26 +64,42 @@ public class DocumentGraph {
 		this.documentContent = documentContent;
 	}
 	
-	@Column(length=1024, columnDefinition="TEXT")
+	@Column(length=2048, columnDefinition="TEXT")
 	public String getGraphDot() {
 		return graphDot;
 	}
 	public void setGraphDot(String source) {
 		this.graphDot = source;
 	}
-	@Column(length=1024, columnDefinition="TEXT")
+	
+	@Column(length=2048, columnDefinition="TEXT")
+	public String getGraphJson() {
+		return graphJson;
+	}
+	public void setGraphJson(String graphJson) {
+		this.graphJson = graphJson;
+	}
+
+	@Column(length=2048, columnDefinition="TEXT")
 	public String getActions() {
 		return actions;
 	}
 	public void setActions(String actions) {
 		this.actions = actions;
 	}
-
+	
+	@Column(length=2048, columnDefinition="TEXT")
+	public String getSuggestions() {
+		return suggestions;
+	}
+	public void setSuggestions(String suggestions) {
+		this.suggestions = suggestions;
+	}
 	@Transient
 	public String getSourceEncoded() {
 		try {
 			return URLEncoder.encode(this.graphDot, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
+		} catch (Exception e) {
 			return "ERROR: " + e.getMessage();
 		}
 	}

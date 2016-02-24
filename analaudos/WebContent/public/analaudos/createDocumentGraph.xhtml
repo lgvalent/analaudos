@@ -29,9 +29,10 @@
 		<h:inputHidden id="actions" value="#{createDocumentGraphBean.actions}" rows="6" style="width: 100%; background: lightgray;"/>
 		<h:inputHidden id="graphDot" value="#{createDocumentGraphBean.graphDot}" rows="6" style="width: 100%; background: lightgray;"/>
 		<h:inputHidden id="graphJson" value="#{createDocumentGraphBean.graphJson}" rows="6" style="width: 100%; background: lightgray;"/>
-
+		<p:effect type="slide" event="load" for="form"/>
 		<p:accordionPanel id="panel" multiple="true" activeIndex="-1" >
-			<p:tab title="Tutorial">
+			
+			<p:tab title="Tutorial#{createDocumentGraphBean.currentDocumentIdIndex}">
 				<iframe width="100%" height="500px" src="//www.youtube.com/embed/uZ2vtREXpqo?rel=0" frameborder="0" allowfullscreen="true"></iframe>
 			</p:tab>
 			<p:tab title="Sugestões">
@@ -51,8 +52,6 @@
 				<p:button onclick="analaudos.removeOrphans(); return false;" value="Remover órfãos"/>
 				<input id="newNode" type="text"></input>
 				<p:button onclick="analaudos.addNode(jQuery('#newNode')[0].value); return false;" value="Adicionar novo nó"/>
-
- 
 			</p:tab>
 		</p:accordionPanel>
 	</ui:define>

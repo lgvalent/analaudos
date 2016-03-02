@@ -9,14 +9,12 @@
 <ui:composition template="/public/basic/templates/simpleProcess.xhtml">
 	<ui:param name="title" value="Analaudos - Analisador semântico de laudos médicos" />
 	<ui:param name="icon" value="http://ssl.gstatic.com/codesite/ph/images/defaultlogo.png" />
-	<ui:param name="description" value="Olá &lt;b&gt;#{createDocumentGraphBean.author}&lt;/b&gt;, &lt;br/&gt; Obrigado por participar da pesquisa. Sua contribuição será muito importante para entendermos os processos de criação de estruturas conceituais e desenvolver ferramentas que melhorem e agilizem a aplicação de tais métodos na busca de informações em grandes bases de dados sobre laudos médicos.&lt;br/&gt; Analise o texto original e no painel do grafo. Realize as ligações entre os termos que possuem alguma relação.&lt;br/&gt;Ao terminar, clique no botão &lt;b&gt;Concluído.&lt;b/&gt;" />
+	<ui:param name="description" value="Analise o texto original e no painel do grafo. Realize as ligações entre os termos que possuem alguma relação.&lt;br/&gt;Ao terminar, clique no botão &lt;b&gt;Concluído.&lt;b/&gt;&lt;br/&gt;Se preferir, assista ao breve tutorial em vídeo." />
 	<ui:define name="content">
 	<f:metadata>
 		<f:viewParam name="documentId" value="#{createDocumentGraphBean.documentId}"/>
-		<f:viewParam name="author" value="#{createDocumentGraphBean.author}"/>
 		<f:viewParam name="soundOn" value="#{createDocumentGraphBean.soundOn}"/>
 	</f:metadata>
-
 		<script src="./js/springy.js"/>
 		<script src="./js/springyui.js"/>
 		<script src="./js/utils.js"/>
@@ -26,19 +24,17 @@
 		<link href="css/jquery.growl.css" rel="stylesheet" type="text/css" />
 		<link href="css/analaudos.css" rel="stylesheet" type="text/css" />
 		
-		<h:inputHidden id="actions" value="#{createDocumentGraphBean.actions}" rows="6" style="width: 100%; background: lightgray;"/>
-		<h:inputHidden id="graphDot" value="#{createDocumentGraphBean.graphDot}" rows="6" style="width: 100%; background: lightgray;"/>
-		<h:inputHidden id="graphJson" value="#{createDocumentGraphBean.graphJson}" rows="6" style="width: 100%; background: lightgray;"/>
+		<h:inputHidden id="actions" value="#{createDocumentGraphBean.documentGraph.object.actions}" rows="6" style="width: 100%; background: lightgray;"/>
+		<h:inputHidden id="graphDot" value="#{createDocumentGraphBean.documentGraph.object.graphDot}" rows="6" style="width: 100%; background: lightgray;"/>
+		<h:inputHidden id="graphJson" value="#{createDocumentGraphBean.documentGraph.object.graphJson}" rows="6" style="width: 100%; background: lightgray;"/>
 		<p:effect type="slide" event="load" for="form"/>
 		<p:accordionPanel id="panel" multiple="true" activeIndex="-1" >
-			
-			<p:tab title="Tutorial#{createDocumentGraphBean.currentDocumentIdIndex}">
+			<p:tab title="Tutorial">
 				<iframe width="100%" height="500px" src="//www.youtube.com/embed/uZ2vtREXpqo?rel=0" frameborder="0" allowfullscreen="true"></iframe>
 			</p:tab>
 			<p:tab title="Sugestões">
 				Deixe sua sugestão ou crítica sobre esta pesquisa:<br/>
-				<p:inputTextarea id="areaSuggestions" rows="6" style="width: 100%;" value="#{createDocumentGraphBean.suggestions}"/>
-				
+				<p:inputTextarea id="areaSuggestions" rows="6" style="width: 100%;" value="#{createDocumentGraphBean.documentGraph.object.suggestions}"/>
 			</p:tab>
 			<p:tab title="Avançado" rendered="#{!createDocumentGraphBean.hasAuthor}">
 				<textarea id="areaActions" rows="6" style="width: 100%; background: lightgray;"/>
@@ -64,7 +60,6 @@
 				</td>
 			</tr>
 		</table>
-		
 		<table width="100%">
 			<tr>
 				<td>
@@ -76,13 +71,18 @@
 				</td>
 			</tr>
 		</table>
+		
 		<canvas id="graph" height="100" width="100"/>
+		
 		<div id="menu">
+			<span id="progressText">
+				#{createDocumentGraphBean.documentIdsPosition}/#{createDocumentGraphBean.documentIdsCount}
+			</span>
+			<br/>
 			<img id="unmute" onclick="analaudos.unmute();jQuery('#unmute')[0].style.display='none';jQuery('#mute')[0].style.display='';" src="img/speaker.png" width="40" height="40" title="Ativar a leitura das mensagens"/>
 			<img id="mute" onclick="analaudos.mute();jQuery('#mute')[0].style.display='none';jQuery('#unmute')[0].style.display='';" src="img/mute.png" width="40" height="40" title="Desativar o som" />
 		</div>
 		<script type="text/javascript">
-	
 			setLogOut(jQuery('#form\\:targetText')[0]);
 			analaudos.init(jQuery('#form\\:sourceText')[0], jQuery('#graph'));
 			
@@ -92,12 +92,16 @@
 				jQuery('#unmute')[0].style.display='';
 			</c:if>
 			
+
 			<c:if test="#{createDocumentGraphBean.soundOn}">
+				jQuery('#mute')[0].style.display='';
+				jQuery('#unmute')[0].style.display='none';
+	        </c:if>
+
+			<c:if test="#{createDocumentGraphBean.soundOn and createDocumentGraphBean.currentDocumentIdIndex lt 1}">
 				setTimeout(function(){
 				analaudos.speak(document.getElementsByClassName("description")[0].textContent, 1.3);
 				}, 1000);
-				jQuery('#mute')[0].style.display='';
-				jQuery('#unmute')[0].style.display='none';
 	        </c:if>
 
 	        function beforeSave(){
@@ -105,7 +109,6 @@
 				document.getElementById('form:graphJson').value = "" + analaudos.createJson();
 				document.getElementById('form:actions').value = "" + analaudos.actionsHistory.join("; ");
 			}
-			
 		</script>
 		
 		<script>

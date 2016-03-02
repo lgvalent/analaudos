@@ -2,10 +2,12 @@ package br.com.valentin.analaudos.web;
 
 import java.util.Calendar;
 
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 
 import br.com.orionsoft.monstrengo.core.exception.BusinessException;
+import br.com.orionsoft.monstrengo.crud.entity.IEntity;
 import br.com.orionsoft.monstrengo.crud.entity.dao.IDAO;
 import br.com.orionsoft.monstrengo.crud.services.UtilsCrud;
 import br.com.orionsoft.monstrengo.view.jsf.bean.BeanSessionBasic;
@@ -29,18 +31,31 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 	public static final String REQUEST_PARAM_SOUND_ON = "soundOn";
 
 	private long documentId = IDAO.ENTITY_UNSAVED;
-	private String author;
-	private boolean soundOn = false;
+	private int currentDocumentIdIndex = -1;
+	private long[] documentIds = new long[]{1,1,1};
+//	private String author;
+	private boolean soundOn = true;
 
-	private DocumentContent documentContent = null;
+	private IEntity<DocumentContent> documentContent = null;
+	private IEntity<DocumentGraph> documentGraph = null;
 	private String text = "ULTRASSONOGRAFIA TRANSVAGINAL Bexiga vazia. Útero visualizado (histerectomia sub-total). O colo mede: 3,1 x 3,0 x 1,8 cm. Ovário direito: Medindo 3,1 x 2,2 x 2,3 cm nos seus maiores eixos. Volume de 3,4 cm³. Aprsentando uma imagem cistica, de aspecto simples, medindo 21 mm (funcional?). Ovário esquerdo: nao visualizado (grande interposicao gasosa). Ausência de líquido livre na escavação retro uterina. Não evidenciam-se massas ou tumores nas regiões anexiais. CONCLUSÃO Cisto em ovario direito.";
-	private String textNormalized;
-	private String graphDot;
-	private String graphJson;
-	private String actions;
-	private String suggestions;
-	
+//	private String textNormalized;
+//	private String graphDot;
+//	private String graphJson;
+//	private String actions;
+//	private String suggestions;
 
+	
+	@PostConstruct
+	public void onLoad(){
+		try {
+			this.documentGraph = UtilsCrud.create(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentGraph.class, null);
+		} catch (BusinessException e) {
+			e.printStackTrace();
+			FacesUtils.addErrorMsg(e.getMessage());
+		}
+	}
+	
 	public long getDocumentId() {
 		return documentId;
 	}
@@ -49,8 +64,8 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 		this.documentId = documentId;
 
 		try {
-			this.documentContent = UtilsCrud.objectRetrieve(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentContent.class, this.documentId, null);
-			this.text = this.documentContent.getContent();
+			this.documentContent = UtilsCrud.retrieve(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentContent.class, this.documentId, null);
+			this.text = this.documentContent.getObject().getContent();
 		} catch (BusinessException e) {
 			this.text = "Error loading document:\n" + e.getMessage();
 			e.printStackTrace();
@@ -58,19 +73,11 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 		
 	}
 
-	public String getAuthor() {
-		return author;
-	}
-
-	public void setAuthor(String author) {
-		this.author = author;
-	}
-
-	public DocumentContent getDocumentContent() {
+	public IEntity<DocumentContent> getDocumentContent() {
 		return documentContent;
 	}
 
-	public void setDocumentContent(DocumentContent documentContent) {
+	public void setDocumentContent(IEntity<DocumentContent> documentContent) {
 		this.documentContent = documentContent;
 	}
 
@@ -82,42 +89,19 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 		this.text = document;
 	}
 
-	public String getTextNormalized() {
-		return textNormalized;
-	}
+	public int getCurrentDocumentIdIndex() {return currentDocumentIdIndex;}
+	public void setCurrentDocumentIdIndex(int currentDocumentId) {this.currentDocumentIdIndex = currentDocumentId;}
 
-	public void setTextNormalized(String documentNormalized) {
-		this.textNormalized = documentNormalized;
-	}
-
-	public String getGraphDot() {
-		return graphDot;
-	}
-
-	public void setGraphDot(String graphSource) {
-		this.graphDot = graphSource;
-	}
+	public int getDocumentIdsCount(){return this.documentIds.length;}
+	public int getDocumentIdsPosition(){return this.currentDocumentIdIndex + 1;}
 	
-	public String getGraphJson() {
-		return graphJson;
-	}
+	public long[] getDocumentIds() {return documentIds;}
+	public void setDocumentIds(long[] documentIds) {this.documentIds = documentIds;}
 
-	public void setGraphJson(String graphJson) {
-		this.graphJson = graphJson;
-	}
+	public IEntity<DocumentGraph> getDocumentGraph() {return documentGraph;}
+	public void setDocumentGraph(IEntity<DocumentGraph> documentGraph) {this.documentGraph = documentGraph;}
 
-	public String getActions() {
-		return actions;
-	}
-
-	public void setActions(String actions) {
-		this.actions = actions;
-	}
-	
-	public String getSuggestions() {return suggestions;}
-	public void setSuggestions(String suggestions) {this.suggestions = suggestions;}
-
-	public boolean isHasAuthor(){ return this.author != null && !this.author.equals("");}
+	public boolean isHasAuthor(){ return this.documentGraph.getObject().getAuthor() != null && !this.documentGraph.getObject().getAuthor().equals("");}
 	
 		public boolean isSoundOn() {
 		return soundOn;
@@ -128,42 +112,51 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 	}
 
 	public String actionStart(){
+		this.currentDocumentIdIndex = 0;
+		
 		// Limpa os dados antigos se houver
 		System.out.println("==============================================START");
 		// Pesquisa o documentId e prepara a visão para aprimeira execução
 		if(FacesUtils.getRequestParams().containsKey(REQUEST_PARAM_DOCUMENT_ID))
 			this.documentId = Integer.parseInt(FacesUtils.getRequestParam(REQUEST_PARAM_DOCUMENT_ID));
+		else
+			this.documentId = this.documentIds[this.currentDocumentIdIndex];
 		if(FacesUtils.getRequestParams().containsKey(REQUEST_PARAM_AUTHOR))
-			this.author = FacesUtils.getRequestParam(REQUEST_PARAM_AUTHOR);
+			this.documentGraph.getObject().setAuthor(FacesUtils.getRequestParam(REQUEST_PARAM_AUTHOR));
 		if(FacesUtils.getRequestParams().containsKey(REQUEST_PARAM_SOUND_ON))
 			this.soundOn = FacesUtils.checkRequestParam(REQUEST_PARAM_SOUND_ON);
 		
 		if(this.documentId > 0){
-			try {
-				this.documentContent = UtilsCrud.objectRetrieve(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentContent.class, this.documentId, null);
-			} catch (BusinessException e) {
-				this.text = "Error loading document:\n" + e.getMessage();
-				e.printStackTrace();
-			}
+			// Prepara o conteúdo e texto	
+			setDocumentId(this.documentId);
 		}
 
 		return FACES_VIEW_1;
 	};
 	
 	public String actionSave(){
-		DocumentGraph doc = new DocumentGraph();
-		doc.setAuthor(this.author);
-		doc.setDocumentContent(this.documentContent);
-		doc.setGraphDot(this.graphDot);
-		doc.setGraphJson(this.graphJson);
-		doc.setActions(this.actions);
-		doc.setSuggestions(this.suggestions);
-		doc.setTimeStamp(Calendar.getInstance());
-		
+//		DocumentGraph doc = new DocumentGraph();
+//		doc.setAuthor(this.author);
+//		doc.setDocumentContent(this.documentContent);
+//		doc.setGraphDot(this.graphDot);
+//		doc.setGraphJson(this.graphJson);
+//		doc.setActions(this.actions);
+//		doc.setSuggestions(this.suggestions);
+//		doc.setTimeStamp(Calendar.getInstance());
+//		
 		try {
-			UtilsCrud.objectUpdate(this.getApplicationBean().getProcessManager().getServiceManager(), doc, null);
-			FacesUtils.addInfoMsg("Conexões semânticas salvas com sucesso!");
-			return FACES_VIEW_2;
+			UtilsCrud.update(this.getApplicationBean().getProcessManager().getServiceManager(), this.documentGraph, null);
+//			FacesUtils.addInfoMsg("Conexões semânticas salvas com sucesso!");
+			
+			this.documentGraph = UtilsCrud.create(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentGraph.class, null);
+			this.currentDocumentIdIndex++;
+			
+			if(this.currentDocumentIdIndex >= this.documentIds.length)			
+				return FACES_VIEW_2;
+			else{ 
+				setDocumentId(this.documentIds[this.currentDocumentIdIndex]);
+				return "";
+			}
 		} catch (BusinessException e) {
 			FacesUtils.addErrorMsg("Ocorreu um erro ao salvar!");
 			FacesUtils.addErrorMsgs(e.getErrorList());

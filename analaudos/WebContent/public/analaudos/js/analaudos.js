@@ -379,7 +379,7 @@ else{
 		};
 
 		a.toast = function (text){
-				$.growl({title:"", message:text});
+				$.growl({title:"", message:text, location:"tc"});
 				try{
 					if(!a.isMuted)a.speak(text);
 				}catch(error){
@@ -391,7 +391,7 @@ else{
 		a.speak = function speak(text, rate){
 			/* Remove <TAGs>*/
 			text = text.replace(/<(?:.|\n)*?>/gm, '');
-			responsiveVoice.speak(text, "Portuguese Female", {rate: (typeof rate=="undefined"?1.7:rate)});
+			responsiveVoice.speak(text, "Portuguese Female", {rate: (typeof rate=="undefined"?1.5:rate)});
 		};
 
 	};

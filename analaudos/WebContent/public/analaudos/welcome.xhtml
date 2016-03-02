@@ -7,8 +7,8 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 <ui:composition template="/public/basic/templates/simpleProcess.xhtml">
 	<ui:param name="title" value="Analaudos - Analisador semântico de laudos médicos" />
-	<ui:param name="icon" value="../../public/analaudos/img/welcome.png" />
-	<ui:param name="description" value="Analaudos é um projeto de pesquisa desenvolvido em parceria com o Instituto de Matemática e Estatístaca da Universidade de São Paulo (IME-USP) e a Universidade Tecnológica Federal do Paraná (UTFPR).&lt;br/&gt;Seja bem vindo." />
+	<ui:param name="icon" value="../../public/analaudos/img/logo_usp_utf.png" />
+	<ui:param name="description" value="Olá &lt;b&gt;#{createDocumentGraphBean.documentGraph.object.author}&lt;/b&gt;, &lt;br/&gt; Obrigado por participar da pesquisa.&lt;br/&gt; Sua contribuição será muito importante para entendermos as relações semânticas entres os termos de um laudo médico.&lt;br/&gt;Forneça alguns dados iniciais e clique em &lt;b&gt;Iniciar&lt;b/&gt;" />
 	<ui:define name="content">
 		Selecione sua especialidade:<br/>
 		<p:selectOneRadio value="#{createDocumentGraphBean.documentId}">
@@ -17,7 +17,8 @@
 			<f:selectItem itemValue="3" itemLabel="Outra"/>
 		</p:selectOneRadio><br/>
 		Informe seu nome, se preferir:<br/>
-		<p:inputText value="#{createDocumentGraphBean.author}"/><br/><br/>
+		<p:inputText value="#{createDocumentGraphBean.documentGraph.object.author}"/><br/>
+		<br/>
 		Escolha como deseja iniciar a pesquisa:<br/>
 		<p:selectOneButton value="#{createDocumentGraphBean.soundOn}"  onIcon="ui-icon-volume-on">
 			<f:selectItem itemLabel="Sem som" itemValue="false" styleClass="ui-icon-volume-off"/>

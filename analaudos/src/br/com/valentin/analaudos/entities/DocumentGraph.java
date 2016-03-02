@@ -1,6 +1,5 @@
 package br.com.valentin.analaudos.entities;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Calendar;
 
@@ -31,6 +30,10 @@ public class DocumentGraph {
 	
 	private long id = IDAO.ENTITY_UNSAVED;
 	private String author;
+//	private Integer graduationYear;
+//	private Integer residenceYear;
+//	private Integer specialistYear;
+//	private boolean holdSpecialistTitle = false;
 	private DocumentContent documentContent;
 	private String graphDot;
 	private String graphJson;

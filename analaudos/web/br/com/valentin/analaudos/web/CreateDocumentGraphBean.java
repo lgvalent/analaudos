@@ -1,6 +1,6 @@
 package br.com.valentin.analaudos.web;
 
-import java.util.Calendar;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -32,8 +32,8 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 
 	private long documentId = IDAO.ENTITY_UNSAVED;
 	private int currentDocumentIdIndex = -1;
-	private long[] documentIds = new long[]{1,1,1};
-//	private String author;
+	private long[] documentIds = new long[]{1,2,3,4,5,6,7,8,9,10};
+	private String authorUUIDSession;
 	private boolean soundOn = true;
 
 	private IEntity<DocumentContent> documentContent = null;
@@ -49,7 +49,10 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 	@PostConstruct
 	public void onLoad(){
 		try {
+			this.authorUUIDSession =  UUID.randomUUID().toString();
+
 			this.documentGraph = UtilsCrud.create(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentGraph.class, null);
+			this.documentGraph.getObject().setAuthor(this.authorUUIDSession);
 		} catch (BusinessException e) {
 			e.printStackTrace();
 			FacesUtils.addErrorMsg(e.getMessage());
@@ -149,6 +152,7 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 //			FacesUtils.addInfoMsg("Conexões semânticas salvas com sucesso!");
 			
 			this.documentGraph = UtilsCrud.create(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentGraph.class, null);
+			this.documentGraph.getObject().setAuthor(this.authorUUIDSession);
 			this.currentDocumentIdIndex++;
 			
 			if(this.currentDocumentIdIndex >= this.documentIds.length)			

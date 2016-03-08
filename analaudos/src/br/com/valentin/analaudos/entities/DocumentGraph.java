@@ -30,10 +30,11 @@ public class DocumentGraph {
 	
 	private long id = IDAO.ENTITY_UNSAVED;
 	private String author;
-//	private Integer graduationYear;
-//	private Integer residenceYear;
-//	private Integer specialistYear;
-//	private boolean holdSpecialistTitle = false;
+	private Integer graduationYear;
+	private Integer residenceYear;
+	private Integer specialistYear;
+	private Integer masterYear;
+	private Integer doctorYear;
 	private DocumentContent documentContent;
 	private String graphDot;
 	private String graphJson;
@@ -115,6 +116,36 @@ public class DocumentGraph {
 		this.timeStamp = timeStamp;
 	}
 	
+	public Integer getGraduationYear() {
+		return graduationYear;
+	}
+	public void setGraduationYear(Integer graduationYear) {
+		this.graduationYear = graduationYear;
+	}
+	public Integer getResidenceYear() {
+		return residenceYear;
+	}
+	public void setResidenceYear(Integer residenceYear) {
+		this.residenceYear = residenceYear;
+	}
+	public Integer getSpecialistYear() {
+		return specialistYear;
+	}
+	public void setSpecialistYear(Integer specialistYear) {
+		this.specialistYear = specialistYear;
+	}
+	public Integer getMasterYear() {
+		return masterYear;
+	}
+	public void setMasterYear(Integer masterYear) {
+		this.masterYear = masterYear;
+	}
+	public Integer getDoctorYear() {
+		return doctorYear;
+	}
+	public void setDoctorYear(Integer doctorYear) {
+		this.doctorYear = doctorYear;
+	}
 	@Override
 	public String toString() {
 		return this.author + "(" + this.id + ")";

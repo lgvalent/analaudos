@@ -10,8 +10,11 @@
 	<ui:param name="icon" value="../../public/analaudos/img/ok.png" />
 	<ui:param name="description" value="Obrigado por participar." />
 	<ui:define name="content">
-		Suas ligações foram armazenadas.<br/><br/>
+		Suas ligações foram armazenadas.
+		<br/>
+		<br/>
 		Convide um amigo para participar de nossa pesquisa. <a href="mailto:?subject=Pesquisa de recuperação de informação em laudos médicos&amp;body=Participe acessando o link http://analaudos.valentin.com.br">Clique aqui para enviar um e-mail.</a>
+		<br/>
 		<br/>
 		Mais uma vez, muito obrigado.
 		
@@ -26,6 +29,7 @@
   			ga('create', 'UA-73147661-1', 'auto');
   			ga('send', 'pageview');
 		</script>
+		<span style="color: lightgray;">#{createDocumentGraphBean.documentGraph.object.author}</span>
 	</ui:define>
 </ui:composition>
 </html>

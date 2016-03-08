@@ -8,16 +8,29 @@
 <ui:composition template="/public/basic/templates/simpleProcess.xhtml">
 	<ui:param name="title" value="Analaudos - Analisador semântico de laudos médicos" />
 	<ui:param name="icon" value="../../public/analaudos/img/logo_usp_utf.png" />
-	<ui:param name="description" value="Olá &lt;b&gt;#{createDocumentGraphBean.documentGraph.object.author}&lt;/b&gt;, &lt;br/&gt; Obrigado por participar da pesquisa.&lt;br/&gt; Sua contribuição será muito importante para entendermos as relações semânticas entres os termos de um laudo médico.&lt;br/&gt;Forneça alguns dados iniciais e clique em &lt;b&gt;Iniciar&lt;b/&gt;" />
+	<ui:param name="description" value="Obrigado por participar da pesquisa.&lt;br/&gt; Sua contribuição será muito importante para entendermos as relações semânticas entres os termos de um laudo médico.&lt;br/&gt;Forneça alguns dados iniciais e clique em &lt;b&gt;Iniciar&lt;b/&gt;&lt;br/&gt;" />
 	<ui:define name="content">
+		<br/>
 		Selecione sua especialidade:<br/>
 		<p:selectOneRadio value="#{createDocumentGraphBean.documentId}">
 			<f:selectItem itemValue="1" itemLabel="Obstetrícia"/>
 			<f:selectItem itemValue="2" itemLabel="Ortopedia"/>
 			<f:selectItem itemValue="3" itemLabel="Outra"/>
 		</p:selectOneRadio><br/>
-		Informe seu nome, se preferir:<br/>
-		<p:inputText value="#{createDocumentGraphBean.documentGraph.object.author}"/><br/>
+		Informe o ano de sua formatura:<br/>
+		<p:inputText value="#{createDocumentGraphBean.documentGraph.object.graduationYear}" onkeypress="return keyPressInt(this,event)" maxlength="4"/><br/>
+		<br/>
+		Informe o ano da conclusão de sua residência:<br/>
+		<p:inputText value="#{createDocumentGraphBean.documentGraph.object.residenceYear}" onkeypress="return keyPressInt(this,event)" maxlength="4"/><br/>
+		<br/>
+		Informe o ano de conclusão de sua especialização:<br/>
+		<p:inputText value="#{createDocumentGraphBean.documentGraph.object.specialistYear}" onkeypress="return keyPressInt(this,event)" maxlength="4"/><br/>
+		<br/>
+		Informe o ano de conclusão do seu mestrado:<br/>
+		<p:inputText value="#{createDocumentGraphBean.documentGraph.object.masterYear}" onkeypress="return keyPressInt(this,event)" maxlength="4"/><br/>
+		<br/>
+		Informe o ano de conclusão do seu doutorado:<br/>
+		<p:inputText value="#{createDocumentGraphBean.documentGraph.object.doctorYear}" onkeypress="return keyPressInt(this,event)" maxlength="4"/><br/>
 		<br/>
 		Escolha como deseja iniciar a pesquisa:<br/>
 		<p:selectOneButton value="#{createDocumentGraphBean.soundOn}"  onIcon="ui-icon-volume-on">
@@ -36,6 +49,9 @@
   			ga('create', 'UA-73147661-1', 'auto');
   			ga('send', 'pageview');
 		</script>
+		<span style="color: lightgray;">#{createDocumentGraphBean.documentGraph.object.author}</span>
 	</ui:define>
 </ui:composition>
+
 </html>
+

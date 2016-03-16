@@ -22,7 +22,7 @@ import br.com.orionsoft.monstrengo.crud.entity.dao.IDAO;
 @Entity
 @Table(name="analaudos_document_graph")
 public class DocumentGraph {
-	public static final String AUTHOR = "autor";
+	public static final String AUTHOR = "author";
 	public static final String DOCUMENT_CONTENT = "documentContent";
 	public static final String GRAPH_DOT= "graphDot";
 	public static final String GRAPH_JSON= "graphJson";

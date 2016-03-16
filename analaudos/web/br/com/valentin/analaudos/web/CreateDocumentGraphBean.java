@@ -1,10 +1,14 @@
 package br.com.valentin.analaudos.web;
 
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+import javax.faces.context.FacesContext;
+import javax.faces.view.facelets.FaceletContext;
+import javax.servlet.http.Cookie;
 
 import br.com.orionsoft.monstrengo.core.exception.BusinessException;
 import br.com.orionsoft.monstrengo.crud.entity.IEntity;
@@ -49,7 +53,17 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 	@PostConstruct
 	public void onLoad(){
 		try {
-			this.authorUUIDSession =  UUID.randomUUID().toString();
+
+			/* Try recovery authorId from cookie */
+			Map cookies = FacesContext.getCurrentInstance().getExternalContext().getRequestCookieMap();
+			Cookie cookie = null;
+			if(cookies.containsKey(DocumentGraph.AUTHOR)){
+				cookie = (Cookie) cookies.get(DocumentGraph.AUTHOR);
+				this.authorUUIDSession =  cookie.getValue();
+			}else{
+				this.authorUUIDSession =  UUID.randomUUID().toString();
+				FacesContext.getCurrentInstance().getExternalContext().addResponseCookie(DocumentGraph.AUTHOR, this.authorUUIDSession, null);
+			}
 
 			this.documentGraph = UtilsCrud.create(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentGraph.class, null);
 			this.documentGraph.getObject().setAuthor(this.authorUUIDSession);
@@ -148,6 +162,9 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 //		doc.setTimeStamp(Calendar.getInstance());
 //		
 		try {
+			/* Set current documentContent used */
+			this.documentGraph.getObject().setDocumentContent(this.documentContent.getObject());
+			
 			UtilsCrud.update(this.getApplicationBean().getProcessManager().getServiceManager(), this.documentGraph, null);
 //			FacesUtils.addInfoMsg("Conexões semânticas salvas com sucesso!");
 			

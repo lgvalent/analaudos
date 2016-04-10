@@ -1,5 +1,7 @@
 package br.com.valentin.analaudos.web;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -7,10 +9,11 @@ import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
-import javax.faces.view.facelets.FaceletContext;
+import javax.faces.model.SelectItem;
 import javax.servlet.http.Cookie;
 
 import br.com.orionsoft.monstrengo.core.exception.BusinessException;
+import br.com.orionsoft.monstrengo.core.exception.MessageList;
 import br.com.orionsoft.monstrengo.crud.entity.IEntity;
 import br.com.orionsoft.monstrengo.crud.entity.dao.IDAO;
 import br.com.orionsoft.monstrengo.crud.services.UtilsCrud;
@@ -18,6 +21,7 @@ import br.com.orionsoft.monstrengo.view.jsf.bean.BeanSessionBasic;
 import br.com.orionsoft.monstrengo.view.jsf.util.FacesUtils;
 import br.com.valentin.analaudos.entities.DocumentContent;
 import br.com.valentin.analaudos.entities.DocumentGraph;
+import br.com.valentin.analaudos.entities.ResearchSettings;
 
 @ManagedBean
 @SessionScoped
@@ -29,33 +33,31 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 	public static final String FACES_VIEW_0 = "/public/analaudos/welcome?faces-redirect=true";
 	public static final String FACES_VIEW_1 = "/public/analaudos/createDocumentGraph?faces-redirect=true";
 	public static final String FACES_VIEW_2 = "/public/analaudos/thanks?faces-redirect=true";
-		
+
 	public static final String REQUEST_PARAM_DOCUMENT_ID = "documentId";
 	public static final String REQUEST_PARAM_AUTHOR = "author";
 	public static final String REQUEST_PARAM_SOUND_ON = "soundOn";
 
+	private ResearchSettings researchSettings;
+	private long researchSettingsId = IDAO.ENTITY_UNSAVED;
+
+	private DocumentContent documentContent = null;
 	private long documentId = IDAO.ENTITY_UNSAVED;
 	private int currentDocumentIdIndex = -1;
-	private long[] documentIds = new long[]{1,2,3,4,5,6,7,8,9,10};
+	private List<DocumentContent> documentContentList = new ArrayList<DocumentContent>(10);
+
 	private String authorUUIDSession;
 	private boolean soundOn = true;
 
-	private IEntity<DocumentContent> documentContent = null;
+	//	private IEntity<DocumentContent> documentContent = null;
 	private IEntity<DocumentGraph> documentGraph = null;
-	private String text = "ULTRASSONOGRAFIA TRANSVAGINAL Bexiga vazia. Útero visualizado (histerectomia sub-total). O colo mede: 3,1 x 3,0 x 1,8 cm. Ovário direito: Medindo 3,1 x 2,2 x 2,3 cm nos seus maiores eixos. Volume de 3,4 cm³. Aprsentando uma imagem cistica, de aspecto simples, medindo 21 mm (funcional?). Ovário esquerdo: nao visualizado (grande interposicao gasosa). Ausência de líquido livre na escavação retro uterina. Não evidenciam-se massas ou tumores nas regiões anexiais. CONCLUSÃO Cisto em ovario direito.";
-//	private String textNormalized;
-//	private String graphDot;
-//	private String graphJson;
-//	private String actions;
-//	private String suggestions;
 
-	
+
 	@PostConstruct
 	public void onLoad(){
 		try {
-
 			/* Try recovery authorId from cookie */
-			Map cookies = FacesContext.getCurrentInstance().getExternalContext().getRequestCookieMap();
+			Map<String,Object> cookies = FacesContext.getCurrentInstance().getExternalContext().getRequestCookieMap();
 			Cookie cookie = null;
 			if(cookies.containsKey(DocumentGraph.AUTHOR)){
 				cookie = (Cookie) cookies.get(DocumentGraph.AUTHOR);
@@ -72,120 +74,141 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 			FacesUtils.addErrorMsg(e.getMessage());
 		}
 	}
-	
-	public long getDocumentId() {
-		return documentId;
+
+
+	public ResearchSettings getResearchSettings() {
+		return researchSettings;
 	}
 
+	public void setResearchSettings(ResearchSettings researchSettings) {
+		this.researchSettings = researchSettings;
+	}
+
+	public long getResearchSettingsId() {
+		return researchSettingsId;
+	}
+
+	public void setResearchSettingsId(long researchSettingsId) {
+		this.researchSettingsId = researchSettingsId;
+
+		try {
+			this.researchSettings = UtilsCrud.objectRetrieve(this.getApplicationBean().getProcessManager().getServiceManager(), ResearchSettings.class, this.researchSettingsId, null);
+		} catch (BusinessException e) {
+			e.printStackTrace();
+		}
+	}
+
+	
+	
+	public long getDocumentId() {return documentId;}
 	public void setDocumentId(long documentId) {
 		this.documentId = documentId;
 
-		try {
-			this.documentContent = UtilsCrud.retrieve(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentContent.class, this.documentId, null);
-			this.text = this.documentContent.getObject().getContent();
-		} catch (BusinessException e) {
-			this.text = "Error loading document:\n" + e.getMessage();
-			e.printStackTrace();
+		if(documentId > 0){
+			try{
+				this.documentContent = UtilsCrud.objectRetrieve(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentContent.class, documentId, null);
+			} catch (BusinessException e) {
+				e.printStackTrace();// Prepara o conteúdo e texto	
+
+				this.documentContent = new DocumentContent();
+				this.documentContent.setContent("Error loading document:\n" + e.getMessage());
+			}
 		}
-		
 	}
 
-	public IEntity<DocumentContent> getDocumentContent() {
-		return documentContent;
-	}
 
-	public void setDocumentContent(IEntity<DocumentContent> documentContent) {
-		this.documentContent = documentContent;
-	}
-
-	public String getText() {
-		return text;
-	}
-
-	public void setText(String document) {
-		this.text = document;
-	}
+	public DocumentContent getDocumentContent() {return documentContent;}
+	public void setDocumentContent(DocumentContent documentContent) {this.documentContent = documentContent;}
 
 	public int getCurrentDocumentIdIndex() {return currentDocumentIdIndex;}
 	public void setCurrentDocumentIdIndex(int currentDocumentId) {this.currentDocumentIdIndex = currentDocumentId;}
 
-	public int getDocumentIdsCount(){return this.documentIds.length;}
+	public int getDocumentIdsCount(){return this.documentContentList.size();}
 	public int getDocumentIdsPosition(){return this.currentDocumentIdIndex + 1;}
-	
-	public long[] getDocumentIds() {return documentIds;}
-	public void setDocumentIds(long[] documentIds) {this.documentIds = documentIds;}
 
 	public IEntity<DocumentGraph> getDocumentGraph() {return documentGraph;}
 	public void setDocumentGraph(IEntity<DocumentGraph> documentGraph) {this.documentGraph = documentGraph;}
 
 	public boolean isHasAuthor(){ return this.documentGraph.getObject().getAuthor() != null && !this.documentGraph.getObject().getAuthor().equals("");}
-	
-		public boolean isSoundOn() {
-		return soundOn;
-	}
 
-	public void setSoundOn(boolean soundOn) {
-		this.soundOn = soundOn;
+	public boolean isSoundOn() {return soundOn;}
+	public void setSoundOn(boolean soundOn) {this.soundOn = soundOn;}
+
+	public List<SelectItem> getResearchSettingsList(){
+		try {
+			return this.getApplicationBean().getProcessManager().getServiceManager().getEntityManager().getEntitySelectItems(ResearchSettings.class, ResearchSettings.INACTIVE + "= false");
+		} catch (BusinessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public String actionStart(){
-		this.currentDocumentIdIndex = 0;
-		
-		// Limpa os dados antigos se houver
-		System.out.println("==============================================START");
+		this.documentContentList.clear();
+
 		// Pesquisa o documentId e prepara a visão para aprimeira execução
-		if(FacesUtils.getRequestParams().containsKey(REQUEST_PARAM_DOCUMENT_ID))
-			this.documentId = Integer.parseInt(FacesUtils.getRequestParam(REQUEST_PARAM_DOCUMENT_ID));
-		else
-			this.documentId = this.documentIds[this.currentDocumentIdIndex];
+		if(FacesUtils.getRequestParams().containsKey(REQUEST_PARAM_DOCUMENT_ID)){
+			setDocumentId(Integer.parseInt(FacesUtils.getRequestParam(REQUEST_PARAM_DOCUMENT_ID)));
+			this.documentContentList.add(this.documentContent);
+		}else{
+			for(DocumentContent content: this.researchSettings.getDocumentsContents()){
+				this.documentContentList.add(content);
+			}
+		}
+		
 		if(FacesUtils.getRequestParams().containsKey(REQUEST_PARAM_AUTHOR))
 			this.documentGraph.getObject().setAuthor(FacesUtils.getRequestParam(REQUEST_PARAM_AUTHOR));
+
 		if(FacesUtils.getRequestParams().containsKey(REQUEST_PARAM_SOUND_ON))
 			this.soundOn = FacesUtils.checkRequestParam(REQUEST_PARAM_SOUND_ON);
-		
-		if(this.documentId > 0){
-			// Prepara o conteúdo e texto	
-			setDocumentId(this.documentId);
-		}
 
-		return FACES_VIEW_1;
-	};
-	
-	public String actionSave(){
-//		DocumentGraph doc = new DocumentGraph();
-//		doc.setAuthor(this.author);
-//		doc.setDocumentContent(this.documentContent);
-//		doc.setGraphDot(this.graphDot);
-//		doc.setGraphJson(this.graphJson);
-//		doc.setActions(this.actions);
-//		doc.setSuggestions(this.suggestions);
-//		doc.setTimeStamp(Calendar.getInstance());
-//		
+		this.currentDocumentIdIndex = -1;
+		
 		try {
-			/* Set current documentContent used */
-			this.documentGraph.getObject().setDocumentContent(this.documentContent.getObject());
-			
+			return prepareNextDocument();
+		} catch (BusinessException e) {
+			e.printStackTrace();
+			FacesUtils.addErrorMsgs(MessageList.createSingleInternalError(e));
+			return FacesUtils.FACES_VIEW_FAILURE;
+		}
+	}
+
+	public String actionSave(){
+		try {
+
+			//	FacesUtils.addInfoMsg("Conexões semânticas salvas com sucesso!");
 			UtilsCrud.update(this.getApplicationBean().getProcessManager().getServiceManager(), this.documentGraph, null);
-//			FacesUtils.addInfoMsg("Conexões semânticas salvas com sucesso!");
 			
-			this.documentGraph = UtilsCrud.create(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentGraph.class, null);
-			this.documentGraph.getObject().setAuthor(this.authorUUIDSession);
-			this.currentDocumentIdIndex++;
-			
-			if(this.currentDocumentIdIndex >= this.documentIds.length)			
-				return FACES_VIEW_2;
-			else{ 
-				setDocumentId(this.documentIds[this.currentDocumentIdIndex]);
-				return "";
-			}
+			return prepareNextDocument();
+
 		} catch (BusinessException e) {
 			FacesUtils.addErrorMsg("Ocorreu um erro ao salvar!");
 			FacesUtils.addErrorMsgs(e.getErrorList());
 			return FacesUtils.FACES_VIEW_FAILURE;
 		}
-		
-		
+
+
 	}
+
+	private String prepareNextDocument() throws BusinessException {
+		this.documentGraph = UtilsCrud.create(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentGraph.class, null);
+		this.documentGraph.getObject().setAuthor(this.authorUUIDSession);
+		
+		/* Set current documentContent used */
+		this.documentGraph.getObject().setDocumentContent(this.documentContent);
+
+		this.currentDocumentIdIndex++;
+
+		if(this.currentDocumentIdIndex >= this.documentContentList.size())			
+			return FACES_VIEW_2;
+		else{ 
+			this.documentContent = this.documentContentList.get(this.currentDocumentIdIndex);
+			this.documentId = this.documentContent.getId();
+			return FACES_VIEW_1;
+		}
+	}
+
 
 	public String getViewName() {
 		return VIEW_NAME;
@@ -194,14 +217,14 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 	@Override
 	public void doReload() throws BusinessException, Exception {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void doReset() throws BusinessException, Exception {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
-	
+
+
 }

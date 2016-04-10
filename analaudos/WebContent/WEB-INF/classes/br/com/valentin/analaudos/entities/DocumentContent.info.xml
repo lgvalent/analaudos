@@ -3,7 +3,8 @@
     <group name="Geral" label="Geral" hint="" description="">
         <property xsi:type="PropertyNumericType" name="id" label="Id"/>
         <property xsi:type="PropertyStringType" name="name" label="Nome" hint="Nome do documento (título)"/>
-        <property xsi:type="PropertyStringType" name="content" label="Conteúdo" hint="Conteúdo do documento"/>
         <property xsi:type="PropertyEntityType" name="documentCategory" label="Categoria"/>
+        <property xsi:type="PropertyStringType" name="content" label="Conteúdo" hint="Conteúdo do documento" editMask="HTML"/>
+        <property xsi:type="PropertyStringType" name="contentPlain" label="Conteúdo sem formatação" hint="Conteúdo do documento sem formatação" calculated="true"/>
     </group>
 </entity>

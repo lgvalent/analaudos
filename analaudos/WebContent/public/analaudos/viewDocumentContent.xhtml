@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition template="/public/basic/templates/simpleProcess.xhtml">
+	<ui:param name="title" value="Analaudos - #{createDocumentGraphBean.documentContent.name}" />
+	<ui:param name="icon" value="../../public/analaudos/img/externalLink.png" />
+	<ui:param name="description" value="Visualizando o documento: #{createDocumentGraphBean.documentContent.name}" />
+	<ui:define name="content">
+		<h:outputText value="#{createDocumentGraphBean.documentContent.content}" escape="false" />
+	</ui:define>
+	<ui:define name="actions">
+		<p:commandButton value="Fechar" icon="ui-icon-close" onclick="window.close()"/>
+		<script>
+  			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+				 m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			  })
+			(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  			ga('create', 'UA-73147661-1', 'auto');
+  			ga('send', 'pageview');
+		</script>
+		<span style="color: lightgray;">#{createDocumentGraphBean.documentGraph.object.author}</span>
+	</ui:define>
+</ui:composition>
+
+</html>
+

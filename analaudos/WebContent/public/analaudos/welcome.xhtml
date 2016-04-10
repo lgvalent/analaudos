@@ -7,15 +7,13 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets">
 <ui:composition template="/public/basic/templates/simpleProcess.xhtml">
 	<ui:param name="title" value="Analaudos - Analisador semântico de laudos médicos" />
-	<ui:param name="icon" value="../../public/analaudos/img/logo_usp_utf.png" />
+	<ui:param name="icon" value="../../public/analaudos/img/logo_180x180.png" />
 	<ui:param name="description" value="Obrigado por participar da pesquisa.&lt;br/&gt; Sua contribuição será muito importante para entendermos as relações semânticas entres os termos de um laudo médico.&lt;br/&gt;Forneça alguns dados iniciais e clique em &lt;b&gt;Iniciar&lt;b/&gt;&lt;br/&gt;" />
 	<ui:define name="content">
 		<br/>
-		Selecione sua especialidade:<br/>
-		<p:selectOneRadio value="#{createDocumentGraphBean.documentId}">
-			<f:selectItem itemValue="1" itemLabel="Obstetrícia"/>
-			<f:selectItem itemValue="2" itemLabel="Ortopedia"/>
-			<f:selectItem itemValue="3" itemLabel="Outra"/>
+		Selecione a pesquisa:<br/>
+		<p:selectOneRadio value="#{createDocumentGraphBean.researchSettingsId}" >
+			<f:selectItems value="#{createDocumentGraphBean.researchSettingsList}"/>
 		</p:selectOneRadio><br/>
 		Informe o ano de sua formatura:<br/>
 		<p:inputText value="#{createDocumentGraphBean.documentGraph.object.graduationYear}" onkeypress="return keyPressInt(this,event)" maxlength="4"/><br/>

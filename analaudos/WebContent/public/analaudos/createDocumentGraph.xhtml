@@ -8,12 +8,13 @@
 	xmlns:c="http://java.sun.com/jsp/jstl/core">
 <ui:composition template="/public/basic/templates/simpleProcess.xhtml">
 	<ui:param name="title" value="Analaudos - Analisador semântico de laudos médicos" />
-	<ui:param name="icon" value="http://ssl.gstatic.com/codesite/ph/images/defaultlogo.png" />
+	<ui:param name="icon" value="../../public/analaudos/img/logo_180x180.png" />
 	<ui:param name="description" value="Analise o texto original e no painel do grafo. Realize as ligações entre os termos que possuem alguma relação.&lt;br/&gt;Ao terminar, clique no botão &lt;b&gt;Concluído.&lt;b/&gt;&lt;br/&gt;Se preferir, assista ao breve tutorial em vídeo." />
 	<ui:define name="content">
 	<f:metadata>
 		<f:viewParam name="documentId" value="#{createDocumentGraphBean.documentId}"/>
 		<f:viewParam name="soundOn" value="#{createDocumentGraphBean.soundOn}"/>
+		<f:viewParam name="author" value="#{createDocumentGraphBean.documentGraph.object.author}"/>
 	</f:metadata>
 		<script src="./js/springy.js"/>
 		<script src="./js/springyui.js"/>
@@ -52,11 +53,13 @@
 		</p:accordionPanel>
 	</ui:define>
 	<ui:define name="actions">
-		<b>1º: <span title="id=#{createDocumentGraphBean.documentId}">Leia o laudo original</span></b><br/>
+		<b>1º: <span title="id=#{createDocumentGraphBean.documentId}">Leia o laudo original sem formatação</span></b>
+		<a target="_blank" href="../../public/analaudos/viewDocumentContent.xhtml" title="Visualizar laudo original formatado"><img src="../../public/analaudos/img/externalLink.png" /></a>
+		<br/>
 		<table width="100%">
 			<tr>
 				<td>
-					<h:inputTextarea id="sourceText" value="#{createDocumentGraphBean.text}" rows="6" style="width: 100%; font-size: 16px; font-style: italic" readonly="#{createDocumentGraphBean.hasAuthor}"/>
+					<h:inputTextarea id="sourceText" value="#{createDocumentGraphBean.documentContent.contentPlain}" rows="6" style="width: 100%; font-size: 16px; font-style: italic" readonly="#{createDocumentGraphBean.hasAuthor}"/>
 				</td>
 			</tr>
 		</table>

@@ -7,9 +7,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.Index;
+import org.jsoup.Jsoup;
 
 import br.com.orionsoft.monstrengo.crud.entity.dao.IDAO;
 
@@ -47,6 +49,11 @@ public class DocumentContent {
 	}
 	public void setContent(String content) {
 		this.content = content;
+	}
+	
+	@Transient
+	public String getContentPlain(){
+		return Jsoup.parse(this.content).text();
 	}
 	
 	@ManyToOne

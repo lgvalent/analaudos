@@ -325,7 +325,7 @@ else{
 			
 			/* Resize canvas */
 			a.canvas.width = a.canvas.parentNode.clientWidth - a.canvas.offsetLeft;
-			a.canvas.height = 500;
+			a.canvas.height = 550;
 			
 			a.gui.renderer.start();
 		};

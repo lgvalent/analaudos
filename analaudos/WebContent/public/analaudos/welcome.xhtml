@@ -11,29 +11,37 @@
 	<ui:param name="description" value="Obrigado por participar da pesquisa.&lt;br/&gt; Sua contribuição será muito importante para entendermos as relações semânticas entres os termos de um laudo médico.&lt;br/&gt;Forneça alguns dados iniciais e clique em &lt;b&gt;Iniciar&lt;b/&gt;&lt;br/&gt;" />
 	<ui:define name="content">
 		<br/>
-		Selecione a pesquisa:<br/>
-		<p:selectOneRadio value="#{createDocumentGraphBean.researchSettingsId}" >
+		Selecione a especialidade dos laudos:<br/>
+		<p:selectOneRadio value="#{createDocumentGraphBean.researchSettingsId}" required="true">
 			<f:selectItems value="#{createDocumentGraphBean.researchSettingsList}"/>
 		</p:selectOneRadio><br/>
-		Informe o ano de sua formatura:<br/>
-		<p:inputText value="#{createDocumentGraphBean.documentGraph.object.graduationYear}" onkeypress="return keyPressInt(this,event)" maxlength="4"/><br/>
-		<br/>
-		Informe o ano da conclusão de sua residência:<br/>
-		<p:inputText value="#{createDocumentGraphBean.documentGraph.object.residenceYear}" onkeypress="return keyPressInt(this,event)" maxlength="4"/><br/>
-		<br/>
-		Informe o ano de conclusão de sua especialização:<br/>
-		<p:inputText value="#{createDocumentGraphBean.documentGraph.object.specialistYear}" onkeypress="return keyPressInt(this,event)" maxlength="4"/><br/>
-		<br/>
-		Informe o ano de conclusão do seu mestrado:<br/>
-		<p:inputText value="#{createDocumentGraphBean.documentGraph.object.masterYear}" onkeypress="return keyPressInt(this,event)" maxlength="4"/><br/>
-		<br/>
-		Informe o ano de conclusão do seu doutorado:<br/>
-		<p:inputText value="#{createDocumentGraphBean.documentGraph.object.doctorYear}" onkeypress="return keyPressInt(this,event)" maxlength="4"/><br/>
-		<br/>
-		Escolha como deseja iniciar a pesquisa:<br/>
-		<p:selectOneButton value="#{createDocumentGraphBean.soundOn}"  onIcon="ui-icon-volume-on">
-			<f:selectItem itemLabel="Sem som" itemValue="false" styleClass="ui-icon-volume-off"/>
-            <f:selectItem itemLabel="Com assistente sonoro" itemValue="true" />
+		<fieldset>
+  			<legend>Informações para estatísticas</legend>
+			Informe o ano da sua formatura:<br />
+  			<p:inputText value="#{createDocumentGraphBean.documentGraph.object.graduationYear}" onkeypress="return keyPressInt(this,event)" maxlength="4"/><br/>
+			<br/> Informe o ano da conclusão da sua residência:<br />
+			<p:inputText
+				value="#{createDocumentGraphBean.documentGraph.object.residenceYear}"
+				onkeypress="return keyPressInt(this,event)" maxlength="4" />
+			<br /> <br /> Informe o ano da conclusão da sua especialização:<br />
+			<p:inputText
+				value="#{createDocumentGraphBean.documentGraph.object.specialistYear}"
+				onkeypress="return keyPressInt(this,event)" maxlength="4" />
+			<br /> <br /> Informe o ano da conclusão do seu mestrado:<br />
+			<p:inputText
+				value="#{createDocumentGraphBean.documentGraph.object.masterYear}"
+				onkeypress="return keyPressInt(this,event)" maxlength="4" />
+			<br /> <br /> Informe o ano da conclusão do seu doutorado:<br />
+			<p:inputText
+				value="#{createDocumentGraphBean.documentGraph.object.doctorYear}"
+				onkeypress="return keyPressInt(this,event)" maxlength="4" />
+		</fieldset>
+		<br /> Escolha como deseja iniciar a pesquisa:<br />
+		<p:selectOneButton value="#{createDocumentGraphBean.soundOn}"
+			onIcon="ui-icon-volume-on">
+			<f:selectItem itemLabel="Sem som" itemValue="false"
+				styleClass="ui-icon-volume-off" />
+			<f:selectItem itemLabel="Com assistente sonoro" itemValue="true" />
 		</p:selectOneButton>
 	</ui:define>
 	<ui:define name="actions">

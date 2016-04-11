@@ -4,8 +4,20 @@
         <property xsi:type="PropertyNumericType" name="id" label="Id" readOnly="true" required="true"/>
         <property xsi:type="PropertyStringType" name="author" label="Autor" hint="Indica o autor que compôs este grafo"/>
         <property xsi:type="PropertyEntityType" name="documentContent" label="Documento original"/>
-        <property xsi:type="PropertyStringType" name="source" label="Grafo .dot" />
-        <property xsi:type="PropertyStringType" name="sourceEncoded" label="SourceEncoded" calculated="true" visible="false"/>
         <property xsi:type="PropertyCalendarType" name="timeStamp" label="Data e hora" hint="Indica a data e hora da criação desse grafo"/>
+        <property xsi:type="PropertyStringType" name="suggestions" label="Suggestions"/>
+    </group>
+    <group name="Estatística" label="Dados estatísticos" hint="" description="">
+        <property xsi:type="PropertyNumericType" name="graduationYear" label="Ano da formatura"/>
+        <property xsi:type="PropertyNumericType" name="residenceYear" label="Ano da conclusão da residência"/>
+        <property xsi:type="PropertyNumericType" name="specialistYear" label="Ano da conclusão da especialização"/>
+        <property xsi:type="PropertyNumericType" name="masterYear" label="Ano da conclusão do mestrado"/>
+        <property xsi:type="PropertyNumericType" name="doctorYear" label="Ano da conclusão do doutorado"/>
+    </group>
+    <group name="Análise" label="Análise" hint="" description="">
+        <property xsi:type="PropertyStringType" name="actions" label="Ações" hint="Registros das ações executadas durante as ligações"/>
+        <property xsi:type="PropertyStringType" name="graphJson" label="Grafo em Json"/>
+        <property xsi:type="PropertyStringType" name="graphDot" label="Grafo em .dot"/>
+        <property xsi:type="PropertyStringType" name="graphDotEncoded" label=".dot URL encoded" calculated="true" visible="false"/>
     </group>
 </entity>

@@ -1,9 +1,13 @@
 package br.com.valentin.analaudos.web;
 
+import java.util.Calendar;
+
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 
 import br.com.orionsoft.monstrengo.core.exception.BusinessException;
+import br.com.orionsoft.monstrengo.core.util.CalendarUtils;
 import br.com.orionsoft.monstrengo.crud.entity.IEntityList;
 import br.com.orionsoft.monstrengo.crud.entity.dao.IDAO;
 import br.com.orionsoft.monstrengo.crud.services.UtilsCrud;
@@ -22,6 +26,9 @@ public class ListDocumentGraphBean extends BeanSessionBasic{
 		
 	private Long documentId = IDAO.ENTITY_UNSAVED;
 	private String author;
+	private boolean filterByDate = true;
+	private Calendar dateFrom = CalendarUtils.getCalendarFirstMonthDay();
+	private Calendar dateTo = CalendarUtils.getCalendarLastMonthDay();
 	
 
 	private IEntityList<DocumentGraph> documents;
@@ -35,33 +42,38 @@ public class ListDocumentGraphBean extends BeanSessionBasic{
 		}
 	}
 
-	public Long getDocumentId() {
-		return documentId;
-	}
+	public Long getDocumentId() {return documentId;}
+	public void setDocumentId(Long documentId) {this.documentId = documentId;}
 
-	public void setDocumentId(Long documentId) {
-		this.documentId = documentId;
-	}
-
-	public String getAuthor() {
-		return author;
-	}
-
-	public void setAuthor(String author) {
-		this.author = author;
-	}
+	public String getAuthor() {return author;}
+	public void setAuthor(String author) {this.author = author;}
 	
+	public Calendar getDateFrom() {return dateFrom;}
+	public void setDateFrom(Calendar dateFrom) {this.dateFrom = dateFrom;}
+
+	public Calendar getDateTo() {return dateTo;}
+	public void setDateTo(Calendar dateTo) {this.dateTo = dateTo;}
+	
+	public boolean isFilterByDate() {return filterByDate;}
+	public void setFilterByDate(boolean filterByDate) {this.filterByDate = filterByDate;}
 
 	public IEntityList<DocumentGraph> getDocuments() {
 		return documents;
 	}
 
 	public String actionStart(){
+		
 		return FACES_VIEW_1;
 	};
 	
 	public void doList(){
 		StringBuilder filter = new StringBuilder();
+		if(this.filterByDate){
+			
+			filter.append(" (timeStamp BETWEEN  '" + CalendarUtils.formatToSQLDate(this.dateFrom) + "' AND '" + CalendarUtils.formatToSQLDate(this.dateTo) + "') AND");
+		}
+
+		
 		if(this.author != null && !this.author.isEmpty()){
 			
 			filter.append(" (author like '%" + this.author + "%') AND");

@@ -99,8 +99,9 @@ public class DocumentGraph {
 	public void setSuggestions(String suggestions) {
 		this.suggestions = suggestions;
 	}
+	
 	@Transient
-	public String getSourceEncoded() {
+	public String getGraphDotEncoded() {
 		try {
 			return URLEncoder.encode(this.graphDot, "UTF-8");
 		} catch (Exception e) {

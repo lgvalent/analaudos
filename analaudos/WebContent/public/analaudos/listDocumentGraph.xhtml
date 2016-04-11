@@ -11,27 +11,63 @@
 	<ui:param name="icon" value="http://ssl.gstatic.com/codesite/ph/images/defaultlogo.png" />
 	<ui:param name="description" value="Visualiza todos os grafo gerados pelos pesquisadores." />
 	<ui:define name="content">
-	
+		<div id="graph"/>
 		<script src="./js/springy.js"/>
 		<script src="./js/springyui.js"/>
 		<script src="./js/utils.js"/>
 		<script src="./js/analaudos.js"/>
 		<script src="./js/jquery.growl.js"/>
-		<script src='https://code.responsivevoice.org/responsivevoice.js'/>
+		<script src="./js/viz.js"/>
+		<script src="https://code.responsivevoice.org/responsivevoice.js"/>
 		<link href="css/jquery.growl.css" rel="stylesheet" type="text/css" />
 		<link href="css/analaudos.css" rel="stylesheet" type="text/css" />
-	
+
+		<script>
+			function generateGraphs(){
+				var graphs = $('.graph');
+			 	graphs.each(
+					function(i, val){
+				 		try{
+				  			val.innerHTML = Viz(val.innerText);
+					 
+				 		}catch(e){
+				  			val.innerHTML += e.message;
+				 		}
+			 		}
+			 	)
+			}
+		</script>
+
+		<p:selectBooleanCheckbox value="#{listDocumentGraphBean.filterByDate}"/>
+		<h:outputLabel value="Data "/>
+		<h:panelGroup>
+			<h:outputLabel value="de "/>
+			<ui:include src="/public/basic/tiles/calendar.xhtml">
+          		<ui:param name="timeField" value="#{listDocumentGraphBean.dateFrom.time}" />
+			</ui:include>
+			<h:outputLabel value=" até "/>
+			<ui:include src="/public/basic/tiles/calendar.xhtml">
+        		<ui:param name="timeField" value="#{listDocumentGraphBean.dateTo.time}" />
+			</ui:include>
+		</h:panelGroup>
+				
 		Documento Origem (Id): <p:inputText value="#{listDocumentGraphBean.documentId}" style="text-align: right;"/>
-		Autor do grafo: <p:inputText value="#{listDocumentGraphBean.author}"/>
-		<p:commandButton actionListener="#{listDocumentGraphBean.doList}" update="result" value="Listar"/>
+		&nbsp;
+		<p:commandButton actionListener="#{listDocumentGraphBean.doList}" update="result" value="Listar" ajax="false"/>
+
 		<p:dataTable id="result" value="#{listDocumentGraphBean.getDocuments().getList()}" var="item">
 			<p:column headerText="Grafos" style="text-align:center;">
-				(<h:outputLabel value="#{item.object.timeStamp.time}"><f:convertDateTime/></h:outputLabel>) Autor: #{item.object.author}<br/>
-				<!--img src="https://chart.googleapis.com/chart?cht=gv&amp;chl=#{item.object.sourceEncoded}"/-->
-				<iframe width="100%" height="200" src="./listDocumentGraphChart.xhtml?documentId=#{item.object.id}" onclick="this.height=this.height*1.5" style="border:solid light-gray 3px"/>
+				(<h:outputLabel value="#{item.object.timeStamp.time}"><f:convertDateTime pattern="dd/MM/yyy hh:mm" /></h:outputLabel>) Autor: #{item.object.author}<br/>
+				<!-- img src="https://chart.googleapis.com/chart?cht=gv&amp;chl=#{item.object.sourceEncoded}"/-->
+				<!-- iframe width="100%" height="200" src="./listDocumentGraphChart.xhtml?documentId=#{item.object.id}" onclick="this.height=this.height*1.5" style="border:solid light-gray 3px"/-->
+				<h:outputLabel styleClass="graph" value="#{item.object.graphDot}"/>
 			</p:column>
 		
 		</p:dataTable>
+		<script>
+			generateGraphs();
+		</script>
+		
 	</ui:define>
 	<ui:define name="actions">
 	</ui:define>

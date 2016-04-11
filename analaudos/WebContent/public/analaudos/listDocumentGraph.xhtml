@@ -28,15 +28,23 @@
 			 	graphs.each(
 					function(i, val){
 				 		try{
-				  			val.innerHTML = Viz(val.innerText);
+				  			val.innerHTML = Viz(val.title);
 					 
 				 		}catch(e){
-				  			val.innerHTML += e.message;
+				  			val.innerText += e.message;
 				 		}
 			 		}
 			 	)
 			}
-		</script>
+
+			function downloadGraphPng(src){
+				var image = Viz(src.parentNode.children[3].title, { format: "png-image-element" });
+   			
+    			window.setTimeout(function (){window.open(image.src);}, 10);
+  
+			}
+
+			</script>
 
 		<p:selectBooleanCheckbox value="#{listDocumentGraphBean.filterByDate}"/>
 		<h:outputLabel value="Data "/>
@@ -57,10 +65,12 @@
 
 		<p:dataTable id="result" value="#{listDocumentGraphBean.getDocuments().getList()}" var="item">
 			<p:column headerText="Grafos" style="text-align:center;">
-				(<h:outputLabel value="#{item.object.timeStamp.time}"><f:convertDateTime pattern="dd/MM/yyy hh:mm" /></h:outputLabel>) Autor: #{item.object.author}<br/>
+				(<h:outputLabel value="#{item.object.timeStamp.time}"><f:convertDateTime pattern="dd/MM/yyy hh:mm" /></h:outputLabel>) Autor: #{item.object.author}
+				<img src="../../public/analaudos/img/externalLink.png" onclick="javascript:downloadGraphPng(this);" width="24" height="24" style="cursor:pointer;" title="Abre a imagem do grafo em uma nova janela"/>
+				<br/>
 				<!-- img src="https://chart.googleapis.com/chart?cht=gv&amp;chl=#{item.object.sourceEncoded}"/-->
 				<!-- iframe width="100%" height="200" src="./listDocumentGraphChart.xhtml?documentId=#{item.object.id}" onclick="this.height=this.height*1.5" style="border:solid light-gray 3px"/-->
-				<h:outputLabel styleClass="graph" value="#{item.object.graphDot}"/>
+				<h:outputLabel styleClass="graph" title="#{item.object.graphDot}" value="Aguarde..."/>
 			</p:column>
 		
 		</p:dataTable>

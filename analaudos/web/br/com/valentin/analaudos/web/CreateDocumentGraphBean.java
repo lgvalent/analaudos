@@ -37,6 +37,7 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 	public static final String REQUEST_PARAM_DOCUMENT_ID = "documentId";
 	public static final String REQUEST_PARAM_AUTHOR = "author";
 	public static final String REQUEST_PARAM_SOUND_ON = "soundOn";
+	public static final String REQUEST_PARAM_EXPERT = "expert";
 
 	private ResearchSettings researchSettings;
 	private long researchSettingsId = IDAO.ENTITY_UNSAVED;
@@ -48,6 +49,7 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 
 	private String authorUUIDSession;
 	private boolean soundOn = true;
+	private boolean expert = true;
 
 	//	private IEntity<DocumentContent> documentContent = null;
 	private IEntity<DocumentGraph> documentGraph = null;
@@ -129,10 +131,11 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 	public IEntity<DocumentGraph> getDocumentGraph() {return documentGraph;}
 	public void setDocumentGraph(IEntity<DocumentGraph> documentGraph) {this.documentGraph = documentGraph;}
 
-	public boolean isHasAuthor(){ return this.documentGraph.getObject().getAuthor() != null && !this.documentGraph.getObject().getAuthor().equals("");}
-
 	public boolean isSoundOn() {return soundOn;}
 	public void setSoundOn(boolean soundOn) {this.soundOn = soundOn;}
+
+	public boolean isExpert() {return expert;}
+	public void setExpert(boolean expert) {this.expert = expert;}
 
 	public List<SelectItem> getResearchSettingsList(){
 		try {

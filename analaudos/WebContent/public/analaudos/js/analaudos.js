@@ -36,6 +36,7 @@ else{
 		a.rootNodeFontColor = "red";
 		a.orphanNodeFontColor = "#000000";
 		a.nodeFont = "16px Verdana, sans-serif";
+		a.edgeColor = "#00A0B0";
 		
 		
 		a.wordsCount = 0;
@@ -115,7 +116,7 @@ else{
 					} else {
 						a.log("createEdge", a.sourceNode.id, target.id);
 						a.toast(target.data.label);
-						a.gui.graph.newEdge(a.sourceNode, target, {color: '#00A0B0', label: ''});
+						a.addEdge(a.sourceNode, target);
 					}
 				}
 				
@@ -123,6 +124,7 @@ else{
 				a.colorizeEdge(a.sourceNode);
 				a.colorizeEdge(target);
 				a.sourceNode.data.border = false;
+				a.sourceNode = null;
 
 			}		
 		};
@@ -157,14 +159,50 @@ else{
 						}
 					}
 					if(!exists) a.gui.graph.removeNode(a.gui.graph.nodeSet[id]);
-				}
+				} 
 			};
 		};
 
-		a.addNode = function(str){
-			a.gui.graph.addNode(new Springy.Node('w'+a.wordsCount++, {label:str}));
+		a.addNode = function(id, word, label, fontColor){
+			if("undefined" == typeof word)
+				word = id;
+			if("undefined" == typeof label)
+				label = word;
+			return a.gui.graph.addNode(new Springy.Node(id, {label:label, word: word, fontColor: fontColor, onclick:a.onNodeClick}));
 		};
 
+		a.addEdge = function(src, trg){
+			return a.gui.graph.newEdge(src, trg, {color: a.edgeColor, label: ''});
+		};
+		
+		
+		a.reverseEdges = function(){
+			var tmpEdges = a.gui.graph.edges.slice();
+			tmpEdges.forEach(function(e) {
+				this.removeEdge(e);
+					a.addEdge(e.target, e.source);
+			}, a.gui.graph);
+		};
+		
+		a.joinNodes = function(){
+			var tmpNodes1 = a.gui.graph.nodes.slice();
+			var tmpNodes2 = a.gui.graph.nodes.slice();
+			tmpNodes1.forEach(function(n1) {
+				tmpNodes2.forEach(function(n2){
+					if(n1.id != n2.id && n1.data.word == n2.data.word && n1.id in this.nodeSet){
+						for(var adjN2 in this.adjacency[n2.id]){
+							var edges = this.adjacency[n2.id][adjN2];
+							for(var i in edges){
+								a.addEdge(n1, edges[i].target);
+								a.gui.graph.removeEdge(edges[i]);
+							}
+						}
+						a.gui.graph.removeNode(n2);
+					}
+				}, this);
+			}, a.gui.graph);
+		};
+		
 		/* Return a .dot format 
 		 */
 		a.createDot = function(){
@@ -183,7 +221,7 @@ else{
 
 			for(var sourceId in a.gui.graph.adjacency){
 				for(var targetId in a.gui.graph.adjacency[sourceId]){
-					dotGraph += targetId + "->" + sourceId + ";";
+					dotGraph +=  sourceId + "->" + targetId + ";";
 				}
 			}
 
@@ -193,9 +231,15 @@ else{
 		};
 
 		/* Return a .json format 
+		 * { "nodes": [{"id":"w0","fontcolor":"blue" , "label":"ULTRASSONOGRAFIA", "word":"ultrassonografia"}, ...],
+		 *   "edges":[
+		 *   			["w0", "w1"],["w0", "w2"],...
+		 *   		 ],
+		 *   "version":"0.1"
+		 * }
 		 */
 		a.createJson = function(){
-			var jsonGraph = "{\"graph\":{\"nodes\":[";
+			var jsonGraph = "{\"nodes\":[";
 			var nodes = [];
 			for(var id in a.gui.graph.nodeSet){
 				// Check for orphan nodes
@@ -205,23 +249,44 @@ else{
 				});
 				if(!orphan){
 					var node = a.gui.graph.nodeSet[id];
-					nodes.push("{\"id\":\""+id+"\"" + (node.data.fontColor !== undefined? ",\"fontcolor\":\"" + node.data.fontColor + "\" ":"") + ", \"label\":\"" + node.data.label +"\", \"word\":\"" + node.data.word+ "\"}");
+					nodes.push("{\"id\":\""+id+"\"" + (node.data.fontColor !== undefined? ",\"fontColor\":\"" + node.data.fontColor + "\" ":"") + ", \"label\":\"" + node.data.label +"\", \"word\":\"" + node.data.word+ "\"}");
 				}
 			}
-			jsonGraph += nodes.join(",") + "], \"links\":[";
+			jsonGraph += nodes.join(",") + "], \"edges\":[";
 			
 			var links = [];
 			for(var sourceId in a.gui.graph.adjacency){
 				for(var targetId in a.gui.graph.adjacency[sourceId]){
-					links.push("{\"source\":\""+targetId +"\", \"target\":\"" + sourceId + "\"}");
+					links.push("[\""+ sourceId +"\", \"" + targetId + "\"]");
 				}
 			}
 
-			jsonGraph += links.join(",") + "]}}";
+			jsonGraph += links.join(",") + "], \"version\":\"0.1\"}";
 
 			return jsonGraph;
 		};
 
+		/* Return a .json format 
+		 */
+		a.loadJson = function(json){
+			// parse if a string is passed (EC5+ browsers)
+			if (typeof json == 'string' || json instanceof String) {
+				json = JSON.parse( json );
+			}
+
+			if ('nodes' in json || 'edges' in json) {
+				var nodes = json['nodes']; 
+				for(i in nodes)
+					a.addNode(nodes[i].id, nodes[i].word, nodes[i].label, nodes[i].fontColor);
+				
+				var edges = json['edges']; 
+				for(i in edges){
+					var src = a.gui.graph.nodeSet[edges[i][0]];
+					var trg = a.gui.graph.nodeSet[edges[i][1]];
+					a.addEdge(trg, src);
+				}
+			}
+		};
 		/* dotSource: String
 		 * imgTarget: <img />
 		 * http://sandbox.kidstrythisathome.com/erdos/
@@ -271,6 +336,11 @@ else{
 		};
 		
 		a.createImagePopup = function(dotSource){
+
+			var image = Viz(dotSource, { format: "png-image-element" });
+   			
+   			window.setTimeout(function (){window.open(image.src);}, 10);
+			/*
 			var iFrame = $("<iframe/>");
 			iFrame.append("<form action='https://chart.googleapis.com/chart' method='POST' target='_blank'/>");
 			
@@ -281,6 +351,8 @@ else{
 		    form[0].children[0].value = dotSource || a.createDot();
 
 			form[0].submit();
+			
+			*/
 			
 		};
 		/* @deprecated Usando JSF
@@ -315,7 +387,6 @@ else{
 				a.selectSource();
 			else{
 				a.createEdge(a.gui.getNodeSelected());
-				a.unselectSource();
 			}
 		};
 
@@ -325,7 +396,7 @@ else{
 			
 			/* Resize canvas */
 			a.canvas.width = a.canvas.parentNode.clientWidth - a.canvas.offsetLeft;
-			a.canvas.height = 550;
+			//a.canvas.height = 550;
 			
 			a.gui.renderer.start();
 		};
@@ -333,28 +404,10 @@ else{
 		a.init = function(inputText, outputCanvas){
 			a.startTime = new Date();
 			a.log("start");
-			/* Clear sourceNodes graph */
-			var graph = new Springy.Graph();
-
-			var words = inputText.value.split(' ');
-
-			for(var i in words){
-				var word = words[i].toLowerCase();
-				word = word.replace(/[:;()\[\]?!]/g, '');
-				word = word.replace(/[\n\r\.,](\ |$)/g, ' '); // Replace dot and comma by a space, or word separator
-				word = a.stemmer(word);
-				
-				/* Create a node */
-				graph.addNode(new Springy.Node('w'+i, {label:words[i], word: word, onclick:a.onNodeClick}));
-
-				/* Link current node to sourceNodeious node */
-//				if(i!=0) graph.newEdge(graph.nodeSet['w'+ (i-1)], graph.nodeSet['w'+i], {color: '#AA0000', label: ''});
-			}
-			a.wordsCount = words.length;
 
 			if(a.gui == null){
 				/* Select a start node to avoid null pointer */
-				a.gui = outputCanvas.springy({graph: graph, nodeSelected: graph.nodeSet['w1'], damping:0.00000001, stiffness:400, repulsion:400, minEnergyThreshold:0.0001});
+				a.gui = outputCanvas.springy({damping:0.00000001, stiffness:400, repulsion:400, minEnergyThreshold:0.0001});
 				
 				a.canvas = outputCanvas[0]; 
 
@@ -365,6 +418,23 @@ else{
 				a.canvas.style.cursor = "pointer";
 			}
 
+			var words = inputText.value.split(' ');
+
+			a.wordsCount = 0;
+			for(var i in words){
+				var word = words[i].toLowerCase();
+				word = word.replace(/[:;()\[\]?!]/g, '');
+				word = word.replace(/[\n\r\.,](\ |$)/g, ' '); // Replace dot and comma by a space, or word separator
+				word = a.stemmer(word);
+				
+				/* Create a node */
+				a.addNode('w'+a.wordsCount++, words[i], word);
+
+				/* Link current node to sourceNodeious node */
+//				if(i!=0) graph.newEdge(graph.nodeSet['w'+ (i-1)], graph.nodeSet['w'+i], {color: '#AA0000', label: ''});
+			}
+			a.wordsCount = words.length;
+			
 			/* Organize items */
 			a.arrange();
 			window.setTimeout(a.arrange, 2000); // Refresh first arrange moviment from center
@@ -372,6 +442,7 @@ else{
 			/* Update graph size while window resizing */
 			window.onresize = a.updateSize;
 			
+			a.gui.setNodeSelected(a.gui.graph.nodeSet['w1']);
 			a.selectSource();
 			/* Activate first selection */
 //			sourceNode = a.gui.getNodeSelected();

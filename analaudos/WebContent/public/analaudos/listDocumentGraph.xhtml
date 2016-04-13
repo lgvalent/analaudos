@@ -38,10 +38,9 @@
 			}
 
 			function downloadGraphPng(src){
-				var image = Viz(src.parentNode.children[3].title, { format: "png-image-element" });
+				var image = Viz(src.parentNode.lastChild.title, { format: "png-image-element" });
    			
     			window.setTimeout(function (){window.open(image.src);}, 10);
-  
 			}
 
 			</script>

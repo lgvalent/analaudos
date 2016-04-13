@@ -15,6 +15,7 @@
 		<f:viewParam name="documentId" value="#{createDocumentGraphBean.documentId}"/>
 		<f:viewParam name="soundOn" value="#{createDocumentGraphBean.soundOn}"/>
 		<f:viewParam name="author" value="#{createDocumentGraphBean.documentGraph.object.author}"/>
+		<f:viewParam name="expert" value="#{createDocumentGraphBean.expert}"/>
 	</f:metadata>
 		<script src="./js/springy.js"/>
 		<script src="./js/springyui.js"/>
@@ -24,6 +25,7 @@
 		<script src='https://code.responsivevoice.org/responsivevoice.js'/>
 		<link href="css/jquery.growl.css" rel="stylesheet" type="text/css" />
 		<link href="css/analaudos.css" rel="stylesheet" type="text/css" />
+		<script src="./js/viz.js"/>
 		
 		<h:inputHidden id="actions" value="#{createDocumentGraphBean.documentGraph.object.actions}" rows="6" style="width: 100%; background: lightgray;"/>
 		<h:inputHidden id="graphDot" value="#{createDocumentGraphBean.documentGraph.object.graphDot}" rows="6" style="width: 100%; background: lightgray;"/>
@@ -37,7 +39,7 @@
 				Deixe sua sugestão ou crítica sobre esta pesquisa:<br/>
 				<p:inputTextarea id="areaSuggestions" rows="6" style="width: 100%;" value="#{createDocumentGraphBean.documentGraph.object.suggestions}"/>
 			</p:tab>
-			<p:tab title="Avançado" rendered="#{!createDocumentGraphBean.hasAuthor}">
+			<p:tab title="Avançado" rendered="#{createDocumentGraphBean.expert}">
 				<textarea id="areaActions" rows="6" style="width: 100%; background: lightgray;"/>
 				<textarea id="areaGraphDot" rows="6" style="width: 100%; background: lightgray;"/>
 				<textarea id="areaGraphJson" rows="6" style="width: 100%; background: lightgray;"/>
@@ -59,7 +61,7 @@
 		<table width="100%">
 			<tr>
 				<td>
-					<h:inputTextarea id="sourceText" value="#{createDocumentGraphBean.documentContent.contentPlain}" rows="6" style="width: 100%; font-size: 16px; font-style: italic" readonly="#{createDocumentGraphBean.hasAuthor}"/>
+					<h:inputTextarea id="sourceText" value="#{createDocumentGraphBean.documentContent.contentPlain}" rows="6" style="width: 100%; font-size: 16px; font-style: italic" readonly="#{!createDocumentGraphBean.expert}"/>
 				</td>
 			</tr>
 		</table>

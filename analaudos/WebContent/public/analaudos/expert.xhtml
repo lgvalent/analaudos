@@ -23,13 +23,14 @@
 		<fieldset>
 	 		<legend>Documento</legend>
 			<h:inputTextarea id="sourceText" rows="6" style="width: 100%; font-size: 16px;" value="Digite aqui seu documento"/>
-			<p:button onclick="analaudos.init(jQuery('#form\\:sourceText')[0], jQuery('#graph')); return false;" value="Gerar grafo"/>
+			<p:button onclick="analaudos.addText(document.getElementById('form:sourceText').value); return false;" value="Gerar grafo"/>
 			<input id="newNode" type="text"></input>
 			<p:button onclick="analaudos.addNode(jQuery('#newNode')[0].value); return false;" value="Adicionar novo nó"/>
 			<p:button onclick="analaudos.arrange(); return false;" value="Re-arranjar" />
 			<p:button onclick="analaudos.removeOrphans(); return false;" value="Remover órfãos"/>
 			<p:button onclick="analaudos.reverseEdges(); return false;" value="Inverter" title="Inverte a direção das arestas"/>
 			<p:button onclick="analaudos.joinNodes(); return false;" value="Join" title="Junta os nós com mesmas identificação em um só nó"/>
+			<p:button onclick="analaudos.clearNodes(); return false;" value="Clear" title="Exclui todos os atuais nós e vértices"/>
 	 	</fieldset>
 		<fieldset>
 		 	<legend onclick="document.getElementById('graph').height = document.getElementById('graph').height + 100">Grafo</legend>
@@ -43,12 +44,12 @@
 		<textarea id="areaGraphDot" rows="6" style="width: 100%; background: lightgray;"/>
 		JSON:
 		<textarea id="areaGraphJson" rows="6" style="width: 100%; background: lightgray;"/>
-		<p:button onclick="document.getElementById('areaGraphDot').value = analaudos.createDot(); document.getElementById('areaGraphJson').value = analaudos.createJson(); document.getElementById('areaActions').value = analaudos.actionsHistory.join(';\n'); return false;" value="Copiar .dot .json"/>
-		<p:button onclick="analaudos.loadJson(document.getElementById('areaGraphJson').value); return false;" value="Carregar .json"/>
-		<p:button onclick="analaudos.createImagePopup(document.getElementById('areaGraphDot').value); return false;" value="Ver grafo"/>
+		<p:button value="Gerar .dot .json" onclick="document.getElementById('areaGraphDot').value = analaudos.createDot(); document.getElementById('areaGraphJson').value = analaudos.createJson(); document.getElementById('areaActions').value = analaudos.actionsHistory.join(';\n'); return false;" />
+		<p:button value="Carregar .json" onclick="analaudos.loadJson(document.getElementById('areaGraphJson').value); return false;" />
+		<p:button value="Ver grafo" onclick="analaudos.createImagePopup(document.getElementById('areaGraphDot').value); return false;" />
 		
 		<script type="text/javascript">
-			// analaudos.init(jQuery('#form\\:sourceText')[0], jQuery('#graph'));
+			var analaudos = new Analaudos(jQuery('#graph'));
 		</script>
 		<span style="color: lightgray;">#{createDocumentGraphBean.documentGraph.object.author}</span>
 	</ui:define>

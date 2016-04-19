@@ -7,9 +7,26 @@
 
 	z-index:100;
 	opacity: 0.6;
+	
+	-webkit-animation-name: menu; /* Chrome, Safari, Opera */
+    -webkit-animation-duration: 2s; /* Chrome, Safari, Opera */
+    animation-name: menu;
+    animation-duration: 2s;
 }
 
+/* Chrome, Safari, Opera */
+@-webkit-keyframes menu {
+    from  {right:1024px;}
+    to  {right:0px;}
+}
+
+/* Standard syntax */
+@keyframes menu {
+    from  {right:1024px;}
+    to  {right:0px;}
+}
 #progressText {
 	font-size: 30px;
 	font-weight: bold;
 }
+

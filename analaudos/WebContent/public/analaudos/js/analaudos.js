@@ -27,8 +27,9 @@
 
 if("undefined" != typeof analaudos) console.log("Analaudos already defined");
 else{
-	var Analaudos = function(){
+	var Analaudos = function(outputCanvas){
 		var a = this;
+		a.canvas = outputCanvas;
 		
 		a.version = "0.1b";
 		a.sourceNodeFontColor = "#008000";
@@ -39,9 +40,7 @@ else{
 		a.edgeColor = "#00A0B0";
 		
 		
-		a.wordsCount = 0;
 		a.gui = null;
-		a.canvas = null;
 		a.sourceNode = null;
 		
 		a.isMuted = false;
@@ -98,7 +97,6 @@ else{
 		};
 
 		a.createEdge = function(target){
-
 			if(a.sourceNode != target){
 				/* Check sourceNode edges to add ou remove */
 				var edges = a.gui.graph.getEdges(a.sourceNode, target);
@@ -170,7 +168,13 @@ else{
 				label = word;
 			return a.gui.graph.addNode(new Springy.Node(id, {label:label, word: word, fontColor: fontColor, onclick:a.onNodeClick}));
 		};
+		
+		a.clearNodes = function(){
+			var tmpNodes = a.gui.graph.nodes.slice();
+			tmpNodes.forEach(function(e){this.removeNode(e);}, a.gui.graph);
+		};
 
+		/* edge.data{color, label, weight, font, directional}*/
 		a.addEdge = function(src, trg){
 			return a.gui.graph.newEdge(src, trg, {color: a.edgeColor, label: ''});
 		};
@@ -190,11 +194,17 @@ else{
 			tmpNodes1.forEach(function(n1) {
 				tmpNodes2.forEach(function(n2){
 					if(n1.id != n2.id && n1.data.word == n2.data.word && n1.id in this.nodeSet){
-						for(var adjN2 in this.adjacency[n2.id]){
-							var edges = this.adjacency[n2.id][adjN2];
-							for(var i in edges){
-								a.addEdge(n1, edges[i].target);
-								a.gui.graph.removeEdge(edges[i]);
+						var tempEdges = a.gui.graph.edges.slice();
+						for(var i in tempEdges){
+							/* Remove adjacents */
+							if(tempEdges[i].source.id == n2.id){
+								a.addEdge(n1, tempEdges[i].target);
+								a.gui.graph.removeEdge(tempEdges[i]);
+							}
+							/* Remove incidents */
+							if(tempEdges[i].target.id == n2.id){
+								a.addEdge(tempEdges[i].source, n1);
+								a.gui.graph.removeEdge(tempEdges[i]);
 							}
 						}
 						a.gui.graph.removeNode(n2);
@@ -268,7 +278,9 @@ else{
 
 		/* Return a .json format 
 		 */
+		var loadJSONCount = -1;
 		a.loadJson = function(json){
+			loadJSONCount++;
 			// parse if a string is passed (EC5+ browsers)
 			if (typeof json == 'string' || json instanceof String) {
 				json = JSON.parse( json );
@@ -277,12 +289,12 @@ else{
 			if ('nodes' in json || 'edges' in json) {
 				var nodes = json['nodes']; 
 				for(i in nodes)
-					a.addNode(nodes[i].id, nodes[i].word, nodes[i].label, nodes[i].fontColor);
+					a.addNode(nodes[i].id+loadJSONCount, nodes[i].word, nodes[i].label, nodes[i].fontColor);
 				
 				var edges = json['edges']; 
 				for(i in edges){
-					var src = a.gui.graph.nodeSet[edges[i][0]];
-					var trg = a.gui.graph.nodeSet[edges[i][1]];
+					var src = a.gui.graph.nodeSet[edges[i][0]+loadJSONCount];
+					var trg = a.gui.graph.nodeSet[edges[i][1]+loadJSONCount];
 					a.addEdge(trg, src);
 				}
 			}
@@ -353,8 +365,8 @@ else{
 			form[0].submit();
 			
 			*/
-			
 		};
+		
 		/* @deprecated Usando JSF
 		 * 
 		 */
@@ -401,26 +413,12 @@ else{
 			a.gui.renderer.start();
 		};
 		
-		a.init = function(inputText, outputCanvas){
-			a.startTime = new Date();
-			a.log("start");
+		a.addText = function(text){
+			a.log("Analaudos.addText");
 
-			if(a.gui == null){
-				/* Select a start node to avoid null pointer */
-				a.gui = outputCanvas.springy({damping:0.00000001, stiffness:400, repulsion:400, minEnergyThreshold:0.0001});
-				
-				a.canvas = outputCanvas[0]; 
+			var words = text.split(' ');
 
-				a.updateSize();
-
-				/* Borders and cursor */
-				a.canvas.style.border = "solid 1px #333";
-				a.canvas.style.cursor = "pointer";
-			}
-
-			var words = inputText.value.split(' ');
-
-			a.wordsCount = 0;
+			var wordsCount = 0;
 			for(var i in words){
 				var word = words[i].toLowerCase();
 				word = word.replace(/[:;()\[\]?!]/g, '');
@@ -428,25 +426,19 @@ else{
 				word = a.stemmer(word);
 				
 				/* Create a node */
-				a.addNode('w'+a.wordsCount++, words[i], word);
+				a.addNode('w'+wordsCount++, words[i], word);
 
 				/* Link current node to sourceNodeious node */
 //				if(i!=0) graph.newEdge(graph.nodeSet['w'+ (i-1)], graph.nodeSet['w'+i], {color: '#AA0000', label: ''});
 			}
-			a.wordsCount = words.length;
 			
 			/* Organize items */
 			a.arrange();
 			window.setTimeout(a.arrange, 2000); // Refresh first arrange moviment from center
 
-			/* Update graph size while window resizing */
-			window.onresize = a.updateSize;
-			
-			a.gui.setNodeSelected(a.gui.graph.nodeSet['w1']);
-			a.selectSource();
 			/* Activate first selection */
-//			sourceNode = a.gui.getNodeSelected();
-//			selectRoot();
+			a.gui.setNodeSelected(a.gui.graph.nodes[1]);
+			a.selectSource();
 		};
 
 		a.toast = function (text){
@@ -464,9 +456,30 @@ else{
 			text = text.replace(/<(?:.|\n)*?>/gm, '');
 			responsiveVoice.speak(text, "Portuguese Female", {rate: (typeof rate=="undefined"?1.5:rate)});
 		};
+		
+		function init(){
+			a.startTime = new Date();
+			a.log("Analaudos.init");
+			
+			if(a.gui == null){
+				/* Select a start node to avoid null pointer */
+				a.gui = a.canvas.springy({damping:0.00000001, stiffness:400, repulsion:400, minEnergyThreshold:0.0001});
+				
+				a.canvas = a.canvas[0]; 
 
+				a.updateSize();
+
+				/* Borders and cursor */
+				a.canvas.style.border = "solid 1px #333";
+				a.canvas.style.cursor = "pointer";
+			}
+
+			/* Update graph size while window resizing */
+			window.onresize = a.updateSize;
+		};
+		
+		init();
 	};
-	analaudos = new Analaudos;
 };
 
 

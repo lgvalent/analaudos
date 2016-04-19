@@ -69,6 +69,7 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 				FacesContext.getCurrentInstance().getExternalContext().addResponseCookie(DocumentGraph.AUTHOR, this.authorUUIDSession, null);
 			}
 
+			/* Prepare this document to collect statistic data*/
 			this.documentGraph = UtilsCrud.create(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentGraph.class, null);
 			this.documentGraph.getObject().setAuthor(this.authorUUIDSession);
 		} catch (BusinessException e) {
@@ -150,7 +151,7 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 	public String actionStart(){
 		this.documentContentList.clear();
 
-		// Pesquisa o documentId e prepara a visão para aprimeira execução
+		// Pesquisa o documentId e prepara a visão para a primeira execução
 		if(FacesUtils.getRequestParams().containsKey(REQUEST_PARAM_DOCUMENT_ID)){
 			setDocumentId(Integer.parseInt(FacesUtils.getRequestParam(REQUEST_PARAM_DOCUMENT_ID)));
 			this.documentContentList.add(this.documentContent);
@@ -195,12 +196,6 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 	}
 
 	private String prepareNextDocument() throws BusinessException {
-		this.documentGraph = UtilsCrud.create(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentGraph.class, null);
-		this.documentGraph.getObject().setAuthor(this.authorUUIDSession);
-		
-		/* Set current documentContent used */
-		this.documentGraph.getObject().setDocumentContent(this.documentContent);
-
 		this.currentDocumentIdIndex++;
 
 		if(this.currentDocumentIdIndex >= this.documentContentList.size())			
@@ -208,6 +203,20 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 		else{ 
 			this.documentContent = this.documentContentList.get(this.currentDocumentIdIndex);
 			this.documentId = this.documentContent.getId();
+			
+			DocumentGraph previousDocGraph = this.documentGraph.getObject(); 
+
+			this.documentGraph = UtilsCrud.create(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentGraph.class, null);
+			this.documentGraph.getObject().setAuthor(this.authorUUIDSession);
+			this.documentGraph.getObject().setDocumentContent(this.documentContent);
+			
+			/* Copy previous data */
+			DocumentGraph docGraph = this.documentGraph.getObject(); 
+			docGraph.setGraduationYear(previousDocGraph.getGraduationYear());
+			docGraph.setResidenceYear(previousDocGraph.getResidenceYear());
+			docGraph.setSpecialistYear(previousDocGraph.getSpecialistYear());
+			docGraph.setMasterYear(previousDocGraph.getMasterYear());
+			docGraph.setDoctorYear(previousDocGraph.getDoctorYear());
 			return FACES_VIEW_1;
 		}
 	}

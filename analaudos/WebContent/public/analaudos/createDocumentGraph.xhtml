@@ -31,13 +31,13 @@
 		<h:inputHidden id="graphDot" value="#{createDocumentGraphBean.documentGraph.object.graphDot}" rows="6" style="width: 100%; background: lightgray;"/>
 		<h:inputHidden id="graphJson" value="#{createDocumentGraphBean.documentGraph.object.graphJson}" rows="6" style="width: 100%; background: lightgray;"/>
 		<!-- p:effect type="slide" event="load" for="form"/ -->
-		<p:accordionPanel id="panel" multiple="true" activeIndex="-1" >
+
+		<p:dialog header="Deixe sua sugestão ou crítica sobre esta pesquisa" widgetVar="dlgSuggestions" modal="true" height="150">
+			<p:inputTextarea id="areaSuggestions" rows="8" style="width: 100%;" value="#{createDocumentGraphBean.documentGraph.object.suggestions}"/>
+		</p:dialog> 
+		<p:accordionPanel id="panel" multiple="true" activeIndex="2" >
 			<p:tab title="Tutorial">
 				<iframe width="100%" height="500px" src="//www.youtube.com/embed/uZ2vtREXpqo?rel=0" frameborder="0" allowfullscreen="true"></iframe>
-			</p:tab>
-			<p:tab title="Sugestões">
-				Deixe sua sugestão ou crítica sobre esta pesquisa:<br/>
-				<p:inputTextarea id="areaSuggestions" rows="6" style="width: 100%;" value="#{createDocumentGraphBean.documentGraph.object.suggestions}"/>
 			</p:tab>
 			<p:tab title="Avançado" rendered="#{createDocumentGraphBean.expert}">
 				<textarea id="areaActions" rows="6" style="width: 100%; background: lightgray;"/>
@@ -61,7 +61,7 @@
 		<table width="100%">
 			<tr>
 				<td>
-					<textarea id="sourceText" readonly="#{!createDocumentGraphBean.expert}" rows="6" style="width: 100%; font-size: 16px; font-style: italic">#{createDocumentGraphBean.documentContent.contentPlain}"</textarea> 
+					<textarea id="sourceText" readonly="#{createDocumentGraphBean.expert}" rows="6" style="width: 100%; font-size: 16px; font-style: italic">#{createDocumentGraphBean.documentContent.contentPlain}</textarea> 
 				</td>
 			</tr>
 		</table>
@@ -84,6 +84,7 @@
 				#{createDocumentGraphBean.documentIdsPosition}/#{createDocumentGraphBean.documentIdsCount}
 			</span>
 			<br/>
+			<img id="suggestions" onclick="dlgSuggestions.show()" src="img/suggestions.png" width="40" height="40" title="Deixe sua sugestão" />
 			<img id="unmute" onclick="analaudos.unmute();jQuery('#unmute')[0].style.display='none';jQuery('#mute')[0].style.display='';" src="img/speaker.png" width="40" height="40" title="Ativar a leitura das mensagens"/>
 			<img id="mute" onclick="analaudos.mute();jQuery('#mute')[0].style.display='none';jQuery('#unmute')[0].style.display='';" src="img/mute.png" width="40" height="40" title="Desativar o som" />
 		</div>

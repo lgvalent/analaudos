@@ -295,7 +295,7 @@ else{
 				for(i in edges){
 					var src = a.gui.graph.nodeSet[edges[i][0]+loadJSONCount];
 					var trg = a.gui.graph.nodeSet[edges[i][1]+loadJSONCount];
-					a.addEdge(trg, src);
+					a.addEdge(src, trg);
 				}
 			}
 		};
@@ -426,7 +426,7 @@ else{
 				word = a.stemmer(word);
 				
 				/* Create a node */
-				a.addNode('w'+wordsCount++, words[i], word);
+				a.addNode('w'+wordsCount++, word, words[i]);
 
 				/* Link current node to sourceNodeious node */
 //				if(i!=0) graph.newEdge(graph.nodeSet['w'+ (i-1)], graph.nodeSet['w'+i], {color: '#AA0000', label: ''});

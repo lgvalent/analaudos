@@ -27,6 +27,11 @@ public class DocumentGraph {
 	public static final String GRAPH_DOT= "graphDot";
 	public static final String GRAPH_JSON= "graphJson";
 	public static final String TIME_STAMP = "timeStamp";
+	public static final String GRADUATION_YEAR = "graduationYear";
+	public static final String RESIDENCE_YEAR = "residenceYear";
+	public static final String SPECIALIST_YEAR = "specialistYear";
+	public static final String MASTER_YEAR = "masterYear";
+	public static final String DOCTOR_YEAR = "doctorYear";
 	
 	private long id = IDAO.ENTITY_UNSAVED;
 	private String author;

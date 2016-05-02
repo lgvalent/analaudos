@@ -64,7 +64,7 @@
 
 		<p:dataTable id="result" value="#{listDocumentGraphBean.getDocuments().getList()}" var="item">
 			<p:column headerText="Grafos" style="text-align:left;">
-				(<h:outputLabel value="#{item.object.timeStamp.time}"><f:convertDateTime pattern="dd/MM/yyy hh:mm" /></h:outputLabel>) Autor: #{item.object.author}
+				(<h:outputLabel value="#{item.object.timeStamp.time}"><f:convertDateTime locale="pt_Br"/></h:outputLabel>) Autor: #{item.object.author}
 				<img src="../../public/basic/img/retrieve.png" onclick="linkRetrieve('br.com.valentin.analaudos.entities.DocumentGraph',#{item.object.id})" width="24" height="24" style="cursor:pointer;" title="Visualizar o documento original"/>
 				<img src="../../public/analaudos/img/externalLink.png" onclick="javascript:downloadGraphPng(this);" width="24" height="24" style="cursor:pointer;" title="Abre a imagem do grafo em uma nova janela"/>
 				<br/>

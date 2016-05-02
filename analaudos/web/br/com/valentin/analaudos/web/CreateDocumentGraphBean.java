@@ -8,6 +8,7 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.Cookie;
@@ -34,6 +35,7 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 	public static final String FACES_VIEW_1 = "/public/analaudos/createDocumentGraph?faces-redirect=true";
 	public static final String FACES_VIEW_2 = "/public/analaudos/thanks?faces-redirect=true";
 
+	public static final String REQUEST_PARAM_RESEARCH_SETTINGS_ID = "researchSettingsId";
 	public static final String REQUEST_PARAM_DOCUMENT_ID = "documentId";
 	public static final String REQUEST_PARAM_AUTHOR = "author";
 	public static final String REQUEST_PARAM_SOUND_ON = "soundOn";
@@ -48,8 +50,9 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 	private List<DocumentContent> documentContentList = new ArrayList<DocumentContent>(10);
 
 	private String authorUUIDSession;
+	private boolean authorIsBack = false;
 	private boolean soundOn = true;
-	private boolean expert = true;
+	private boolean expert = false;
 
 	//	private IEntity<DocumentContent> documentContent = null;
 	private IEntity<DocumentGraph> documentGraph = null;
@@ -64,6 +67,7 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 			if(cookies.containsKey(DocumentGraph.AUTHOR)){
 				cookie = (Cookie) cookies.get(DocumentGraph.AUTHOR);
 				this.authorUUIDSession =  cookie.getValue();
+				this.authorIsBack = true;
 			}else{
 				this.authorUUIDSession =  UUID.randomUUID().toString();
 				FacesContext.getCurrentInstance().getExternalContext().addResponseCookie(DocumentGraph.AUTHOR, this.authorUUIDSession, null);
@@ -72,6 +76,35 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 			/* Prepare this document to collect statistic data*/
 			this.documentGraph = UtilsCrud.create(this.getApplicationBean().getProcessManager().getServiceManager(), DocumentGraph.class, null);
 			this.documentGraph.getObject().setAuthor(this.authorUUIDSession);
+
+			/* Retrieve Cookie Data from previous attempt */
+			if(cookies.containsKey(REQUEST_PARAM_RESEARCH_SETTINGS_ID)){
+				cookie = (Cookie) cookies.get(REQUEST_PARAM_RESEARCH_SETTINGS_ID);
+				this.researchSettingsId = Long.parseLong(cookie.getValue());
+			}
+			
+			if(cookies.containsKey(DocumentGraph.GRADUATION_YEAR)){
+				cookie = (Cookie) cookies.get(DocumentGraph.GRADUATION_YEAR);
+				this.documentGraph.getProperty(DocumentGraph.GRADUATION_YEAR).getValue().setAsString(cookie.getValue());
+			}
+			if(cookies.containsKey(DocumentGraph.RESIDENCE_YEAR)){
+				cookie = (Cookie) cookies.get(DocumentGraph.RESIDENCE_YEAR);
+				this.documentGraph.getProperty(DocumentGraph.RESIDENCE_YEAR).getValue().setAsString(cookie.getValue());
+			}
+			if(cookies.containsKey(DocumentGraph.SPECIALIST_YEAR)){
+				cookie = (Cookie) cookies.get(DocumentGraph.SPECIALIST_YEAR);
+				this.documentGraph.getProperty(DocumentGraph.SPECIALIST_YEAR).getValue().setAsString(cookie.getValue());
+			}
+			if(cookies.containsKey(DocumentGraph.MASTER_YEAR)){
+				cookie = (Cookie) cookies.get(DocumentGraph.MASTER_YEAR);
+				this.documentGraph.getProperty(DocumentGraph.MASTER_YEAR).getValue().setAsString(cookie.getValue());
+			}
+			if(cookies.containsKey(DocumentGraph.DOCTOR_YEAR)){
+				cookie = (Cookie) cookies.get(DocumentGraph.DOCTOR_YEAR);
+				this.documentGraph.getProperty(DocumentGraph.DOCTOR_YEAR).getValue().setAsString(cookie.getValue());
+			}
+			
+		
 		} catch (BusinessException e) {
 			e.printStackTrace();
 			FacesUtils.addErrorMsg(e.getMessage());
@@ -137,6 +170,9 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 
 	public boolean isExpert() {return expert;}
 	public void setExpert(boolean expert) {this.expert = expert;}
+	
+	public boolean isAuthorIsBack() {return authorIsBack;}
+	public void setAuthorIsBack(boolean authorIsBack) {this.authorIsBack = authorIsBack;}
 
 	public List<SelectItem> getResearchSettingsList(){
 		try {
@@ -166,8 +202,29 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 
 		if(FacesUtils.getRequestParams().containsKey(REQUEST_PARAM_SOUND_ON))
 			this.soundOn = FacesUtils.checkRequestParam(REQUEST_PARAM_SOUND_ON);
-
-		this.currentDocumentIdIndex = -1;
+		
+		/* Record current statistics data in Cookie */
+		ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
+		context.addResponseCookie(REQUEST_PARAM_RESEARCH_SETTINGS_ID, this.researchSettingsId+"", null);
+		context.addResponseCookie(DocumentGraph.GRADUATION_YEAR, this.documentGraph.getObject().getGraduationYear()+"", null);
+		context.addResponseCookie(DocumentGraph.RESIDENCE_YEAR, this.documentGraph.getObject().getResidenceYear()+"", null);
+		context.addResponseCookie(DocumentGraph.SPECIALIST_YEAR, this.documentGraph.getObject().getSpecialistYear()+"", null);
+		context.addResponseCookie(DocumentGraph.MASTER_YEAR, this.documentGraph.getObject().getMasterYear()+"", null);
+		context.addResponseCookie(DocumentGraph.DOCTOR_YEAR, this.documentGraph.getObject().getDoctorYear()+"", null);
+	
+		/* Try recovery last DocumentId from cookie */
+		if(context.getRequestCookieMap().containsKey(REQUEST_PARAM_DOCUMENT_ID)){
+			Cookie	cookie = (Cookie) context.getRequestCookieMap().get(REQUEST_PARAM_DOCUMENT_ID);
+			long lastDocumentId = Long.parseLong(cookie.getValue());
+			for(DocumentContent content: this.documentContentList){
+				if(content.getId() == lastDocumentId){
+					this.currentDocumentIdIndex = this.documentContentList.indexOf(content);
+				}
+			}
+		}else{
+			/* Start from beginning */
+			this.currentDocumentIdIndex = -1;
+		}
 		
 		try {
 			return prepareNextDocument();
@@ -183,6 +240,10 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 
 			//	FacesUtils.addInfoMsg("Conexões semânticas salvas com sucesso!");
 			UtilsCrud.update(this.getApplicationBean().getProcessManager().getServiceManager(), this.documentGraph, null);
+			
+			/* Record current id data in Cookie */
+			ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
+			context.addResponseCookie(REQUEST_PARAM_DOCUMENT_ID, this.documentId+"", null);
 			
 			return prepareNextDocument();
 

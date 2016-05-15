@@ -252,15 +252,8 @@ else{
 			var jsonGraph = "{\"nodes\":[";
 			var nodes = [];
 			for(var id in a.gui.graph.nodeSet){
-				// Check for orphan nodes
-				var orphan = a.gui.graph.adjacency[id] == undefined; // in source edges
-				if(orphan) a.gui.graph.edges.forEach(function(e) {   // in target edges
-					if (e.target.id === id) { orphan = false; }
-				});
-				if(!orphan){
-					var node = a.gui.graph.nodeSet[id];
-					nodes.push("{\"id\":\""+id+"\"" + (node.data.fontColor !== undefined? ",\"fontColor\":\"" + node.data.fontColor + "\" ":"") + ", \"label\":\"" + node.data.label +"\", \"word\":\"" + node.data.word+ "\"}");
-				}
+				var node = a.gui.graph.nodeSet[id];
+				nodes.push("{\"id\":\""+id+"\"" + (node.data.fontColor !== undefined? ",\"fontColor\":\"" + node.data.fontColor + "\" ":"") + ", \"label\":\"" + node.data.label +"\", \"word\":\"" + node.data.word+ "\"}");
 			}
 			jsonGraph += nodes.join(",") + "], \"edges\":[";
 			
@@ -271,7 +264,7 @@ else{
 				}
 			}
 
-			jsonGraph += links.join(",") + "], \"version\":\"0.1\"}";
+			jsonGraph += links.join(",") + "], \"version\":\"0.2\"}";
 
 			return jsonGraph;
 		};
@@ -413,12 +406,12 @@ else{
 			a.gui.renderer.start();
 		};
 		
+		var wordsCount = 0;
 		a.addText = function(text){
 			a.log("Analaudos.addText");
 
 			var words = text.split(' ');
 
-			var wordsCount = 0;
 			for(var i in words){
 				var word = words[i].toLowerCase();
 				word = word.replace(/[:;()\[\]?!]/g, '');

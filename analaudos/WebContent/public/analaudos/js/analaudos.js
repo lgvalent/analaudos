@@ -51,7 +51,7 @@ else{
 		a.startTime = null; // filled on a.init();
 		a.log = function(action, params){
 			var args = Array.prototype.slice.call(arguments, 1);
-			a.actionsHistory.push(new Date() - a.startTime + ":" + action + "(" + args.join(";")+ ")");
+			a.actionsHistory.push(new Date() - a.startTime + ":" + action + "(" + args.join(",")+ ")");
 		};
 
 		/* Edit edges CONTROLS */
@@ -218,15 +218,8 @@ else{
 		a.createDot = function(){
 			var dotGraph = "digraph G {";
 			for(var id in a.gui.graph.nodeSet){
-				// Check for orphan nodes
-				var orphan = a.gui.graph.adjacency[id] == undefined; // in source edges
-				if(orphan) a.gui.graph.edges.forEach(function(e) {   // in target edges
-					if (e.target.id === id) { orphan = false; }
-				});
-				if(!orphan){
-					var node = a.gui.graph.nodeSet[id];
-					dotGraph += id +"[" + (node.data.fontColor !== undefined? "fontcolor=\"" + node.data.fontColor + "\", ":"") + "label=\"" + node.data.word +"\"];";
-				}
+				var node = a.gui.graph.nodeSet[id];
+				dotGraph += id +"[" + (node.data.fontColor !== undefined? "fontcolor=\"" + node.data.fontColor + "\", ":"") + "label=\"" + node.data.word +"\"];";
 			}
 
 			for(var sourceId in a.gui.graph.adjacency){
@@ -416,6 +409,7 @@ else{
 				var word = words[i].toLowerCase();
 				word = word.replace(/[:;()\[\]?!]/g, '');
 				word = word.replace(/[\n\r\.,](\ |$)/g, ' '); // Replace dot and comma by a space, or word separator
+				word = word.trim();
 				word = a.stemmer(word);
 				
 				/* Create a node */

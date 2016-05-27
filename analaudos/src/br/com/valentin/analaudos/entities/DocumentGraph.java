@@ -19,19 +19,27 @@ import org.hibernate.annotations.Index;
 
 import br.com.orionsoft.monstrengo.crud.entity.dao.IDAO;
 
+/**
+ * @author lucio
+ *
+ */
 @Entity
 @Table(name="analaudos_document_graph")
 public class DocumentGraph {
+	
 	public static final String AUTHOR = "author";
-	public static final String DOCUMENT_CONTENT = "documentContent";
-	public static final String GRAPH_DOT= "graphDot";
-	public static final String GRAPH_JSON= "graphJson";
-	public static final String TIME_STAMP = "timeStamp";
 	public static final String GRADUATION_YEAR = "graduationYear";
 	public static final String RESIDENCE_YEAR = "residenceYear";
 	public static final String SPECIALIST_YEAR = "specialistYear";
 	public static final String MASTER_YEAR = "masterYear";
 	public static final String DOCTOR_YEAR = "doctorYear";
+	public static final String DOCUMENT_CONTENT = "documentContent";
+	public static final String GRAPH_DOT= "graphDot";
+	public static final String GRAPH_JSON= "graphJson";
+	public static final String ACTIONS= "actions";
+	public static final String SUGGESTIONS= "suggestions";
+	public static final String TAG= "tag";
+	public static final String TIME_STAMP = "timeStamp";
 	
 	private long id = IDAO.ENTITY_UNSAVED;
 	private String author;
@@ -45,65 +53,38 @@ public class DocumentGraph {
 	private String graphJson;
 	private String actions;
 	private String suggestions;
+	private String tag;
 	private Calendar timeStamp = Calendar.getInstance();
 	
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
-	public long getId() {
-		return id;
-	}
-	public void setId(long id) {
-		this.id = id;
-	}
+	public long getId() {return id;}
+	public void setId(long id) {this.id = id;}
 	
 	@Column(length=50)
-	public String getAuthor() {
-		return author;
-	}
-	public void setAuthor(String author) {
-		this.author = author;
-	}
+	public String getAuthor() {return author;}
+	public void setAuthor(String author) {this.author = author;}
 	
 	@ManyToOne
 	@ForeignKey(name=DOCUMENT_CONTENT)
 	@Index(name=DOCUMENT_CONTENT)
-	public DocumentContent getDocumentContent() {
-		return documentContent;
-	}
-	public void setDocumentContent(DocumentContent documentContent) {
-		this.documentContent = documentContent;
-	}
+	public DocumentContent getDocumentContent() {return documentContent;}
+	public void setDocumentContent(DocumentContent documentContent) {this.documentContent = documentContent;}
 	
 	@Column(length=2048, columnDefinition="TEXT")
-	public String getGraphDot() {
-		return graphDot;
-	}
-	public void setGraphDot(String source) {
-		this.graphDot = source;
-	}
+	public String getGraphDot() {return graphDot;}
+	public void setGraphDot(String source) {this.graphDot = source;}
 	
 	@Column(length=2048, columnDefinition="TEXT")
-	public String getGraphJson() {
-		return graphJson;
-	}
-	public void setGraphJson(String graphJson) {
-		this.graphJson = graphJson;
-	}
+	public String getGraphJson() {return graphJson;}
+	public void setGraphJson(String graphJson) {this.graphJson = graphJson;}
 
 	@Column(length=2048, columnDefinition="TEXT")
-	public String getActions() {
-		return actions;
-	}
-	public void setActions(String actions) {
-		this.actions = actions;
-	}
+	public String getActions() {return actions;}
+	public void setActions(String actions) {this.actions = actions;}
 	
 	@Column(length=2048, columnDefinition="TEXT")
-	public String getSuggestions() {
-		return suggestions;
-	}
-	public void setSuggestions(String suggestions) {
-		this.suggestions = suggestions;
-	}
+	public String getSuggestions() {return suggestions;}
+	public void setSuggestions(String suggestions) {this.suggestions = suggestions;}
 	
 	@Transient
 	public String getGraphDotEncoded() {
@@ -115,43 +96,28 @@ public class DocumentGraph {
 	}
 	
 	@Temporal(TemporalType.TIMESTAMP)
-	public Calendar getTimeStamp() {
-		return timeStamp;
-	}
-	public void setTimeStamp(Calendar timeStamp) {
-		this.timeStamp = timeStamp;
-	}
+	public Calendar getTimeStamp() {return timeStamp;}
+	public void setTimeStamp(Calendar timeStamp) {this.timeStamp = timeStamp;}
 	
-	public Integer getGraduationYear() {
-		return graduationYear;
-	}
-	public void setGraduationYear(Integer graduationYear) {
-		this.graduationYear = graduationYear;
-	}
-	public Integer getResidenceYear() {
-		return residenceYear;
-	}
-	public void setResidenceYear(Integer residenceYear) {
-		this.residenceYear = residenceYear;
-	}
-	public Integer getSpecialistYear() {
-		return specialistYear;
-	}
-	public void setSpecialistYear(Integer specialistYear) {
-		this.specialistYear = specialistYear;
-	}
-	public Integer getMasterYear() {
-		return masterYear;
-	}
-	public void setMasterYear(Integer masterYear) {
-		this.masterYear = masterYear;
-	}
-	public Integer getDoctorYear() {
-		return doctorYear;
-	}
-	public void setDoctorYear(Integer doctorYear) {
-		this.doctorYear = doctorYear;
-	}
+	public Integer getGraduationYear() {return graduationYear;}
+	public void setGraduationYear(Integer graduationYear) {this.graduationYear = graduationYear;}
+	
+	public Integer getResidenceYear() {return residenceYear;}
+	public void setResidenceYear(Integer residenceYear) {this.residenceYear = residenceYear;}
+	
+	public Integer getSpecialistYear() {return specialistYear;}
+	public void setSpecialistYear(Integer specialistYear) {this.specialistYear = specialistYear;}
+	
+	public Integer getMasterYear() {return masterYear;}
+	public void setMasterYear(Integer masterYear) {this.masterYear = masterYear;}
+	
+	public Integer getDoctorYear() {return doctorYear;}
+	public void setDoctorYear(Integer doctorYear) {this.doctorYear = doctorYear;}
+	
+	@Column(length=100)
+	public String getTag() {return tag;}
+	public void setTag(String tag) {this.tag = tag;}
+	
 	@Override
 	public String toString() {
 		return this.author + "(" + this.id + ")";

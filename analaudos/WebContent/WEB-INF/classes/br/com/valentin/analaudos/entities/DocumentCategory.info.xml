@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<entity xmlns="http://orionsoft.net.br/entityMetadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" className="br.com.valentin.analaudos.entities.DocumentCategory" crudOperations="CREATE UPDATE RETRIEVE DELETE QUERY" propertiesInQueryGrid="id name" name="DocumentCategory" label="Categoria de documento" xsi:schemaLocation="http://orionsoft.net.br/entityMetadata http://orionsoft.net.br/entityMetadata.xsd">
-    <group name="Geral" label="Geral" hint="" description="">
-        <property xsi:type="PropertyNumericType" name="id" label="Id"/>
-        <property xsi:type="PropertyStringType" name="name" label="Nome"/>
-    </group>
-</entity>

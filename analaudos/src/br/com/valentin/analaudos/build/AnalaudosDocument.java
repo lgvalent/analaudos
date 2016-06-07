@@ -12,7 +12,7 @@ import org.jgraph.graph.DefaultEdge;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class AnalaudosDocument extends DirectedGraph<AnalaudosDocument.DocNode, AnalaudosDocument.DocEdge>{
+public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNode, AnalaudosDocument.DocEdge>{
 	private static final long serialVersionUID = 1L;
 
 	public AnalaudosDocument(String jsonGraph) {
@@ -64,7 +64,7 @@ public class AnalaudosDocument extends DirectedGraph<AnalaudosDocument.DocNode, 
 
 		@Override
 		public String toString() {
-			return super.toString() + "[wd:" + wordsDistance + ", ll:"+ linkLatency +"ms, ip:"+ interceptedPonctuations  +", r:" + String.format("%.2f", reliability) + "%]";
+			return "[wd:" + wordsDistance + ", ll:"+ linkLatency +"ms, ip:'"+ interceptedPonctuations  +"', r:" + String.format("%.2f", reliability) + "%]";
 		}
 	}
 
@@ -78,30 +78,38 @@ public class AnalaudosDocument extends DirectedGraph<AnalaudosDocument.DocNode, 
 			e.linkLatency = retrieveCreateEdgeLatency(source.id, target.id, actionLog);
 	
 			/* Check ponctuation between nodes */ 
-			e.interceptedPonctuations = "";
-			DocNode temp = source;
-			while(temp != target){
-				if(e.wordsDistance > 0)
-					temp = temp.after;
-				else
-					temp = temp.before;
-	
-				if(temp == null) break;
-	
-				if(temp.label.contains("."))
-					e.interceptedPonctuations += '.';
-				if(temp.label.contains(","))
-					e.interceptedPonctuations += ',';
-				if(temp.label.contains(";"))
-					e.interceptedPonctuations += ';';
-				if(temp.label.contains(":"))
-					e.interceptedPonctuations += ':';
-				if(temp.label.contains("!"))
-					e.interceptedPonctuations += '!';
-				if(temp.label.contains("?"))
-					e.interceptedPonctuations += '?';
-			}
+			e.interceptedPonctuations = checkIntercepPonctuation(source, target);
 		}
+	}
+	
+	public static String checkIntercepPonctuation(DocNode source, DocNode target){
+		StringBuilder result = new StringBuilder();
+		DocNode temp = source;
+		while(temp != target){
+			if(source.index < target.index)
+				temp = temp.after;
+			else
+				temp = temp.before;
+
+			if(temp == null) break;
+
+			// Doesn't match number like 2,3 or 2.3 as ponctuation
+			if(temp.label.matches(".*\\.([ a-zA-Z].*|$)"))
+				result.append('.');
+			if(temp.label.matches(".*,([ a-zA-Z].*|$)"))
+				result.append(',');
+			if(temp.label.contains(";"))
+				result.append(';');
+			if(temp.label.contains(":"))
+				result.append(':');
+			if(temp.label.contains("!"))
+				result.append('!');
+			if(temp.label.contains("?"))
+				result.append('?');
+		}
+		
+		return result.toString();
+
 	}
 
 	private void addJsonGraph(String analaudosJson){
@@ -163,7 +171,6 @@ public class AnalaudosDocument extends DirectedGraph<AnalaudosDocument.DocNode, 
 	public void addContent(String content){
 		String[] words = content.split(" ");
 		int wordsCount = 0;
-		DocNode before = null;
 		DocNode previous = null;
 	
 		for(String word: words){
@@ -179,8 +186,10 @@ public class AnalaudosDocument extends DirectedGraph<AnalaudosDocument.DocNode, 
 			word = word.trim();
 			node.word = word.toLowerCase();
 	
-			if(before != null)node.before = before;
-			if(previous != null)previous.after = node;
+			if(previous != null){
+				previous.after = node;
+				node.before = previous;
+			}
 			previous = node;
 	
 			this.addVertex(node);

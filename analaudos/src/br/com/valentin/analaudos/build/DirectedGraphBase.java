@@ -1,7 +1,9 @@
 package br.com.valentin.analaudos.build;
 
 import org.jgraph.graph.DefaultEdge;
-import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.AbstractBaseGraph;
+import org.jgrapht.graph.ClassBasedEdgeFactory;
 
 /**
  * Specializes DirectGraph with defaultEdge to set Source and Target.
@@ -11,10 +13,10 @@ import org.jgrapht.graph.DefaultDirectedGraph;
  * @param <V>
  * @param <E>
  */
-public class DirectedGraph <V,E extends DefaultEdge > extends DefaultDirectedGraph<V, E>{
+public class DirectedGraphBase <V,E extends DefaultEdge > extends AbstractBaseGraph<V, E> implements DirectedGraph<V, E>{
 
-	public DirectedGraph(Class<? extends E> edgeClass) {
-		super(edgeClass);
+	public DirectedGraphBase(Class<? extends E> edgeClass) {
+		super(new ClassBasedEdgeFactory<V, E>(edgeClass), true, true);
 	}
 
 	private static final long serialVersionUID = 1L;

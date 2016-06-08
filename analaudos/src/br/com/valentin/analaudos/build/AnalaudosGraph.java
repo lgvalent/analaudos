@@ -15,6 +15,7 @@ import org.jgraph.graph.DefaultEdge;
 
 import br.com.valentin.analaudos.build.AnalaudosDocument.DocEdge;
 import br.com.valentin.analaudos.build.AnalaudosDocument.DocNode;
+import br.com.valentin.analaudos.build.AnalaudosGraph.AnalaudosNode.Type;
 
 public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNode, AnalaudosGraph.AnalaudosEdge>{
 	private final Logger log = Logger.getLogger(getClass()); 
@@ -130,8 +131,7 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 		AnalaudosNode analNodeSource = retrieveNode(docNodeSource);
 		AnalaudosNode analNodeTarget= retrieveNode(docNodeTarget);
 		if(analNodeSource != null && analNodeTarget != null){
-			AnalaudosEdge analEdge = this.getEdge(analNodeSource, analNodeTarget);
-			if(analEdge != null){
+			for(AnalaudosEdge analEdge: this.getAllEdges(analNodeSource, analNodeTarget)){
 				// Analyze WordDistance feature
 				double wordDistanceWeight = 0;
 				double wordDistance = analEdge.wordDistance.getMean() - (docNodeTarget.index - docNodeSource.index);
@@ -167,8 +167,11 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 
 				if(result > 0){
 					sb.append("[LINKED<->]");
+					
 				}
 				log.debug(sb.toString());
+
+				if(result > 0) break;
 			}
 		}
 		
@@ -197,18 +200,19 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 		AnalaudosNode analNodeTarget = addDocNode((DocNode) docEdge.getTarget());
 
 		AnalaudosEdge analEdge = null;
-		for(AnalaudosEdge analEdge_: this.getAllEdges(analNodeSource, analNodeTarget)){
-			/* Analyze recurrent link */
-			System.out.print("[" + analEdge_.getSource() + "->" + analEdge_.getTarget());
-			System.out.print("--------->" + analEdge_.wordDistance.getMean() + "<->" + docEdge.wordsDistance);
-			if(analEdge_.wordDistance.getMean() == docEdge.wordsDistance){
-				System.out.println("NOPSSSSSSS");
-				analEdge = analEdge_;
+		if(analNodeSource.type != Type.NUMBER){
+			analEdge = this.getEdge(analNodeSource, analNodeTarget);
+		} else{
+			/* NUMBER vertex allows multiple edges */
+			for(AnalaudosEdge analEdge_: this.getAllEdges(analNodeSource, analNodeTarget)){
+				/* Analyze recurrent link */
+				if(analEdge_.wordDistance.getMean() == docEdge.wordsDistance){
+					analEdge = analEdge_;
+				}
 			}
 		}
 		
 		if(analEdge == null){
-			System.out.println("CREATEDDDDD");
 			analEdge = this.addEdge(analNodeSource, analNodeTarget);
 		}
 

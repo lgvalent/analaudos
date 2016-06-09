@@ -14,6 +14,8 @@ import com.google.gson.GsonBuilder;
 
 public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNode, AnalaudosDocument.DocEdge>{
 	private static final long serialVersionUID = 1L;
+	
+	private String log;
 
 	public AnalaudosDocument(String jsonGraph) {
 		super(AnalaudosDocument.DocEdge.class);
@@ -67,6 +69,9 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 			return "[wd:" + wordsDistance + ", ll:"+ linkLatency +"ms, ip:'"+ interceptedPonctuations  +"', r:" + String.format("%.2f", reliability) + "%]";
 		}
 	}
+	
+	public String getLog() {return log;}
+	public void setLog(String log) {this.log = log;}
 
 	public void addActionLogData(String actionLog){
 	

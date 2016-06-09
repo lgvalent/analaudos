@@ -1,5 +1,6 @@
 package br.com.valentin.analaudos.build;
 
+import java.io.StringWriter;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
 import java.util.ArrayList;
@@ -11,6 +12,8 @@ import java.util.TreeMap;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
+import org.apache.log4j.SimpleLayout;
+import org.apache.log4j.WriterAppender;
 import org.jgraph.graph.DefaultEdge;
 
 import br.com.valentin.analaudos.build.AnalaudosDocument.DocEdge;
@@ -99,6 +102,10 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 	}
 
 	public AnalaudosDocument createDocGraph(String content){
+		StringWriter sw = new StringWriter();
+		WriterAppender wa = new WriterAppender(new SimpleLayout(), sw);
+		log.addAppender(wa);
+		
 		AnalaudosDocument docGraph = new AnalaudosDocument();
 		
 		docGraph.addContent(content);
@@ -114,6 +121,8 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 			}
 		}
 		
+		docGraph.setLog(sw.toString());
+		log.removeAppender(wa);
 		return docGraph;
 	}
 
@@ -135,8 +144,6 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 				// Analyze WordDistance feature
 				double wordDistanceWeight = 0;
 				double wordDistance = analEdge.wordDistance.getMean() - (docNodeTarget.index - docNodeSource.index);
-				sb.append('\t').append('[').append(wordDistance).append(':').append(analEdge.wordDistance.getMean()).append(':').append(analEdge.wordDistance.getVariance()).append(':').append(analEdge.wordDistance.getStandardDeviation()).append(']');
-				sb.append(Arrays.toString(analEdge.wordDistance.getValues()));
 				
 				if(wordDistance == 0)
 					wordDistanceWeight = 1;
@@ -144,6 +151,8 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 					wordDistanceWeight = -1;
 				else
 					wordDistanceWeight = (Math.abs(wordDistance) / (analEdge.wordDistance.getStandardDeviation()*2));
+				sb.append('\t').append("wd[delta=").append(wordDistance).append(":mean=").append(analEdge.wordDistance.getMean()).append(":var=").append(analEdge.wordDistance.getVariance()).append(":sd=").append(analEdge.wordDistance.getStandardDeviation()).append(":weight=").append(wordDistanceWeight).append(']');
+//				sb.append(" wdValues").append(Arrays.toString(analEdge.wordDistance.getValues()));
 				
 				// Analyze Ponctuation
 				double interceptPonctuationWeight = 0;
@@ -156,17 +165,17 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 						interceptPonctuationWeight = -1;
 					else
 						interceptPonctuationWeight = (Math.abs(interceptPonctuationWeight) / (analEdge.interceptedPonctuations.getStandardDeviation()*2));
-					sb.append("[ip:").append(analEdge.interceptedPonctuations.getMean()).append('-').append(ponctuation.length()).append('=').append(interceptPonctuationWeight).append("]");
+					sb.append(" ip[len=").append(ponctuation.length()).append(":mean=").append(analEdge.interceptedPonctuations.getMean()).append(":weight=").append(interceptPonctuationWeight).append("]");
 				}
 				
 				result = wordDistanceWeight + interceptPonctuationWeight;
 				
 
 				if(Double.isNaN(result)) result = 1;
-				sb.append(result);
+				sb.append(" result=").append(result);
 
 				if(result > 0){
-					sb.append("[LINKED<->]");
+					sb.append("[LINKED]");
 					
 				}
 				log.debug(sb.toString());

@@ -49,14 +49,15 @@
 	<ui:define name="actions">
 	  <h:panelGrid columns="3">
 		<p:inputTextarea cols="80" rows="10" value="#{analaudosGraphBuilderBean.process.paramContent.value}"/>
-		<p:commandButton actionListener="#{analaudosGraphBuilderBean.doCreateDocGraph}" update="result" value="Analisar conteúdo" ajax="true"/>
-		<h:panelGroup id="result">
+		<p:commandButton actionListener="#{analaudosGraphBuilderBean.doCreateDocGraph}" update="result log" value="Analisar conteúdo" ajax="true"/>
+		<p:inputTextarea id="log" cols="160" rows="10" readonly="true" scrollHeight="10" value="#{analaudosGraphBuilderBean.process.contentAnalaudosDocument.log}"/>
+	  </h:panelGrid>
+	  <h:panelGroup id="result">
 			<h:outputLabel styleClass="graph" title="#{analaudosGraphBuilderBean.process.contentAnalaudosDocument.toDot(false)}" value="Aguarde..."/>
 			<script>
 				generateGraphs();
 			</script>
-		</h:panelGroup>
-	  </h:panelGrid>
+	  </h:panelGroup>
 	</ui:define>
 	<ui:define name="result">
 	</ui:define>

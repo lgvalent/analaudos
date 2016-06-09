@@ -112,6 +112,7 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 			if(temp.label.contains("?"))
 				result.append('?');
 		}
+		System.out.println(source + "->" + target + "=" + result);
 		
 		return result.toString();
 

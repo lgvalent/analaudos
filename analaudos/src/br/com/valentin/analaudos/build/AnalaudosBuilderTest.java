@@ -62,7 +62,7 @@ public class AnalaudosBuilderTest {
 		DocumentGraph document2 = prepareDocumentGraphTest2();
 		AnalaudosDocument docGraph2 = new AnalaudosDocument(document2.getGraphJson());
 		System.out.println(docGraph2.toString());
-		docGraph1.addActionLogData(document2.getActions());
+		docGraph2.addActionLogData(document2.getActions());
 		System.out.println(docGraph2.toString());
 
 		AnalaudosGraph analGraph = new AnalaudosGraph();

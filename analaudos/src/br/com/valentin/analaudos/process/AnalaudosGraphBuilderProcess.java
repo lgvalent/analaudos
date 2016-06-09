@@ -91,6 +91,7 @@ public class AnalaudosGraphBuilderProcess extends ProcessBasic implements IRunna
 		for(IEntity<DocumentGraph> documentGraph: this.documentGraphList){
 			if(documentGraph.isSelected()){
 				AnalaudosDocument analDoc = new AnalaudosDocument(documentGraph.getObject().getGraphJson());
+				analDoc.addActionLogData(documentGraph.getObject().getActions());
 
 				this.analaudosDocuments.add(analDoc);
 

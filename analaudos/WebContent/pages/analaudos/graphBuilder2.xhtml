@@ -9,7 +9,7 @@
 <ui:composition template="/public/basic/templates/simpleProcess.xhtml">
 	<ui:param name="title" value="#{menuBean.processInfoMap.AnalaudosGraphBuilderProcess.label}" />
 	<ui:param name="icon" value="http://ssl.gstatic.com/codesite/ph/images/defaultlogo.png" />
-	<ui:param name="description" value="#{menuBean.processInfoMap.AnalaudosGraphBuilderProcess.description}" />
+	<ui:param name="description" value="Analise o modelo gerado e submeta textos para serem analisados pelo modelo e visualize o log da análise e o grafo resultante." />
 	<ui:define name="content">
 		<script src="../../public/analaudos/js/utils.js"/>
 		<script src="../../public/analaudos/js/jquery.growl.js"/>
@@ -36,30 +36,31 @@
     			window.setTimeout(function (){window.open(image.src);}, 10);
 			}
 
-			</script>
-
-
-		<h:outputLabel styleClass="graph" title="#{analaudosGraphBuilderBean.process.analaudosGraph.toDot(true)}" value="Aguarde..."/>
-
-		<script>
-			generateGraphs();
-		</script>
-		
-	</ui:define>
-	<ui:define name="actions">
-	  <h:panelGrid columns="3">
-		<p:inputTextarea cols="80" rows="10" value="#{analaudosGraphBuilderBean.process.paramContent.value}"/>
-		<p:commandButton actionListener="#{analaudosGraphBuilderBean.doCreateDocGraph}" update="result log" value="Analisar conteúdo" ajax="true"/>
-		<p:inputTextarea id="log" cols="160" rows="10" readonly="true" scrollHeight="10" value="#{analaudosGraphBuilderBean.process.contentAnalaudosDocument.log}"/>
-	  </h:panelGrid>
-	  <h:panelGroup id="result">
-			<h:outputLabel styleClass="graph" title="#{analaudosGraphBuilderBean.process.contentAnalaudosDocument.toDot(false)}" value="Aguarde..."/>
-			<script>
-				generateGraphs();
-			</script>
-	  </h:panelGroup>
-	</ui:define>
-	<ui:define name="result">
+			</script> 
+		<p:tabView widgetVar="tabview">
+        	<p:tab title="Modelo gerado">
+				<h:outputLabel styleClass="graph" title="#{analaudosGraphBuilderBean.process.analaudosGraph.toDot(true)}" value="Aguarde..."/>
+				<script>
+					generateGraphs();
+				</script>
+        	</p:tab>
+        	<p:tab title="Analisar um texto">
+				<p:inputTextarea cols="80" rows="10" value="#{analaudosGraphBuilderBean.process.paramContent.value}" style="width:100%;"/>
+				<br/>
+				<p:commandButton actionListener="#{analaudosGraphBuilderBean.doCreateDocGraph}" update="result log" oncomplete="tabview.select(3)" value="Analisar conteúdo" ajax="true"/>
+        	</p:tab>
+        	<p:tab title="Log da análise">
+				<p:inputTextarea id="log" cols="160" rows="10" readonly="true" scrollHeight="10" value="#{analaudosGraphBuilderBean.process.contentAnalaudosDocument.log}"/>
+        	</p:tab>
+        	<p:tab title="Grafo resultante">
+			  <h:panelGroup id="result">
+				<h:outputLabel styleClass="graph" title="#{analaudosGraphBuilderBean.process.contentAnalaudosDocument.toDot(true)}" value="Aguarde..."/>
+				<script>
+					generateGraphs();
+				</script>
+			  </h:panelGroup>
+        	</p:tab>
+        </p:tabView>
 	</ui:define>
 </ui:composition>
 </html>

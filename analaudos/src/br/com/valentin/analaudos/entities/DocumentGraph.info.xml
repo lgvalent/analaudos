@@ -4,7 +4,7 @@
         <property xsi:type="PropertyNumericType" name="id" label="Id" readOnly="true" required="true"/>
         <property xsi:type="PropertyStringType" name="author" label="Autor" hint="Indica o autor que compôs este grafo"/>
         <property xsi:type="PropertyEntityType" name="documentContent" label="Documento original"/>
-        <property xsi:type="PropertyCalendarType" name="timeStamp" editMask="dd/MM/yyy HH:mm" label="Data e hora" hint="Indica a data e hora da criação desse grafo"/>
+        <property xsi:type="PropertyCalendarType" name="timeStamp" editMask="dd/MM/yyyy HH:mm" label="Data e hora" hint="Indica a data e hora da criação desse grafo"/>
         <property xsi:type="PropertyStringType" name="suggestions" label="Suggestions"/>
         <property xsi:type="PropertyStringType" name="tag" label="Tag" hint="Marcação para agrupamentos e categorizações" description="Permite anotar e categorizar documentos para futuras seleções"/>
     </group>

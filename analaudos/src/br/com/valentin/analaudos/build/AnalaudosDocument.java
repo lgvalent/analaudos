@@ -60,13 +60,14 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 		public int wordsDistance;
 		public int linkLatency;
 		public String interceptedPonctuations = "";
-		public double reliability = 0;
+
+		public double linkScore = 0;
 
 		public boolean interceptPonctuation(){return !this.interceptedPonctuations.isEmpty();}
 
 		@Override
 		public String toString() {
-			return "[wd:" + wordsDistance + ", ll:"+ linkLatency +"ms, ip:'"+ interceptedPonctuations  +"', r:" + String.format("%.2f", reliability) + "%]";
+			return "[wd:" + wordsDistance + ", ll:"+ linkLatency +"ms, ip:'"+ interceptedPonctuations  +"', r:" + String.format("%.2f", linkScore) + "%]";
 		}
 	}
 	

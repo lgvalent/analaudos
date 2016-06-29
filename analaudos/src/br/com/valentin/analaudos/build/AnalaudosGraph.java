@@ -110,12 +110,13 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 		docGraph.addContent(content);
 		for(DocNode docNodeSource: docGraph.vertexSet()){
 			for(DocNode docNodeTarget: docGraph.vertexSet()){
-				double linkReliability = linkResolve(docNodeSource, docNodeTarget); 
-				if(linkReliability > 0){
+				double linkScore = linkResolve(docNodeSource, docNodeTarget); 
+				if(linkScore > 0){
 					DocEdge docEdge = docGraph.addEdge(docNodeSource, docNodeTarget);
-					docEdge.reliability = linkReliability;
 					docEdge.wordsDistance = docNodeTarget.index - docNodeSource.index;
 					docEdge.interceptedPonctuations = AnalaudosDocument.checkIntercepPonctuation(docNodeSource, docNodeTarget);
+
+					docEdge.linkScore = linkScore;
 				}
 			}
 		}
@@ -141,38 +142,29 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 		if(analNodeSource != null && analNodeTarget != null){
 			for(AnalaudosEdge analEdge: this.getAllEdges(analNodeSource, analNodeTarget)){
 				// Analyze WordDistance feature
-				double wordDistanceWeight = 0;
 				double wordDistance = analEdge.wordDistance.getMean() - (docNodeTarget.index - docNodeSource.index);
+				double wordStandardDeviation = analEdge.wordDistance.getStandardDeviation();
+				double wordDistanceWeight = 1 - Math.abs(wordDistance) / ((wordStandardDeviation>0?wordStandardDeviation:1)*2);
 				
-				if(wordDistance == 0)
-					wordDistanceWeight = 1;
-				else if(Math.abs(wordDistance) > (analEdge.wordDistance.getStandardDeviation()*2))
-					wordDistanceWeight = -1;
-				else
-					wordDistanceWeight = (Math.abs(wordDistance) / (analEdge.wordDistance.getStandardDeviation()*2));
 				sb.append('\t').append("wd[delta=").append(wordDistance).append(":mean=").append(analEdge.wordDistance.getMean()).append(":var=").append(analEdge.wordDistance.getVariance()).append(":sd=").append(analEdge.wordDistance.getStandardDeviation()).append(":weight=").append(wordDistanceWeight).append(']');
 //				sb.append(" wdValues").append(Arrays.toString(analEdge.wordDistance.getValues()));
+
+				result = wordDistanceWeight;
 				
 				// Analyze Ponctuation
 				double interceptPonctuationWeight = 0;
 				if(wordDistanceWeight > 0){
 					String ponctuation = AnalaudosDocument.checkIntercepPonctuation(docNodeSource, docNodeTarget);
-					interceptPonctuationWeight = analEdge.interceptedPonctuations.getMean() - ponctuation.length();
-					if(interceptPonctuationWeight == 0)
-						interceptPonctuationWeight = 1;
-					else if(Math.abs(interceptPonctuationWeight) > (analEdge.interceptedPonctuations.getStandardDeviation()*2))
-						interceptPonctuationWeight = -1;
-					else
-						interceptPonctuationWeight = (Math.abs(interceptPonctuationWeight) / (analEdge.interceptedPonctuations.getStandardDeviation()*2));
+					double interceptPonctuation = analEdge.interceptedPonctuations.getMean() - ponctuation.length();
+					interceptPonctuationWeight = 1 - Math.abs(interceptPonctuation) / (analEdge.interceptedPonctuations.getStandardDeviation()*2);
 					sb.append(" ip[len=").append(ponctuation.length()).append(":mean=").append(analEdge.interceptedPonctuations.getMean()).append(":weight=").append(interceptPonctuationWeight).append("]");
 				}
+				// interceptPonctuationWight may be NAN -> ?/0
+//				if(!Double.isNaN(interceptPonctuationWeight)) 
+//					result += interceptPonctuationWeight;;
 				
-				result = wordDistanceWeight + interceptPonctuationWeight;
-				
-
-				if(Double.isNaN(result)) result = 1;
 				sb.append(" result=").append(result);
-
+				
 				if(result > 0){
 					sb.append("[LINKED]");
 					

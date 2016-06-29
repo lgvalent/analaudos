@@ -29,7 +29,7 @@ public class AnalaudosBuilder{
 				double linkReliability = linkResolve(docNodeSource, docNodeTarget); 
 				if(linkReliability > 0){
 					DocEdge docEdge = docGraph.addEdge(docNodeSource, docNodeTarget);
-					docEdge.reliability = linkReliability;
+					docEdge.linkScore = linkReliability;
 					docEdge.wordsDistance = docNodeTarget.index - docNodeSource.index;
 					docEdge.interceptedPonctuations = AnalaudosDocument.checkIntercepPonctuation(docNodeSource, docNodeTarget);
 				}

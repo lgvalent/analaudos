@@ -68,7 +68,7 @@ public class AnalaudosGraphBuilderProcess extends ProcessBasic implements IRunna
 		filter.append("(timeStamp BETWEEN  '").append(CalendarUtils.formatToSQLDate(this.paramDateBegin.getValue())).append("' AND '").append(CalendarUtils.formatToSQLDate(this.paramDateEnd.getValue())).append("')");
 		
 		if(!this.paramTag.isEmpty())
-			filter.append(" AND (tag like '%").append(this.paramTag.getValue()).append("%'");
+			filter.append(" AND (tag like '%").append(this.paramTag.getValue()).append("%')");
 
 		try {
 			this.documentGraphList = UtilsCrud.list(this.getProcessManager().getServiceManager(), DocumentGraph.class, filter.toString(), null);

@@ -19,19 +19,21 @@ public class AnalaudosTextStatistics {
 		long time = System.nanoTime();
 
 		if(args.length == 0){
-			System.out.println("Usage: java ... mainClass %1 [%2] \n Where %1 is a filename with text reports, one per line.\nAnd %2 is the number of lines to be processed. Default is all lines.");
+			System.out.println("Usage: java ... mainClass %1 [%2] [%3]\n Where:\n%1 is a filename with text reports, one per line.\n%2 is the number of lines to be processed. Default is all lines.\n%3 is the number of thread used in executor. Default is Runtime.availbleProcessors/2.");
 			System.exit(1);
 		}
-		int numberOfThreads = Runtime.getRuntime().availableProcessors()/2;
-		ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
-		System.out.println(String.format("Processing file %s with %d thread(s)", args[0], numberOfThreads));
-		
-		final Map<String, DescriptiveStatistics> acc = CogrooUtil.createAccumulator();
-		
-		BufferedReader br = new BufferedReader(new FileReader(args[0]));
-		
 		int limit = args.length>1?Integer.parseInt(args[1]):100000;
+		int numberOfThreads = args.length>2?Integer.parseInt(args[2]):Runtime.getRuntime().availableProcessors()/2;
+
+		final Map<String, DescriptiveStatistics> acc = CogrooUtil.createAccumulator();
+	
+
+		BufferedReader br = new BufferedReader(new FileReader(args[0]));
 		String line = br.readLine();
+		
+		ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
+
+		System.out.println(String.format("Runtime settings:\n %d lines\n %d thread(s)\n File: %s", limit, numberOfThreads, args[0]));
 		while(line != null && limit-- > 0){
 			
 			final String localLine = line;

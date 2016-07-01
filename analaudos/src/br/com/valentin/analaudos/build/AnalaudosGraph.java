@@ -108,6 +108,8 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 		AnalaudosDocument docGraph = new AnalaudosDocument();
 		
 		docGraph.addContent(content);
+		
+		log.debug("1st phase: positive linkScore...");
 		for(DocNode docNodeSource: docGraph.vertexSet()){
 			for(DocNode docNodeTarget: docGraph.vertexSet()){
 				double linkScore = linkResolve(docNodeSource, docNodeTarget); 
@@ -121,6 +123,53 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 			}
 		}
 		
+		log.debug("2nd phase: leaf with possible link, lookup max negative score");
+		for(DocNode docNodeSource: docGraph.vertexSet()){
+			if(docGraph.outDegreeOf(docNodeSource)==0){
+				double linkScore = 0;
+				DocNode leftDocNode = docNodeSource.before;
+				DocNode rightDocNode = docNodeSource.after;
+				DocNode foundDocNode = null;
+				
+				while(leftDocNode != null || rightDocNode != null){
+					if(leftDocNode != null){
+						linkScore = linkResolve(docNodeSource, leftDocNode);
+						if(0 > linkScore && linkScore > Double.NEGATIVE_INFINITY){
+							foundDocNode = leftDocNode;
+							break;
+						}else{
+							leftDocNode = leftDocNode.before;
+						}
+					}
+
+					if(rightDocNode != null){
+						linkScore = linkResolve(docNodeSource, rightDocNode);
+						if(0 > linkScore && linkScore > Double.NEGATIVE_INFINITY){
+							/* Break the right flow on end of sentence */
+							String ponctuations = AnalaudosDocument.checkIntercepPonctuation(docNodeSource, rightDocNode);
+							if(ponctuations.contains(".")){
+								rightDocNode = null;
+							}else{
+								foundDocNode = rightDocNode;
+								break;
+							}
+						}else{
+							rightDocNode = rightDocNode.after;
+						}
+					}
+				}
+				
+				if(foundDocNode !=null){
+					log.debug("Linking: " + docNodeSource + "->" + foundDocNode + String.format("%.2f", linkScore));
+					DocEdge docEdge = docGraph.addEdge(docNodeSource, foundDocNode);
+					docEdge.wordsDistance = foundDocNode.index - docNodeSource.index;
+					docEdge.interceptedPonctuations = AnalaudosDocument.checkIntercepPonctuation(docNodeSource, foundDocNode);
+					
+					docEdge.linkScore = linkScore;
+				}
+			}
+		}
+
 		docGraph.setLog(sw.toString());
 		log.removeAppender(wa);
 		return docGraph;

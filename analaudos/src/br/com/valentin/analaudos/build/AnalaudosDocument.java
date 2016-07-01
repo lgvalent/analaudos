@@ -67,7 +67,7 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 
 		@Override
 		public String toString() {
-			return "[wd:" + wordsDistance + ", ll:"+ linkLatency +"ms, ip:'"+ interceptedPonctuations  +"', r:" + String.format("%.2f", linkScore) + "%]";
+			return "[wd:" + wordsDistance + ", ll:"+ linkLatency +"ms, ip:'"+ interceptedPonctuations  +"', s:" + String.format("%.2f", linkScore) + "]";
 		}
 	}
 	
@@ -113,7 +113,7 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 			if(temp.label.contains("?"))
 				result.append('?');
 		}
-		System.out.println(source + "->" + target + "=" + result);
+//		System.out.println(source + "->" + target + "=" + result);
 		
 		return result.toString();
 

@@ -47,6 +47,8 @@ public class AnalaudosBuilderTest {
 	}
 
 	public static void main(String[] args) {
+		
+		
 		System.out.println("2,3 cm. Olá,2 tudo bem".matches(".*\\.[ a-zA-Z].*"));
 		System.out.println("cm.".matches(".*\\.([ a-zA-Z].*|$)"));
 		System.out.println(1.0 == 1);

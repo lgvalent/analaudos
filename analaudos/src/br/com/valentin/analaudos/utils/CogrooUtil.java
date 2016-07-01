@@ -108,8 +108,22 @@ public class CogrooUtil{
 }
 	public static void showStatistcs(String label, Map<?,?> map){
 		System.out.println("::::: " + label + " :::::");
+		System.out.println("POS\t n\t mean\t min\t max\t sd\t var");
 		for(Entry<?,?> entry: map.entrySet()){
-			System.out.println(entry.getKey() + ":" + entry.getValue());
+			System.out.print(entry.getKey() + "\t");
+			Object value = entry.getValue();
+			if(value instanceof DescriptiveStatistics){
+				DescriptiveStatistics values = (DescriptiveStatistics) value;
+				System.out.print(values.getN());System.out.print("\t");
+				System.out.print(values.getMean());System.out.print("\t");
+				System.out.print(values.getMin());System.out.print("\t");
+				System.out.print(values.getMax());System.out.print("\t");
+				System.out.print(values.getStandardDeviation());System.out.print("\t");
+				System.out.print(values.getVariance());System.out.print("\t");
+				System.out.println();
+			}else{
+				System.out.println(value);
+			}
 		}
 		System.out.println(":::::  :::::");
 	}

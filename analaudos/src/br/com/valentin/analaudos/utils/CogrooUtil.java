@@ -108,13 +108,14 @@ public class CogrooUtil{
 }
 	public static void showStatistcs(String label, Map<?,?> map){
 		System.out.println("::::: " + label + " :::::");
-		System.out.println("POS\t n\t mean\t min\t max\t sd\t var");
+		System.out.println("POS\t n\t sum\t mean\t min\t max\t sd\t var");
 		for(Entry<?,?> entry: map.entrySet()){
 			System.out.print(entry.getKey() + "\t");
 			Object value = entry.getValue();
 			if(value instanceof DescriptiveStatistics){
 				DescriptiveStatistics values = (DescriptiveStatistics) value;
 				System.out.print(values.getN());System.out.print("\t");
+				System.out.print(values.getSum());System.out.print("\t");
 				System.out.print(values.getMean());System.out.print("\t");
 				System.out.print(values.getMin());System.out.print("\t");
 				System.out.print(values.getMax());System.out.print("\t");
@@ -141,6 +142,7 @@ public class CogrooUtil{
 		
 		for(Sentence sentence: document.getSentences()){
 			for(Token token: sentence.getTokens()){
+//				System.out.println(token.getPOSTag() + ":" + sentence.getText().substring(token.getStart(), token.getEnd()));
 				Integer count = result.get(token.getPOSTag());
 				if(count == null){
 					result.put(token.getPOSTag(), 1);

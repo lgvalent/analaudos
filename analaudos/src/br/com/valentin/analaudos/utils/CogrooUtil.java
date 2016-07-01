@@ -147,7 +147,7 @@ public class CogrooUtil{
 		return new TreeMap<String, DescriptiveStatistics>();
 	}
 	
-	public static void joinStats(Map<String, DescriptiveStatistics> accumulator, Map<String, Integer> unit){
+	public static synchronized void joinStats(Map<String, DescriptiveStatistics> accumulator, Map<String, Integer> unit){
 		for(Entry<String, Integer> entry: unit.entrySet()){
 			DescriptiveStatistics count = accumulator.get(entry.getKey());
 

@@ -1,6 +1,7 @@
 package br.com.valentin.analaudos.utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -17,6 +18,8 @@ import org.cogroo.checker.CheckDocument;
 import org.cogroo.text.Sentence;
 import org.cogroo.text.Token;
 
+import com.sun.swing.internal.plaf.synth.resources.synth;
+
 import br.com.valentin.analaudos.build.AnalaudosBuilderTest;
 
 /**
@@ -26,6 +29,72 @@ import br.com.valentin.analaudos.build.AnalaudosBuilderTest;
  *  
  */
 public class CogrooUtil{
+	
+	public static class TextStatistics{
+		private static Analyzer analyzer = CogrooUtil.getInstance("pt_BR");
+
+		private Map<String, DescriptiveStatistics> posStatistics = new TreeMap<String, DescriptiveStatistics>();
+		private Map<String, DescriptiveStatistics> wordStatistics = new TreeMap<String, DescriptiveStatistics>();
+
+		public void addDoc(String text){
+			long time = System.nanoTime();
+
+			CheckDocument document = new CheckDocument();
+			document.setText(text);
+
+			analyzer.analyze(document);
+
+			Map<String, Integer> posValues = new HashMap<String, Integer>();
+			Map<String, Integer> wordValues = new HashMap<String, Integer>();
+			
+			for(Sentence sentence: document.getSentences()){
+				for(Token token: sentence.getTokens()){
+//					System.out.println(token.getPOSTag() + ":" + sentence.getText().substring(token.getStart(), token.getEnd()));
+					addStatistics(token.getPOSTag(), token, posValues);
+					addStatistics(sentence.getText().substring(token.getStart(), token.getEnd())+":"+token.getPOSTag(), token, wordValues);
+				}
+			}
+			
+			// Join parcial results
+			addStatistics(posValues, posStatistics);
+			addStatistics(wordValues, wordStatistics);
+
+			System.out.println("Document processed in "+ ((System.nanoTime() - time) / 1000000) + "ms.");
+		}
+		
+		private void addStatistics(String key, Token token, Map<String, Integer> values){
+			if(token.getPOSTag().equals("num"))
+				key = token.getPOSTag();
+			
+			Integer value = values.get(key);
+			if(value == null){
+				values.put(key, 1);
+			}else{
+				values.put(key, value+1);
+			}
+		}
+
+		private synchronized void addStatistics(Map<String, Integer> values, Map<String, DescriptiveStatistics> totals){
+			for(Entry<String, Integer> entry: values.entrySet()){
+				DescriptiveStatistics count = totals.get(entry.getKey());
+
+				if(count == null){
+					count = new DescriptiveStatistics();
+					totals.put(entry.getKey(), count);
+				}
+				
+				count.addValue(entry.getValue());
+			}
+		}
+
+		public Map<String, DescriptiveStatistics> getPosStatistics(){
+			return this.posStatistics;
+		}
+
+		public Map<String, DescriptiveStatistics> getWordStatistics(){
+			return this.wordStatistics;
+		}
+	}
 	
 	
 	/** 
@@ -93,19 +162,20 @@ public class CogrooUtil{
 	}
 	
 	private static void test() {
+		long time = System.nanoTime();
 		
-		Map<String, Integer> stats1 = getPOSStatictics(AnalaudosBuilderTest.prepareDocumentGraphTest1().getDocumentContent().getContentPlain());
-		showStatistcs("DOC 1", stats1);
+		TextStatistics textStatistics = new TextStatistics();
+		textStatistics.addDoc(AnalaudosBuilderTest.prepareDocumentGraphTest1().getDocumentContent().getContentPlain());
+		showStatistcs("DOC 1: POS stats", textStatistics.getPosStatistics());
+		showStatistcs("DOC 1: WORD stats", textStatistics.getWordStatistics());
 
-		Map<String, Integer> stats2 = getPOSStatictics(AnalaudosBuilderTest.prepareDocumentGraphTest2().getDocumentContent().getContentPlain());
-		showStatistcs("DOC 2", stats2);
+		textStatistics.addDoc(AnalaudosBuilderTest.prepareDocumentGraphTest2().getDocumentContent().getContentPlain());
+		showStatistcs("DOC 2: POS stats", textStatistics.getPosStatistics());
+		showStatistcs("DOC 2: WORD stats", textStatistics.getWordStatistics());
 		
-		Map<String, DescriptiveStatistics> results = createAccumulator();
-		joinStats(results, stats1);
-		joinStats(results, stats2);
-		
-		showStatistcs("JOINED", results);
-}
+		System.out.println("TEST: Using class, finished in "+ ((System.nanoTime() - time) / 1000000) + "ms.");
+	}
+
 	public static void showStatistcs(String label, Map<?,?> map){
 		System.out.println("::::: " + label + " :::::");
 		System.out.println("POS\t n\t sum\t mean\t min\t max\t sd\t var");
@@ -129,51 +199,5 @@ public class CogrooUtil{
 		System.out.println(":::::  :::::");
 	}
 	
-	public static Map<String, Integer> getPOSStatictics(String text){
-		long time = System.nanoTime();
-		TreeMap<String, Integer> result = new TreeMap<String, Integer>();
-
-		Analyzer analyzer = CogrooUtil.getInstance("pt_BR");
-		
-		CheckDocument document = new CheckDocument();
-		document.setText(text);
-
-		analyzer.analyze(document);
-		
-		for(Sentence sentence: document.getSentences()){
-			for(Token token: sentence.getTokens()){
-//				System.out.println(token.getPOSTag() + ":" + sentence.getText().substring(token.getStart(), token.getEnd()));
-				Integer count = result.get(token.getPOSTag());
-				if(count == null){
-					result.put(token.getPOSTag(), 1);
-				}else{
-					result.put(token.getPOSTag(), count+1);
-					
-				}
-			}
-		}
-
-		System.out.println("Document processed in "+ ((System.nanoTime() - time) / 1000000) + "ms.");
-		
-		return result;
-	}
-	
-	
-	public static Map<String, DescriptiveStatistics> createAccumulator(){
-		return new TreeMap<String, DescriptiveStatistics>();
-	}
-	
-	public static synchronized void joinStats(Map<String, DescriptiveStatistics> accumulator, Map<String, Integer> unit){
-		for(Entry<String, Integer> entry: unit.entrySet()){
-			DescriptiveStatistics count = accumulator.get(entry.getKey());
-
-			if(count == null){
-				count = new DescriptiveStatistics();
-				accumulator.put(entry.getKey(), count);
-			}
-			
-			count.addValue(entry.getValue());
-		}
-	}
 }
 

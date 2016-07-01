@@ -3,14 +3,11 @@ package br.com.valentin.analaudos.utils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
-import br.com.orionsoft.monstrengo.core.exception.BusinessMessage;
+import br.com.valentin.analaudos.utils.CogrooUtil.TextStatistics;
 
 
 public class AnalaudosTextStatistics {
@@ -24,10 +21,10 @@ public class AnalaudosTextStatistics {
 		}
 		int limit = args.length>1?Integer.parseInt(args[1]):100000;
 		int numberOfThreads = args.length>2?Integer.parseInt(args[2]):Runtime.getRuntime().availableProcessors()/2;
+		int lineCount = 0;
 
-		final Map<String, DescriptiveStatistics> acc = CogrooUtil.createAccumulator();
+		final TextStatistics textStatistics = new TextStatistics();
 	
-
 		BufferedReader br = new BufferedReader(new FileReader(args[0]));
 		String line = br.readLine();
 		
@@ -35,6 +32,7 @@ public class AnalaudosTextStatistics {
 
 		System.out.println(String.format("Runtime settings:\n %d lines\n %d thread(s)\n File: %s", limit, numberOfThreads, args[0]));
 		while(line != null && limit-- > 0){
+			lineCount++;
 			
 			final String localLine = line;
 			
@@ -42,10 +40,7 @@ public class AnalaudosTextStatistics {
 				
 				@Override
 				public void run() {
-					Map<String, Integer> unit = CogrooUtil.getPOSStatictics(localLine);
-					
-					CogrooUtil.joinStats(acc, unit);
-					
+					textStatistics.addDoc(localLine);
 				}
 			});
 			
@@ -58,7 +53,8 @@ public class AnalaudosTextStatistics {
 		if(!executor.awaitTermination(8000, TimeUnit.SECONDS))
 			throw new RuntimeException("Time out for Executor...");
 
-		CogrooUtil.showStatistcs("GERAL", acc);
+		CogrooUtil.showStatistcs("GERAL POS Tags:" + lineCount, textStatistics.getPosStatistics());
+		CogrooUtil.showStatistcs("GERAL WORDS:" + lineCount, textStatistics.getWordStatistics());
 		
 		System.out.println("All documents processed in "+ ((System.nanoTime() - time) / 1000000) + "ms.");
 	}

@@ -1,5 +1,7 @@
 package br.com.valentin.analaudos.utils;
 
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -177,26 +179,37 @@ public class CogrooUtil{
 	}
 
 	public static void showStatistcs(String label, Map<?,?> map){
-		System.out.println("::::: " + label + " :::::");
-		System.out.println("POS\t n\t sum\t mean\t min\t max\t sd\t var");
+		PrintStream out;
+		try {
+			out = new PrintStream(System.out, true, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			out = new PrintStream(System.out, true);
+		}
+		
+		out.println("::::: " + label + " :::::");
+		out.println("POS\t n\t sum\t mean\t min\t max\t sd\t var");
 		for(Entry<?,?> entry: map.entrySet()){
-			System.out.print(entry.getKey() + "\t");
+			out.print(entry.getKey() + "\t");
 			Object value = entry.getValue();
 			if(value instanceof DescriptiveStatistics){
 				DescriptiveStatistics values = (DescriptiveStatistics) value;
-				System.out.print(values.getN());System.out.print("\t");
-				System.out.print(values.getSum());System.out.print("\t");
-				System.out.print(values.getMean());System.out.print("\t");
-				System.out.print(values.getMin());System.out.print("\t");
-				System.out.print(values.getMax());System.out.print("\t");
-				System.out.print(values.getStandardDeviation());System.out.print("\t");
-				System.out.print(values.getVariance());System.out.print("\t");
-				System.out.println();
+				out.print(values.getN());out.print("\t");
+				out.print(values.getSum());out.print("\t");
+				out.print(values.getMean());out.print("\t");
+				out.print(values.getMin());out.print("\t");
+				out.print(values.getMax());out.print("\t");
+				out.print(values.getStandardDeviation());out.print("\t");
+				out.print(values.getVariance());out.print("\t");
+				out.println();
 			}else{
-				System.out.println(value);
+				out.println(value);
 			}
 		}
-		System.out.println(":::::  :::::");
+		out.println(":::::  :::::");
+		
+		out.close();
 	}
 	
 }

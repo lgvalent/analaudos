@@ -2,7 +2,11 @@ package br.com.valentin.analaudos.utils;
 
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +20,7 @@ public class AnalaudosTextStatistics {
 		long time = System.nanoTime();
 
 		if(args.length == 0){
-			System.out.println("Usage: java ... mainClass %1 [%2] [%3]\n Where:\n%1 is a filename with text reports, one per line.\n%2 is the number of lines to be processed. Default is all lines.\n%3 is the number of thread used in executor. Default is Runtime.availbleProcessors/2.");
+			System.out.println("Usage: java ... mainClass %1 [%2] [%3]\n Where:\n%1 is a filename (in UTF-8) with text reports, one per line.\n%2 is the number of lines to be processed. Default is all lines.\n%3 is the number of thread used in executor. Default is Runtime.availbleProcessors/2.");
 			System.exit(1);
 		}
 		int limit = args.length>1?Integer.parseInt(args[1]):100000;
@@ -25,7 +29,7 @@ public class AnalaudosTextStatistics {
 
 		final TextStatistics textStatistics = new TextStatistics();
 	
-		BufferedReader br = new BufferedReader(new FileReader(args[0]));
+		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(args[0])), Charset.forName("UTF-8")));
 		String line = br.readLine();
 		
 		ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);

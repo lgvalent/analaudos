@@ -208,8 +208,6 @@ public class CogrooUtil{
 			}
 		}
 		out.println(":::::  :::::");
-		
-		out.close();
 	}
 	
 }

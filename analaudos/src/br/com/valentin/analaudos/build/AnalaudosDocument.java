@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jgraph.graph.DefaultEdge;
 
 import com.google.gson.Gson;
@@ -57,7 +58,8 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 		private static final long serialVersionUID = 1L;
 
 		public String id;
-		public int wordsDistance;
+		public int wordDistance;
+		public int phraseDistance;
 		public int linkLatency;
 		public String interceptedPonctuations = "";
 
@@ -67,7 +69,7 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 
 		@Override
 		public String toString() {
-			return "[wd:" + wordsDistance + ", ll:"+ linkLatency +"ms, ip:'"+ interceptedPonctuations  +"', s:" + String.format("%.2f", linkScore) + "]";
+			return "[pd:" + phraseDistance + ", wd:" + wordDistance + ", ll:"+ linkLatency +"ms, ip:'"+ interceptedPonctuations  +"', s:" + String.format("%.2f", linkScore) + "]";
 		}
 	}
 	
@@ -83,8 +85,6 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 			/* Time between clicks */
 			e.linkLatency = retrieveCreateEdgeLatency(source.id, target.id, actionLog);
 	
-			/* Check ponctuation between nodes */ 
-			e.interceptedPonctuations = checkIntercepPonctuation(source, target);
 		}
 	}
 	
@@ -119,6 +119,22 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 
 	}
 
+	public static int checkPhraseDistance(DocNode source, DocNode target){
+		String interceptedPonctuations = checkIntercepPonctuation(source, target);
+		
+		return checkPhraseDistance(interceptedPonctuations); 
+	}
+
+	public static int checkPhraseDistance(String interceptedPonctuations){
+		int result = 0;
+		
+		result += StringUtils.countMatches(interceptedPonctuations, ".");
+		result += StringUtils.countMatches(interceptedPonctuations, "!");
+		result += StringUtils.countMatches(interceptedPonctuations, "?");
+
+		return result;
+	}
+
 	private void addJsonGraph(String analaudosJson){
 		Gson gson = new GsonBuilder().create();
 		AnalaudoJson json = gson.fromJson(analaudosJson, AnalaudoJson.class);
@@ -149,7 +165,11 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 	
 			DocEdge edge = this.addEdge(source, target);
 	
-			edge.wordsDistance = target.index - source.index;
+			edge.wordDistance = target.index - source.index;
+			/* Check ponctuation between nodes */ 
+			edge.interceptedPonctuations = checkIntercepPonctuation(source, target);
+			
+			edge.phraseDistance = checkPhraseDistance(edge.interceptedPonctuations);
 		}
 	}
 
@@ -222,7 +242,6 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 
 		sb.append("}");
 
-		
 		return sb.toString();
 	}
 

@@ -30,7 +30,7 @@ public class AnalaudosBuilder{
 				if(linkReliability > 0){
 					DocEdge docEdge = docGraph.addEdge(docNodeSource, docNodeTarget);
 					docEdge.linkScore = linkReliability;
-					docEdge.wordsDistance = docNodeTarget.index - docNodeSource.index;
+					docEdge.wordDistance = docNodeTarget.index - docNodeSource.index;
 					docEdge.interceptedPonctuations = AnalaudosDocument.checkIntercepPonctuation(docNodeSource, docNodeTarget);
 				}
 			}

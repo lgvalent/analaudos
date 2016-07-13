@@ -90,12 +90,13 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 		private static final long serialVersionUID = 1L;
 
 		public DescriptiveStatistics wordDistance = new DescriptiveStatistics(); 
+		public DescriptiveStatistics phraseDistance = new DescriptiveStatistics(); 
 		public DescriptiveStatistics linkLatency = new DescriptiveStatistics();
 		public DescriptiveStatistics interceptedPonctuations = new DescriptiveStatistics();
 
 		@Override
 		public String toString() {
-			return wordDistance.getN() + " link(s)[wd:" + String.format("%.2f", wordDistance.getMean()) + ", ll:"+ String.format("%.2f", linkLatency.getMean()) +"ms, ip:"+ String.format("%.2f", interceptedPonctuations.getMean()) + "]";
+			return wordDistance.getN() + " link(s)[pd:" + String.format("%.2f", phraseDistance.getMean()) + ", wd:" + String.format("%.2f", wordDistance.getMean()) + ", ll:"+ String.format("%.2f", linkLatency.getMean()) +"ms, ip:"+ String.format("%.2f", interceptedPonctuations.getMean()) + "]";
 		}
 		
 	}
@@ -115,8 +116,10 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 				double linkScore = linkResolve(docNodeSource, docNodeTarget); 
 				if(linkScore > 0){
 					DocEdge docEdge = docGraph.addEdge(docNodeSource, docNodeTarget);
-					docEdge.wordsDistance = docNodeTarget.index - docNodeSource.index;
+					docEdge.wordDistance = docNodeTarget.index - docNodeSource.index;
 					docEdge.interceptedPonctuations = AnalaudosDocument.checkIntercepPonctuation(docNodeSource, docNodeTarget);
+					
+					docEdge.phraseDistance= AnalaudosDocument.checkPhraseDistance(docEdge.interceptedPonctuations);
 
 					docEdge.linkScore = linkScore;
 				}
@@ -162,7 +165,7 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 				if(foundDocNode !=null){
 					log.debug("Linking: " + docNodeSource + "->" + foundDocNode + String.format("%.2f", linkScore));
 					DocEdge docEdge = docGraph.addEdge(docNodeSource, foundDocNode);
-					docEdge.wordsDistance = foundDocNode.index - docNodeSource.index;
+					docEdge.wordDistance = foundDocNode.index - docNodeSource.index;
 					docEdge.interceptedPonctuations = AnalaudosDocument.checkIntercepPonctuation(docNodeSource, foundDocNode);
 					
 					docEdge.linkScore = linkScore;
@@ -255,7 +258,7 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 			/* NUMBER vertex allows multiple edges */
 			for(AnalaudosEdge analEdge_: this.getAllEdges(analNodeSource, analNodeTarget)){
 				/* Analyze recurrent link */
-				if(analEdge_.wordDistance.getMean() == docEdge.wordsDistance){
+				if(analEdge_.wordDistance.getMean() == docEdge.wordDistance){
 					analEdge = analEdge_;
 				}
 			}
@@ -266,7 +269,8 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 		}
 
 		analEdge.linkLatency.addValue(docEdge.linkLatency);
-		analEdge.wordDistance.addValue(docEdge.wordsDistance);
+		analEdge.wordDistance.addValue(docEdge.wordDistance);
+		analEdge.phraseDistance.addValue(docEdge.phraseDistance);
 		analEdge.interceptedPonctuations.addValue(docEdge.interceptedPonctuations.length());
 		
 		return analEdge;

@@ -15,7 +15,7 @@ import br.com.valentin.analaudos.entities.DocumentGraph;
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.swing.mxGraphComponent;
 
-public class AnalaudosBuilderTest {
+public class AnalaudosValidationTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static void showGraph(Graph g) {
 		// http://jgrapht.org/visualizations.html
@@ -87,11 +87,6 @@ public class AnalaudosBuilderTest {
 //			System.out.println("--->"+ e.getSource() + "->" + e.getTarget() + ":" + e);
 //			System.out.println("-->" + analGraph.getEdgeWeight(e));
 //		}
-		
-		/** Validation */
-		AnalaudosValidation analVal = new AnalaudosValidation(analGraph);
-		analVal.validate(document2.getDocumentContent().getContentPlain(), document2.getGraphJson());
-		System.out.println("VALIDATE_DOCUMENT:\n" + analVal.getAnalaudosDocument().toDot(true));
 	}
 
 	public static DocumentGraph prepareDocumentGraphTest1(){

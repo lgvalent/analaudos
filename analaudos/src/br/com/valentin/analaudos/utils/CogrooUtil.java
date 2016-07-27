@@ -37,6 +37,9 @@ public class CogrooUtil{
 
 		private Map<String, DescriptiveStatistics> posStatistics = new TreeMap<String, DescriptiveStatistics>();
 		private Map<String, DescriptiveStatistics> wordStatistics = new TreeMap<String, DescriptiveStatistics>();
+		/** TODO Impacto da contagem de stemmer do corpus para afirma que há poucas palavras, já que 
+		 * os atuais dados endicam palavras com POS diferentes ou ainda singular/plural masculino/feminino */
+		private Map<String, DescriptiveStatistics> stemmStatistics = new TreeMap<String, DescriptiveStatistics>();
 
 		public void addDoc(String text){
 			long time = System.nanoTime();

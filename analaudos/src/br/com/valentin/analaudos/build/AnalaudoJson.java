@@ -10,6 +10,7 @@ public class AnalaudoJson{
 
 		public String id;
 		public String fontColor;
+		public String penColor;
 		public String label;
 		public String word;
 		

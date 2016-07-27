@@ -17,7 +17,7 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 	private static final long serialVersionUID = 1L;
 	
 	private String log;
-
+	
 	public AnalaudosDocument(String jsonGraph) {
 		super(AnalaudosDocument.DocEdge.class);
 		addJsonGraph(jsonGraph);
@@ -34,6 +34,7 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 			this.id =  node.id;
 			this.index =  Integer.parseInt(node.id.replaceAll("[A-Za-z]", ""));
 			this.fontColor = node.fontColor;
+			this.penColor = node.penColor;
 			this.label = node.label;
 			this.word = node.word.trim(); // 20160526: Some JSONs are keeping leading and trailing whitespaces 
 		}
@@ -41,6 +42,7 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 		public String id;
 		public int index; // Use id to extract index: w10 -> 10
 		public String fontColor;
+		public String penColor;
 		public String label;
 		public String word;
 
@@ -52,6 +54,11 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 		public String toString() {
 			return label;
 		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			return index == ((DocNode)obj).index;
+		}
 	}
 
 	public static class DocEdge extends DefaultEdge{
@@ -62,6 +69,8 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 		public int phraseDistance;
 		public int linkLatency;
 		public String interceptedPonctuations = "";
+		public String fontColor;
+		public String penColor;
 
 		public double linkScore = 0;
 
@@ -70,6 +79,17 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 		@Override
 		public String toString() {
 			return "[pd:" + phraseDistance + ", wd:" + wordDistance + ", ll:"+ linkLatency +"ms, ip:'"+ interceptedPonctuations  +"', s:" + String.format("%.2f", linkScore) + "]";
+		}
+		
+		public String toString2(){
+			StringBuilder sb = new StringBuilder();
+			DocNode source = (DocNode) getSource();
+			DocNode target = (DocNode) getTarget();
+			
+			sb.append('[').append(source.index).append(':').append(target.index).append(']').append('\t').append(source.word).append('\t').append("->").append(target.word);
+			sb.append('\t').append(toString());
+
+			return sb.toString();
 		}
 	}
 	
@@ -227,7 +247,7 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 		StringBuilder sb = new StringBuilder("digraph G {");
 		
 		for(DocNode node: this.vertexSet()){
-			sb.append(node.id).append("[").append("fontcolor=\"").append(node.fontColor).append("\", ").append("label=\"").append(node.word).append("\"];");
+			sb.append(node.id).append("[").append("fontcolor=\"").append(node.fontColor).append("\", ").append("pencolor=\"").append(node.penColor).append("\", ").append("label=\"").append(node.word).append("\"];");
 		}
 
 		for(DocEdge edge: this.edgeSet()){
@@ -235,7 +255,7 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 			DocNode target = (DocNode) edge.getTarget();
 			sb.append(source.id).append("->").append(target.id);
 			if(showEdgeLabels)
-				sb.append("[label=\"").append(edge.toString()).append("\"]");
+				sb.append("[label=\"").append(edge.toString()).append("\", ").append("fontcolor=\"").append(edge.fontColor).append("\", ").append("color=\"").append(edge.penColor).append("\"]");
 			sb.append(";");
 
 		}

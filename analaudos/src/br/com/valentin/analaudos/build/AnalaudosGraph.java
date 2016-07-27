@@ -46,6 +46,7 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 		public static enum Type{WORD, NUMBER, MEASURE};
 		public String id;
 		public String fontColor;
+		public String penColor;
 		public String word;
 		public Type type = Type.WORD;
 		public List<String> labels = new ArrayList<String>(); 
@@ -88,6 +89,9 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 
 	public static class AnalaudosEdge extends DefaultEdge{
 		private static final long serialVersionUID = 1L;
+
+		public String fontColor;
+		public String penColor;
 
 		public DescriptiveStatistics wordDistance = new DescriptiveStatistics(); 
 		public DescriptiveStatistics phraseDistance = new DescriptiveStatistics(); 
@@ -218,6 +222,10 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 				sb.append(" result=").append(result);
 				
 				if(result > 0){
+					docNodeSource.fontColor = analNodeSource.fontColor;
+					docNodeSource.penColor = analNodeSource.penColor;
+					docNodeTarget.fontColor = analNodeTarget.fontColor;
+					docNodeTarget.penColor = analNodeTarget.penColor;
 					sb.append("[LINKED]");
 					
 				}
@@ -307,6 +315,7 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 			analNode = new AnalaudosNode();
 			analNode.id = "w" + nodeCount++;
 			analNode.fontColor = docNode.fontColor;
+			analNode.penColor = docNode.penColor;
 			
 			analNode.type = AnalaudosNode.checkDataType(docNode.word);
 			analNode.word = getNodeWord(docNode, analNode.type);
@@ -337,7 +346,7 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 		StringBuilder sb = new StringBuilder("digraph G {");
 		
 		for(AnalaudosNode node: this.vertexSet()){
-			sb.append(node.id).append("[").append("fontcolor=\"").append(node.fontColor).append("\", ").append("label=\"").append(node.toString()).append("\"];");
+			sb.append(node.id).append("[").append("fontcolor=\"").append(node.fontColor).append("\", ").append("color=\"").append(node.penColor).append("\", ").append("label=\"").append(node.toString()).append("\"]; ");
 		}
 
 		for(AnalaudosEdge edge: this.edgeSet()){
@@ -345,8 +354,8 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 			AnalaudosNode target = (AnalaudosNode) edge.getTarget();
 			sb.append(source.id).append("->").append(target.id);
 			if(showEdgeLabels)
-				sb.append("[label=\"").append(edge.toString()).append("\"]");
-			sb.append(";");
+				sb.append("[label=\"").append(edge.toString()).append("\", ").append("fontcolor=\"").append(edge.fontColor).append("\", ").append("color=\"").append(edge.penColor).append("\"]");
+			sb.append("; ");
 		}
 
 		sb.append("}");

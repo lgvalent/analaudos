@@ -50,13 +50,14 @@
 		<p:notificationBar position="top" effectSpeed="0.1" effect="slide" widgetVar="bar" style="background-color:lightgreen; height:20px; text-align:center; opacity:0.8;">
     		<h:outputText value="Obrigado por retornar. Seus dados anteriores foram recuperados e você continuará de onde parou." style="font-size:16px; font-weight: bold;" />
 			<p:commandButton onclick="bar.hide()" type="button" icon="ui-icon-close" style="position:absolute; right:20px; top:0px;"/>
-			<h:outputScript rendered="#{createDocumentGraphBean.authorIsBack}">
-    			window.setTimeout(function(){bar.show();}, 500);
-    		</h:outputScript>
-    		<h:outputScript>
-    			window.setTimeout(function(){bar.hide();}, 10000);
-    		</h:outputScript>
 		</p:notificationBar>
+
+		<h:outputScript rendered="#{createDocumentGraphBean.authorIsBack}">
+   			window.setTimeout(function(){bar.show();}, 500);
+   		</h:outputScript>
+   		<h:outputScript>
+   			window.setTimeout(function(){bar.hide();}, 10000);
+   		</h:outputScript>
 		
 		<script>
   			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

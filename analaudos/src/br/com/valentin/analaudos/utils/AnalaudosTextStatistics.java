@@ -4,7 +4,6 @@ package br.com.valentin.analaudos.utils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
@@ -17,6 +16,7 @@ import br.com.valentin.analaudos.utils.CogrooUtil.TextStatistics;
 public class AnalaudosTextStatistics {
 
 	public static void main(String[] args) throws Exception {
+		
 		long time = System.nanoTime();
 
 		if(args.length == 0){

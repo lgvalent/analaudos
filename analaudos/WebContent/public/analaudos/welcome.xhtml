@@ -8,13 +8,16 @@
 <ui:composition template="/public/basic/templates/simpleProcess.xhtml">
 	<ui:param name="title" value="Analaudos - Analisador semântico de laudos médicos" />
 	<ui:param name="icon" value="../../public/analaudos/img/logo_180x180.png" />
-	<ui:param name="description" value="Obrigado por participar da pesquisa.&lt;br/&gt; Sua contribuição será muito importante para entendermos as relações semânticas entres os termos de um laudo médico.&lt;br/&gt;Forneça alguns dados iniciais e clique em &lt;b&gt;Iniciar&lt;b/&gt;&lt;br/&gt;" />
+	<ui:param name="description" value="Obrigado por participar da pesquisa.&lt;br/&gt; Sua contribuição será muito importante para entendermos as relações semânticas entres os termos de um laudo médico.&lt;br/&gt;Forneça alguns dados iniciais e clique em &lt;b&gt;Iniciar&lt;/b&gt;" />
 	<ui:define name="content">
-		<br/>
+		<table>
+			<tr>
+				<td>
 		Selecione a especialidade dos laudos:<br/>
-		<p:selectOneRadio value="#{createDocumentGraphBean.researchSettingsId}" required="true">
+		<p:selectOneRadio id="researchSettingsId" value="#{createDocumentGraphBean.researchSettingsId}" required="true">
 			<f:selectItems value="#{createDocumentGraphBean.researchSettingsList}"/>
 		</p:selectOneRadio><br/>
+		<h:message for="researchSettingsId"/>
 		<fieldset>
   			<legend>Informações para estatísticas</legend>
 			Informe o ano da sua formatura:<br />
@@ -36,6 +39,13 @@
 				value="#{createDocumentGraphBean.documentGraph.object.doctorYear}"
 				onkeypress="return keyPressInt(this,event)" maxlength="4" />
 		</fieldset>
+				</td>
+				<td width="50%" align="right">
+					Este projeto é uma parceria entre:<br/>
+					<img src="./img/logo_usp_utf.png" height="150" width="300"/>
+				</td>
+			</tr>
+		</table>
 		<br /> Escolha como deseja iniciar a pesquisa:<br />
 		<p:selectOneButton value="#{createDocumentGraphBean.soundOn}"
 			onIcon="ui-icon-volume-on">

@@ -81,6 +81,9 @@ public class CreateDocumentGraphBean extends BeanSessionBasic{
 			if(cookies.containsKey(REQUEST_PARAM_RESEARCH_SETTINGS_ID)){
 				cookie = (Cookie) cookies.get(REQUEST_PARAM_RESEARCH_SETTINGS_ID);
 				this.researchSettingsId = Long.parseLong(cookie.getValue());
+			}else{
+				if(!this.getResearchSettingsList().isEmpty())
+					this.researchSettingsId = (Long) this.getResearchSettingsList().get(0).getValue();
 			}
 			
 			if(cookies.containsKey(DocumentGraph.GRADUATION_YEAR)){

@@ -58,8 +58,8 @@ public class CogrooUtil{
 				for(Token token: sentence.getTokens()){
 //					System.out.println(token.getPOSTag() + ":" + sentence.getText().substring(token.getStart(), token.getEnd()));
 					addStatistics(token.getPOSTag(), token, posValues);
-					addStatistics(sentence.getText().substring(token.getStart(), token.getEnd())+":"+token.getPOSTag(), token, wordPosValues);
-					addStatistics(sentence.getText().substring(token.getStart(), token.getEnd()), token, wordValues);
+					addStatistics(sentence.getText().substring(token.getStart(), token.getEnd()).toLowerCase()+":"+token.getPOSTag(), token, wordPosValues);
+					addStatistics(sentence.getText().substring(token.getStart(), token.getEnd()).toLowerCase(), token, wordValues);
 				}
 			}
 			

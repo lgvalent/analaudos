@@ -12,7 +12,20 @@ import java.util.concurrent.TimeUnit;
 
 import br.com.valentin.analaudos.utils.CogrooUtil.TextStatistics;
 
-
+/**
+ * Analyze and generate texts statistics using coogro POStags and the word itself.
+ * To use this class in command line,
+ * Enter in WEB-INF directory and type this command:
+ * java -classpath classes/:lib/* br.com.valentin.analaudos.utils.AnalaudosTextStatistics
+ * 
+ *  If all work, a manual usage will be shown.
+ *  
+ *  Use the tee command to save output to file and console at the same time:
+ *  first_command 2>&1 | tee outfile
+ *  
+ * @author lucio
+ *
+ */
 public class AnalaudosTextStatistics {
 
 	public static void main(String[] args) throws Exception {
@@ -20,7 +33,7 @@ public class AnalaudosTextStatistics {
 		long time = System.nanoTime();
 
 		if(args.length == 0){
-			System.out.println("Usage: java ... mainClass %1 [%2] [%3]\n Where:\n%1 is a filename (in UTF-8) with text reports, one per line.\n%2 is the number of lines to be processed. Default is all lines.\n%3 is the number of thread used in executor. Default is Runtime.availbleProcessors/2.");
+			System.out.println("Usage: java ... AnalaudosTextStatistics %1 [%2] [%3]\n Where:\n%1 is a filename (in UTF-8) with text reports, one per line.\n%2 is the number of lines to be processed. Default is all lines.\n%3 is the number of thread used in executor. Default is Runtime.availbleProcessors/2.");
 			System.exit(1);
 		}
 		int limit = args.length>1?Integer.parseInt(args[1]):100000;
@@ -58,6 +71,7 @@ public class AnalaudosTextStatistics {
 			throw new RuntimeException("Time out for Executor...");
 
 		CogrooUtil.showStatistcs("GERAL POS Tags:" + lineCount, textStatistics.getPosStatistics());
+		CogrooUtil.showStatistcs("GERAL WORDS_POS:" + lineCount, textStatistics.getWordPosStatistics());
 		CogrooUtil.showStatistcs("GERAL WORDS:" + lineCount, textStatistics.getWordStatistics());
 		
 		System.out.println("All documents processed in "+ ((System.nanoTime() - time) / 1000000) + "ms.");

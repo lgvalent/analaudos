@@ -36,6 +36,7 @@ public class CogrooUtil{
 		private static Analyzer analyzer = CogrooUtil.getInstance("pt_BR");
 
 		private Map<String, DescriptiveStatistics> posStatistics = new TreeMap<String, DescriptiveStatistics>();
+		private Map<String, DescriptiveStatistics> wordPosStatistics = new TreeMap<String, DescriptiveStatistics>();
 		private Map<String, DescriptiveStatistics> wordStatistics = new TreeMap<String, DescriptiveStatistics>();
 		/** TODO Impacto da contagem de stemmer do corpus para afirma que há poucas palavras, já que 
 		 * os atuais dados endicam palavras com POS diferentes ou ainda singular/plural masculino/feminino */
@@ -50,18 +51,21 @@ public class CogrooUtil{
 			analyzer.analyze(document);
 
 			Map<String, Integer> posValues = new HashMap<String, Integer>();
+			Map<String, Integer> wordPosValues = new HashMap<String, Integer>();
 			Map<String, Integer> wordValues = new HashMap<String, Integer>();
 			
 			for(Sentence sentence: document.getSentences()){
 				for(Token token: sentence.getTokens()){
 //					System.out.println(token.getPOSTag() + ":" + sentence.getText().substring(token.getStart(), token.getEnd()));
 					addStatistics(token.getPOSTag(), token, posValues);
-					addStatistics(sentence.getText().substring(token.getStart(), token.getEnd())+":"+token.getPOSTag(), token, wordValues);
+					addStatistics(sentence.getText().substring(token.getStart(), token.getEnd())+":"+token.getPOSTag(), token, wordPosValues);
+					addStatistics(sentence.getText().substring(token.getStart(), token.getEnd()), token, wordValues);
 				}
 			}
 			
 			// Join parcial results
 			addStatistics(posValues, posStatistics);
+			addStatistics(wordPosValues, wordPosStatistics);
 			addStatistics(wordValues, wordStatistics);
 
 			System.out.println("Document processed in "+ ((System.nanoTime() - time) / 1000000) + "ms.");
@@ -99,7 +103,11 @@ public class CogrooUtil{
 		public Map<String, DescriptiveStatistics> getWordStatistics(){
 			return this.wordStatistics;
 		}
-	}
+
+		public Map<String, DescriptiveStatistics> getWordPosStatistics(){
+			return this.wordPosStatistics;
+		}
+}
 	
 	
 	/** 

@@ -57,7 +57,7 @@ else{
 		/* Edit edges CONTROLS */
 		a.selectSource = function(){
 			a.log("selectSource", a.gui.getNodeSelected().id);
-			a.toast("Indique o contexto de <b>" + a.gui.getNodeSelected().data.label + "</b>");
+			//a.toast("Indique o contexto de <b>" + a.gui.getNodeSelected().data.label + "</b>");
 			
 			/* Unformat actual root node*/
 			if(a.sourceNode != null){

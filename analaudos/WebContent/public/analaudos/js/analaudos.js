@@ -102,7 +102,7 @@ else{
 				var edges = a.gui.graph.getEdges(a.sourceNode, target);
 				if(edges.length > 0){ 
 					a.log("removeEdge", a.sourceNode.id, target.id);
-					a.toast("Ligação removida");
+					// a.toast("Ligação removida");
 					for(var i in edges) a.gui.graph.removeEdge(edges[i]);
 				}
 				else{
@@ -113,7 +113,7 @@ else{
 						a.toast("Não é permitida ligação cíclica");
 					} else {
 						a.log("createEdge", a.sourceNode.id, target.id);
-						a.toast(target.data.label);
+						// a.toast(target.data.label);
 						a.addEdge(a.sourceNode, target);
 					}
 				}

@@ -27,9 +27,10 @@
 
 if("undefined" != typeof analaudos) console.log("Analaudos already defined");
 else{
-	var Analaudos = function(outputCanvas){
+	var Analaudos = function(){
 		var a = this;
-		a.canvas = outputCanvas;
+		a.canvas = null;
+		a.graph = new Springy.Graph();
 		
 		a.version = "0.1b";
 		a.sourceNodeFontColor = "#008000";
@@ -84,11 +85,11 @@ else{
 		a.colorizeEdge = function(target){
 			target.data.fontColor = a.orphanNodeFontColor;
 
-			if(target.id in a.gui.graph.adjacency)
+			if(target.id in a.graph.adjacency)
 				target.data.fontColor = a.sourceNodeFontColor;
 			
 			var isTouched = false;
-			a.gui.graph.edges.forEach(function(e) {   // in target edges
+			a.graph.edges.forEach(function(e) {   // in target edges
 					if (e.target.id == target.id) isTouched = true;
 			});
 
@@ -99,18 +100,18 @@ else{
 		a.createEdge = function(target){
 			if(a.sourceNode != target){
 				/* Check sourceNode edges to add ou remove */
-				var edges = a.gui.graph.getEdges(a.sourceNode, target);
+				var edges = a.graph.getEdges(a.sourceNode, target);
 				if(edges.length > 0){ 
 					a.log("removeEdge", a.sourceNode.id, target.id);
-					// a.toast("Ligação removida");
-					for(var i in edges) a.gui.graph.removeEdge(edges[i]);
+					// a.toast("LigaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o removida");
+					for(var i in edges) a.graph.removeEdge(edges[i]);
 				}
 				else{
 					/* Check target edges to avoid cyclic link */
-					edges = a.gui.graph.getEdges(target, a.sourceNode);
+					edges = a.graph.getEdges(target, a.sourceNode);
 					if(edges.length > 0){ 
 						a.log("cyclicLinkAvoided", a.sourceNode.id, target.id);
-						a.toast("Não é permitida ligação cíclica");
+						a.toast("NÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© permitida ligaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o cÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­clica");
 					} else {
 						a.log("createEdge", a.sourceNode.id, target.id);
 						// a.toast(target.data.label);
@@ -147,16 +148,16 @@ else{
 		};
 
 		a.removeOrphans = function(){
-			for(var id in a.gui.graph.nodeSet){
-				if(!(id in a.gui.graph.adjacency)){
+			for(var id in a.graph.nodeSet){
+				if(!(id in a.graph.adjacency)){
 					var exists = false;
-					for (var x in a.gui.graph.adjacency) {
-						if (id in a.gui.graph.adjacency[x]) {
+					for (var x in a.graph.adjacency) {
+						if (id in a.graph.adjacency[x]) {
 							exists = true;
 							break;
 						}
 					}
-					if(!exists) a.gui.graph.removeNode(a.gui.graph.nodeSet[id]);
+					if(!exists) a.graph.removeNode(a.graph.nodeSet[id]);
 				} 
 			};
 		};
@@ -166,66 +167,70 @@ else{
 				word = id;
 			if("undefined" == typeof label)
 				label = word;
-			return a.gui.graph.addNode(new Springy.Node(id, {label:label, word: word, fontColor: fontColor, onclick:a.onNodeClick}));
+			return a.graph.addNode(new Springy.Node(id, {label:label, word: word, fontColor: fontColor, onclick:a.onNodeClick}));
 		};
 		
 		a.clearNodes = function(){
-			var tmpNodes = a.gui.graph.nodes.slice();
-			tmpNodes.forEach(function(e){this.removeNode(e);}, a.gui.graph);
+			var tmpNodes = a.graph.nodes.slice();
+			tmpNodes.forEach(function(e){this.removeNode(e);}, a.graph);
+			// reset counters
+			loadJSONCount = -1;
+			wordsCount = 0;
+
+
 		};
 
 		/* edge.data{color, label, weight, font, directional}*/
 		a.addEdge = function(src, trg){
-			return a.gui.graph.newEdge(src, trg, {color: a.edgeColor, label: ''});
+			return a.graph.newEdge(src, trg, {color: a.edgeColor, label: ''});
 		};
 		
 		
 		a.reverseEdges = function(){
-			var tmpEdges = a.gui.graph.edges.slice();
+			var tmpEdges = a.graph.edges.slice();
 			tmpEdges.forEach(function(e) {
 				this.removeEdge(e);
 					a.addEdge(e.target, e.source);
-			}, a.gui.graph);
+			}, a.graph);
 		};
 		
 		a.joinNodes = function(){
-			var tmpNodes1 = a.gui.graph.nodes.slice();
-			var tmpNodes2 = a.gui.graph.nodes.slice();
+			var tmpNodes1 = a.graph.nodes.slice();
+			var tmpNodes2 = a.graph.nodes.slice();
 			tmpNodes1.forEach(function(n1) {
 				tmpNodes2.forEach(function(n2){
 					if(n1.id != n2.id && n1.data.word == n2.data.word && n1.id in this.nodeSet){
-						var tempEdges = a.gui.graph.edges.slice();
+						var tempEdges = a.graph.edges.slice();
 						for(var i in tempEdges){
 							/* Remove adjacents */
 							if(tempEdges[i].source.id == n2.id){
 								a.addEdge(n1, tempEdges[i].target);
-								a.gui.graph.removeEdge(tempEdges[i]);
+								a.graph.removeEdge(tempEdges[i]);
 							}
 							/* Remove incidents */
 							if(tempEdges[i].target.id == n2.id){
 								a.addEdge(tempEdges[i].source, n1);
-								a.gui.graph.removeEdge(tempEdges[i]);
+								a.graph.removeEdge(tempEdges[i]);
 							}
 						}
-						a.gui.graph.removeNode(n2);
+						a.graph.removeNode(n2);
 					}
 				}, this);
-			}, a.gui.graph);
+			}, a.graph);
 		};
 		
 		/* Return a .dot format 
 		 */
 		a.createDot = function(){
 			var dotGraph = "digraph G {";
-			for(var id in a.gui.graph.nodeSet){
-				var node = a.gui.graph.nodeSet[id];
-				dotGraph += id +"[" + (node.data.fontColor !== undefined? "fontcolor=\"" + node.data.fontColor + "\", ":"") + "label=\"" + node.data.word +"\"];";
+			for(var id in a.graph.nodeSet){
+				var node = a.graph.nodeSet[id];
+				dotGraph += id +"[" + (node.data.fontColor? "fontcolor=\"" + node.data.fontColor + "\", ":"") + (node.data.color? "color=\"" + node.data.color + "\", ":"") + "label=\"" + node.data.word +"\"];";
 			}
 
-			for(var sourceId in a.gui.graph.adjacency){
-				for(var targetId in a.gui.graph.adjacency[sourceId]){
-					dotGraph +=  sourceId + "->" + targetId + ";";
-				}
+			for(var i in a.graph.edges){
+				var edge = a.graph.edges[i];
+				dotGraph +=  edge.source.id + "->" + edge.target.id + "[" + (edge.data.fontColor? "fontcolor=\"" + node.data.fontColor + "\", ":"") + (edge.data.color? "color=\"" + edge.data.color + "\", ":"") + (edge.data.label? "label=\"" + edge.data.label + "\"":"") + "];";
 			}
 
 			dotGraph += "}";
@@ -244,15 +249,15 @@ else{
 		a.createJson = function(){
 			var jsonGraph = "{\"nodes\":[";
 			var nodes = [];
-			for(var id in a.gui.graph.nodeSet){
-				var node = a.gui.graph.nodeSet[id];
+			for(var id in a.graph.nodeSet){
+				var node = a.graph.nodeSet[id];
 				nodes.push("{\"id\":\""+id+"\"" + (node.data.fontColor !== undefined? ",\"fontColor\":\"" + node.data.fontColor + "\" ":"") + ", \"label\":\"" + node.data.label +"\", \"word\":\"" + node.data.word+ "\"}");
 			}
 			jsonGraph += nodes.join(",") + "], \"edges\":[";
 			
 			var links = [];
-			for(var sourceId in a.gui.graph.adjacency){
-				for(var targetId in a.gui.graph.adjacency[sourceId]){
+			for(var sourceId in a.graph.adjacency){
+				for(var targetId in a.graph.adjacency[sourceId]){
 					links.push("[\""+ sourceId +"\", \"" + targetId + "\"]");
 				}
 			}
@@ -279,8 +284,8 @@ else{
 				
 				var edges = json['edges']; 
 				for(i in edges){
-					var src = a.gui.graph.nodeSet[edges[i][0]+loadJSONCount];
-					var trg = a.gui.graph.nodeSet[edges[i][1]+loadJSONCount];
+					var src = a.graph.nodeSet[edges[i][0]+loadJSONCount];
+					var trg = a.graph.nodeSet[edges[i][1]+loadJSONCount];
 					a.addEdge(src, trg);
 				}
 			}
@@ -424,7 +429,7 @@ else{
 			window.setTimeout(a.arrange, 2000); // Refresh first arrange moviment from center
 
 			/* Activate first selection */
-			a.gui.setNodeSelected(a.gui.graph.nodes[1]);
+			a.gui.setNodeSelected(a.graph.nodes[1]);
 			a.selectSource();
 		};
 
@@ -443,14 +448,164 @@ else{
 			text = text.replace(/<(?:.|\n)*?>/gm, '');
 			responsiveVoice.speak(text, "Portuguese Female", {rate: (typeof rate=="undefined"?1.5:rate)});
 		};
+
+		a.findNodeByWord = function ( word ){
+			for(var i in a.graph.nodes){
+				if(a.graph.nodes[i].data.word == word)
+				  return a.graph.nodes[i];
+			}
+		};
+		// Levenshtein distance: http://dl.acm.org/citation.cfm?id=2815792
+		a.levenshteinDistance = function( a2 ){
+			var len0 = a.graph.edges.length;
+			var len1 = a2.graph.edges.length;
+			var v1 = new Array();
+			var v2 = new Array();
+			var result = {cost: 0, inserts: [], removes:[], replaces:[]};
+
+			for(var i = 0; i <= len0; i++)
+				v1[i] = i;
+
+			//console.log(v1.toString());
+			for(var j = 1; j <= len1; j++){
+				v2[0] = j;
+				var pair2 = a2.graph.edges[j-1];
+				for(var i = 1; i <= len0; i++){
+					var pair1 = a.graph.edges[i-1];
+					var cost = 0;
+					var op = 'noop';
+//					if(pair1.source.data.label != pair2.source.data.label || pair1.target.data.label != pair2.target.data.label){
+					if(pair1.source.id != pair2.source.id || pair1.target.id != pair2.target.id){
+						cost = 1;
+						op = 'replace [p1, p2]: ' + pair1.source.data.label + '->' + pair1.target.data.label + ' : ' + pair2.source.data.label + '->' + pair2.target.data.label;
+					}
+					var replaceCost = v1[i-1] + cost;
+					var insertCost = v1[i] + 1;
+					var deleteCost = v2[i-1] + 1;
+					//console.log("cost:" + cost +" ,rep:" + replaceCost + ", ins:" + insertCost + ", del:" + deleteCost);
+					if(deleteCost <= insertCost && deleteCost <= replaceCost){
+						v2[i] = deleteCost;
+						op = 'delete p1:' + pair1.source.data.label + '->' + pair1.target.data.label;
+					}else
+					if(insertCost <= replaceCost && insertCost <= deleteCost){
+						v2[i] = insertCost;
+						op = 'insert p2:' + pair2.source.data.label + '->' + pair2.target.data.label;
+					}else
+					if(replaceCost <= insertCost && replaceCost <= deleteCost){
+						v2[i] = replaceCost;
+						//op = 
+					}
+					// Show best way
+					if(i==j || (i>j && j == len1) ||(j>i && i == len0)){
+						//console.log(op);	
+						if(op.indexOf('replace')>-1)
+							result.replaces.push([pair1, pair2]);
+						else if(op.indexOf('insert')>-1)
+							result.inserts.push(pair2);
+						else if(op.indexOf('delete')>-1)
+							result.removes.push(pair1);
+					} 
+				}
+				//console.log(v2.toString());
+				var t = v1;
+				v1 = v2;
+				v2 = t;
+			}
+			result.cost = v1[len0];
+			return result;
+		};
 		
-		function init(){
+		// Inserts and Removes distances
+		a.delta = function( a2 ){
+			var len0 = a.graph.edges.length;
+			var len1 = a2.graph.edges.length;
+			var result = { inserts: [], removes:[]};
+			for(var i = 0; i < len0; i++){
+				var pair1 = a.graph.edges[i];
+				var found = false;
+
+				for(var j = 0; j < len1; j++){
+					var pair2 = a2.graph.edges[j];
+//					if(pair1.source.data.label == pair2.source.data.label && pair1.target.data.label == pair2.target.data.label){
+					if(pair1.source.id == pair2.source.id && pair1.target.id == pair2.target.id){
+						found = true;
+						break;
+					}
+				}
+
+				if(!found) result.removes.push(pair1);
+			}
+			for(var i = 0; i < len1; i++){
+				var pair1 = a2.graph.edges[i];
+				var found = false;
+
+				for(var j = 0; j < len0; j++){
+					var pair2 = a.graph.edges[j];
+// 					if(pair1.source.data.label == pair2.source.data.label && pair1.target.data.label == pair2.target.data.label){
+					if(pair1.source.id == pair2.source.id && pair1.target.id == pair2.target.id){
+						found = true;
+						break;
+					}
+				}
+
+				if(!found) result.inserts.push(pair1);
+			}
+
+			return result;
+		};
+
+		a.deltaHighlight = function( delta ){
+			for(var i in delta.removes){
+				var edgeData = delta.removes[i].data;
+				edgeData.color ="red";
+				edgeData.label += "(-)";
+			}
+			for(var i in delta.inserts){
+				var edge = delta.inserts[i];
+				var source = a.graph.nodeSet[edge.source.id];
+				var target = a.graph.nodeSet[edge.target.id];
+				
+				if(!source)
+					source = a.addNode(source.id + 'delta', source.data.word, source.data.label, source.data.color);
+
+				if(!target)
+					target = a.addNode(target.id + 'delta', target.data.word, target.data.label, target.data.color);
+
+				edge = a.addEdge(source, target);
+				edge.data.color = "lime";
+				edge.data.label += "(+)";
+			}
+			
+			for(var i in delta.replaces){
+				var edge1 = delta.replaces[i][0];
+				edge1.data.color ="red4";
+				edge1.data.label += i+":<->";
+				
+				var edge2 = delta.replaces[i][1];
+				var source = a.graph.nodeSet[edge2.source.id];
+				var target = a.graph.nodeSet[edge2.target.id];
+				
+				if(!source)
+					source = a.addNode(source.id + 'delta', source.data.word, source.data.label, source.data.color);
+
+				if(!target)
+					target = a.addNode(target.id + 'delta', target.data.word, target.data.label, target.data.color);
+
+				edge = a.addEdge(source, target);
+				edge.data.color = "green";
+				edge.data.label += i+":<+>";
+			}
+		};
+
+		a.initGui = function ( outputCanvas ){
 			a.startTime = new Date();
-			a.log("Analaudos.init");
+			a.log("Analaudos.initGui");
 			
 			if(a.gui == null){
+				a.canvas = outputCanvas;
+				
 				/* Select a start node to avoid null pointer */
-				a.gui = a.canvas.springy({damping:0.00000001, stiffness:400, repulsion:400, minEnergyThreshold:0.0001});
+				a.gui = a.canvas.springy({graph: a.graph, damping:0.00000001, stiffness:400, repulsion:400, minEnergyThreshold:0.0001});
 				
 				a.canvas = a.canvas[0]; 
 
@@ -463,12 +618,73 @@ else{
 
 			/* Update graph size while window resizing */
 			window.onresize = a.updateSize;
-		};
-		
-		init();
+		}
 	};
 };
 
+Math.sum = function( array ){
+	var s = 0;
+	for(var i = 0, v; v = array[i]; i++){
+		s += v;
+	}
+	return s;
+};
 
+Math.mean = function( array ){
+	return Math.sum(array) / array.length;
+};
 
+var pool;
+function analyzeGraphs(outMatrix, outGraphDot){
+	pool = new Array();
+	var lines = document.getElementById('form:sourceText').value.split('\n');
+	for(var i = 0, line; line = lines[i]; i++){
+		var a = new Analaudos();
+		a.loadJson(line);
+		pool.push(a);
+	}
+	var vEdgedLength = new Array(pool.length); 
+	var mLevenshtein = new Array(pool.length); 
+	var mDeltaInserts = new Array(pool.length); 
+	var mDeltaRemoves = new Array(pool.length);
+	for(var i = 0, gi; gi = pool[i]; i++){
+		vEdgedLength[i] = gi.graph.edges.length;
+		mLevenshtein[i] = new Array(pool.length);
+		mDeltaInserts[i] = new Array(pool.length);
+		mDeltaRemoves[i] = new Array(pool.length);
+		for(var j = 0, gj; gj = pool[j]; j++){
+			mLevenshtein[i][j] = gi.levenshteinDistance(gj);
+			var delta =  gi.delta(gj);
+			mDeltaInserts[i][j] = delta.inserts.length;
+			mDeltaRemoves[i][j] = delta.removes.length;
+			//console.log("g"+i +":g"+j+"=" + matrix[i][j]);
+		}
+	}
 
+	var strBuffer = [], strCount = 0;
+
+	strBuffer[strCount++] = "Graphs edges length:";
+	strBuffer[strCount++] = vEdgedLength.toString();
+	
+	strBuffer[strCount++] = "Levenshtein Distance Matriz:";
+	for(var i in mLevenshtein) strBuffer[strCount++] = mLevenshtein[i].toString();
+
+	strBuffer[strCount++] = "Delta Inserts Matriz:";
+	for(var i in mDeltaInserts) strBuffer[strCount++] = mDeltaInserts[i].toString();
+
+	strBuffer[strCount++] = "Delta Removes Matriz:";
+	for(var i in mDeltaRemoves) strBuffer[strCount++] = mDeltaRemoves[i].toString();
+	
+	outMatrix.value = strBuffer.join("\n");
+	
+	// Gernerate Graph
+	var strBuffer = [], strCount = 0;
+	strBuffer[strCount++] = 'digraph {node[style="filled", fontname="bold", fillcolor="gray90"];edge[color="gray30", fontname="bold", arrowhead="vee"];';
+	
+	for(var i=0; i < mLevenshtein.length; i++)
+		for(var j=i+1; j < mLevenshtein[i].length; j++)
+			strBuffer[strCount++] = i + '->' + j + '[len='+ (mLevenshtein[i][j]/10)+', label="' + mLevenshtein[i][j] +'"];';
+	strBuffer[strCount++] = '}';
+	outGraphDot.value = strBuffer.join("");
+
+}

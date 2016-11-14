@@ -90,7 +90,8 @@
 		</div>
 		<script type="text/javascript">
 			setLogOut(jQuery('#form\\:targetText')[0]);
-			var analaudos = new Analaudos(jQuery('#graph'));
+			var analaudos = new Analaudos();
+			analaudos.initGui(jQuery('#graph'));
 			analaudos.addText(jQuery('#sourceText')[0].value);
 			
 	        function beforeSave(){

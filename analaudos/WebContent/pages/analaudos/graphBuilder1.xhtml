@@ -40,6 +40,8 @@
 
 		<h:outputLabel value="Tag "/>
         <p:inputText value="#{analaudosGraphBuilderBean.process.paramTag.value}"/>
+		<h:outputLabel value="Documento Id"/>
+        <p:inputText value="#{analaudosGraphBuilderBean.process.paramDocumentId.value}"/>
 		<h:outputLabel value="Data "/>
 		<ui:include src="/public/basic/tiles/calendars.xhtml">
            <ui:param name="timeFieldFrom" value="#{analaudosGraphBuilderBean.process.paramDateBegin.value.time}"/>

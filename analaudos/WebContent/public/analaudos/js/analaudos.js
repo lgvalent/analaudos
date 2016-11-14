@@ -455,63 +455,123 @@ else{
 				  return a.graph.nodes[i];
 			}
 		};
+		
+		var DeltaOperation = function(name, value){
+			this.name = name; //i-nsert , d-elete, r-eplace 
+			this.value = value;
+		};
+		
+		var DeltaResult = function(cost){
+			this.cost = cost;
+			this.operations = [];
+			
+			this.insertCount = function(){var result = 0; for(var i in this.operations) if(this.operations[i].name=='i') result++; return result;};
+			this.deleteCount = function(){var result = 0; for(var i in this.operations) if(this.operations[i].name=='d') result++; return result;};
+			this.replaceCount = function(){var result = 0; for(var i in this.operations) if(this.operations[i].name=='r') result++; return result;};
+			this.noopCount = function(){var result = 0; for(var i in this.operations) if(this.operations[i].name=='n') result++; return result;};
+		};
+		
+		a.deltaHighlight = function( deltaResult ){
+			for(var i in deltaResult.operations){
+				var operation = deltaResult.operations[i];
+				if(operation.name == "n"){
+					var edgeData = operation.value[0].data;
+					edgeData.label += i;
+				} else if(operation.name == "d"){
+					var edgeData = operation.value.data;
+					edgeData.color ="red";
+					edgeData.label += i+"(-)";
+				} else if(operation.name == "i"){
+					var edge = operation.value;
+					var source = a.graph.nodeSet[edge.source.id];
+					var target = a.graph.nodeSet[edge.target.id];
+				
+					if(!source)
+						source = a.addNode(source.id + 'delta', source.data.word, source.data.label, source.data.color);
+
+					if(!target)
+						target = a.addNode(target.id + 'delta', target.data.word, target.data.label, target.data.color);
+
+					edge = a.addEdge(source, target);
+					edge.data.color = "lime";
+					edge.data.label += i+"(+)";
+				} else if(operation.name == "r"){
+					var edge1 = operation.value[0];
+					edge1.data.color ="red4";
+					edge1.data.label += i+"<->";
+				
+					var edge2 = operation.value[1];
+					var source = a.graph.nodeSet[edge2.source.id];
+					var target = a.graph.nodeSet[edge2.target.id];
+				
+					if(!source)
+						source = a.addNode(source.id + 'delta', source.data.word, source.data.label, source.data.color);
+
+					if(!target)
+						target = a.addNode(target.id + 'delta', target.data.word, target.data.label, target.data.color);
+
+					edge = a.addEdge(source, target);
+					edge.data.color = "green";
+					edge.data.label += i+"<+>";
+				}
+			}
+		};
+
 		// Levenshtein distance: http://dl.acm.org/citation.cfm?id=2815792
 		a.levenshteinDistance = function( a2 ){
 			var len0 = a.graph.edges.length;
 			var len1 = a2.graph.edges.length;
 			var v1 = new Array();
 			var v2 = new Array();
-			var result = {cost: 0, inserts: [], removes:[], replaces:[]};
-
+			var Cost = function(value, operation, previousCost){
+				this.cost = value;
+				this.operation = operation;
+				this.previous = previousCost;
+			};
+			
 			for(var i = 0; i <= len0; i++)
-				v1[i] = i;
+				v1[i] = new Cost(i);
 
 			//console.log(v1.toString());
 			for(var j = 1; j <= len1; j++){
-				v2[0] = j;
+				v2[0] = new Cost(j);
 				var pair2 = a2.graph.edges[j-1];
 				for(var i = 1; i <= len0; i++){
 					var pair1 = a.graph.edges[i-1];
-					var cost = 0;
-					var op = 'noop';
+					var cost = new Cost(0, new DeltaOperation('n', [pair1, pair2]));
 //					if(pair1.source.data.label != pair2.source.data.label || pair1.target.data.label != pair2.target.data.label){
 					if(pair1.source.id != pair2.source.id || pair1.target.id != pair2.target.id){
-						cost = 1;
-						op = 'replace [p1, p2]: ' + pair1.source.data.label + '->' + pair1.target.data.label + ' : ' + pair2.source.data.label + '->' + pair2.target.data.label;
+						cost = new Cost(1, new DeltaOperation('r', [pair1, pair2]));
 					}
-					var replaceCost = v1[i-1] + cost;
-					var insertCost = v1[i] + 1;
-					var deleteCost = v2[i-1] + 1;
+					var replaceCost = new Cost(v1[i-1].cost + cost.cost, cost.operation, v1[i-1]);
+					var insertCost = new Cost(v1[i].cost + 1, new DeltaOperation('i', pair2), v1[i]);
+					var deleteCost = new Cost(v2[i-1].cost + 1, new DeltaOperation('d', pair1), v2[i-1]);
 					//console.log("cost:" + cost +" ,rep:" + replaceCost + ", ins:" + insertCost + ", del:" + deleteCost);
-					if(deleteCost <= insertCost && deleteCost <= replaceCost){
+					if(deleteCost.cost <= insertCost.cost && deleteCost.cost <= replaceCost.cost){
 						v2[i] = deleteCost;
-						op = 'delete p1:' + pair1.source.data.label + '->' + pair1.target.data.label;
 					}else
-					if(insertCost <= replaceCost && insertCost <= deleteCost){
+					if(insertCost.cost <= replaceCost.cost && insertCost.cost <= deleteCost.cost){
 						v2[i] = insertCost;
-						op = 'insert p2:' + pair2.source.data.label + '->' + pair2.target.data.label;
 					}else
-					if(replaceCost <= insertCost && replaceCost <= deleteCost){
+					if(replaceCost.cost <= insertCost.cost && replaceCost.cost <= deleteCost.cost){
 						v2[i] = replaceCost;
-						//op = 
 					}
-					// Show best way
-					if(i==j || (i>j && j == len1) ||(j>i && i == len0)){
-						//console.log(op);	
-						if(op.indexOf('replace')>-1)
-							result.replaces.push([pair1, pair2]);
-						else if(op.indexOf('insert')>-1)
-							result.inserts.push(pair2);
-						else if(op.indexOf('delete')>-1)
-							result.removes.push(pair1);
-					} 
 				}
 				//console.log(v2.toString());
 				var t = v1;
 				v1 = v2;
 				v2 = t;
 			}
-			result.cost = v1[len0];
+
+			var cost = v1[len0];
+			var result = new DeltaResult(cost.cost);
+			while(cost.previous){
+				//console.log(op);	
+				result.operations.push(cost.operation);
+
+				cost = cost.previous;
+			}
+
 			return result;
 		};
 		
@@ -519,7 +579,7 @@ else{
 		a.delta = function( a2 ){
 			var len0 = a.graph.edges.length;
 			var len1 = a2.graph.edges.length;
-			var result = { inserts: [], removes:[]};
+			var result = new DeltaResult(0);
 			for(var i = 0; i < len0; i++){
 				var pair1 = a.graph.edges[i];
 				var found = false;
@@ -533,7 +593,7 @@ else{
 					}
 				}
 
-				if(!found) result.removes.push(pair1);
+				if(!found) result.operations.push(new DeltaOperation('d', pair1));
 			}
 			for(var i = 0; i < len1; i++){
 				var pair1 = a2.graph.edges[i];
@@ -548,53 +608,12 @@ else{
 					}
 				}
 
-				if(!found) result.inserts.push(pair1);
+				if(!found) result.operations.push(new DeltaOperation('i', pair1));
 			}
+
+			result.cost = result.operations.length;
 
 			return result;
-		};
-
-		a.deltaHighlight = function( delta ){
-			for(var i in delta.removes){
-				var edgeData = delta.removes[i].data;
-				edgeData.color ="red";
-				edgeData.label += "(-)";
-			}
-			for(var i in delta.inserts){
-				var edge = delta.inserts[i];
-				var source = a.graph.nodeSet[edge.source.id];
-				var target = a.graph.nodeSet[edge.target.id];
-				
-				if(!source)
-					source = a.addNode(source.id + 'delta', source.data.word, source.data.label, source.data.color);
-
-				if(!target)
-					target = a.addNode(target.id + 'delta', target.data.word, target.data.label, target.data.color);
-
-				edge = a.addEdge(source, target);
-				edge.data.color = "lime";
-				edge.data.label += "(+)";
-			}
-			
-			for(var i in delta.replaces){
-				var edge1 = delta.replaces[i][0];
-				edge1.data.color ="red4";
-				edge1.data.label += i+":<->";
-				
-				var edge2 = delta.replaces[i][1];
-				var source = a.graph.nodeSet[edge2.source.id];
-				var target = a.graph.nodeSet[edge2.target.id];
-				
-				if(!source)
-					source = a.addNode(source.id + 'delta', source.data.word, source.data.label, source.data.color);
-
-				if(!target)
-					target = a.addNode(target.id + 'delta', target.data.word, target.data.label, target.data.color);
-
-				edge = a.addEdge(source, target);
-				edge.data.color = "green";
-				edge.data.label += i+":<+>";
-			}
 		};
 
 		a.initGui = function ( outputCanvas ){
@@ -653,10 +672,10 @@ function analyzeGraphs(outMatrix, outGraphDot){
 		mDeltaInserts[i] = new Array(pool.length);
 		mDeltaRemoves[i] = new Array(pool.length);
 		for(var j = 0, gj; gj = pool[j]; j++){
-			mLevenshtein[i][j] = gi.levenshteinDistance(gj);
+			mLevenshtein[i][j] = gi.levenshteinDistance(gj).cost;
 			var delta =  gi.delta(gj);
-			mDeltaInserts[i][j] = delta.inserts.length;
-			mDeltaRemoves[i][j] = delta.removes.length;
+			mDeltaInserts[i][j] = delta.insertCount();
+			mDeltaRemoves[i][j] = delta.deleteCount();
 			//console.log("g"+i +":g"+j+"=" + matrix[i][j]);
 		}
 	}
@@ -687,4 +706,19 @@ function analyzeGraphs(outMatrix, outGraphDot){
 	strBuffer[strCount++] = '}';
 	outGraphDot.value = strBuffer.join("");
 
+}
+
+function highlightDelta(){
+	analaudos1.clearNodes();
+ 	analaudos1.loadJson(document.getElementById("form:sourceText").value.split("\n")[0])
+	
+	analaudos2.clearNodes();
+	analaudos2.loadJson(document.getElementById("form:sourceText").value.split("\n")[1])
+
+	var d = analaudos1.levenshteinDistance(analaudos2);
+
+	document.getElementById('areaActions').value = analaudos1.createDot();
+	analaudos1.deltaHighlight(d);
+	document.getElementById('areaGraphDot').value = analaudos1.createDot();
+	document.getElementById('areaGraphJson').value = analaudos2.createJson();
 }

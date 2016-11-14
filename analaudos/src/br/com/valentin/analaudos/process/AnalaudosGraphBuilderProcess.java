@@ -37,6 +37,7 @@ public class AnalaudosGraphBuilderProcess extends ProcessBasic implements IRunna
 	private ProcessParamBasic<Calendar> paramDateBegin = new ProcessParamBasic<Calendar>(Calendar.class, CalendarUtils.getCalendarFirstMonthDay(), true, this);
 	private ProcessParamBasic<Calendar> paramDateEnd = new ProcessParamBasic<Calendar>(Calendar.class, CalendarUtils.getCalendarLastMonthDay(), true, this);
 	private ProcessParamBasic<String> paramTag = new ProcessParamBasic<String>(String.class, "", false, this);
+	private ProcessParamBasic<Long> paramDocumentId = new ProcessParamBasic<Long>(Long.class, false, this);
 	
 	private IEntityList<DocumentGraph> documentGraphList;
 	private List<AnalaudosDocument> analaudosDocuments = new ArrayList<AnalaudosDocument>();
@@ -69,6 +70,9 @@ public class AnalaudosGraphBuilderProcess extends ProcessBasic implements IRunna
 		
 		if(!this.paramTag.isEmpty())
 			filter.append(" AND (tag like '%").append(this.paramTag.getValue()).append("%')");
+
+		if(!this.paramDocumentId.isEmpty())
+			filter.append(" AND (documentContent = ").append(this.paramDocumentId.getValue()).append(")");
 
 		try {
 			this.documentGraphList = UtilsCrud.list(this.getProcessManager().getServiceManager(), DocumentGraph.class, filter.toString(), null);
@@ -133,12 +137,11 @@ public class AnalaudosGraphBuilderProcess extends ProcessBasic implements IRunna
 	public ProcessParamBasic<String> getParamTag() {
 		return paramTag;
 	}
-
-	public void setParamTag(
-			ProcessParamBasic<String> paramDocumentGraphTag) {
-		this.paramTag = paramDocumentGraphTag;
-	}
 	
+	public ProcessParamBasic<Long> getParamDocumentId() {
+		return paramDocumentId;
+	}
+
 	public AnalaudosDocument getContentAnalaudosDocument() {
 		return contentAnalaudosDocument;
 	}

@@ -31,10 +31,16 @@
 			<p:button onclick="analaudos.reverseEdges(); return false;" value="Inverter" title="Inverte a direção das arestas"/>
 			<p:button onclick="analaudos.joinNodes(); return false;" value="Join" title="Junta os nós com mesmas identificação em um só nó"/>
 			<p:button onclick="analaudos.clearNodes(); return false;" value="Clear" title="Exclui todos os atuais nós e vértices"/>
+			<p:button onclick="analyzeGraphs(document.getElementById('areaActions'), document.getElementById('areaGraphDot')); return false;" value="Analizar múltiplos grafos" title="Lê cada linha do documento como um grafo JSON e gera as matrizes e o grafo de similaridade. A saída é gerada nos componentes logo abaixo."/>
+			<p:button onclick="highlightDelta(); return false;" value="Delta [0,1]" title="Lê cada linha do documento como um grafo JSON e gera as matrizes e o grafo de similaridade. A saída é gerada nos componentes logo abaixo."/>
 	 	</fieldset>
 		<fieldset>
-		 	<legend onclick="document.getElementById('graph').height = document.getElementById('graph').height + 100">Grafo</legend>
-			<canvas id="graph" height="100" width="100"/>
+		 	<legend><input type="radio" name="activeGraph" id="radioGraph1" onchange="if(this.checked)analaudos = analaudos1;" checked="true">Grafo 1 </input><a onclick="document.getElementById('graph1').height = document.getElementById('graph1').height + 100">[+]</a><a onclick="document.getElementById('graph1').height = document.getElementById('graph1').height - 100">[--]</a></legend>
+			<canvas id="graph1" height="100" width="100"/>
+		</fieldset>
+		<fieldset>
+		 	<legend><input type="radio" name="activeGraph" id="radioGraph2" onchange="if(this.checked)analaudos = analaudos2;" >Grafo 2 </input><a onclick="document.getElementById('graph2').height = document.getElementById('graph2').height + 100">[+]</a><a onclick="document.getElementById('graph2').height = document.getElementById('graph2').height - 100">[--]</a></legend>
+			<canvas id="graph2" height="100" width="100"/>
 		</fieldset>
 	</ui:define>
 	<ui:define name="actions">
@@ -49,7 +55,13 @@
 		<p:button value="Ver grafo" onclick="analaudos.createImagePopup(document.getElementById('areaGraphDot').value); return false;" />
 		
 		<script type="text/javascript">
-			var analaudos = new Analaudos(jQuery('#graph'));
+		var analaudos1 = new Analaudos();
+		analaudos1.initGui(jQuery('#graph1'));
+		var analaudos2 = new Analaudos();
+		analaudos2.initGui(jQuery('#graph2'));
+		var analaudos = analaudos1;
+		
+
 		</script>
 		<span style="color: lightgray;">#{createDocumentGraphBean.documentGraph.object.author}</span>
 	</ui:define>

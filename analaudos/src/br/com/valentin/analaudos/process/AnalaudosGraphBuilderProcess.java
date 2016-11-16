@@ -21,6 +21,7 @@ import br.com.orionsoft.monstrengo.crud.entity.IEntityList;
 import br.com.orionsoft.monstrengo.crud.services.UtilsCrud;
 import br.com.valentin.analaudos.build.AnalaudosDocument;
 import br.com.valentin.analaudos.build.AnalaudosGraph;
+import br.com.valentin.analaudos.build.AnalaudosGraphStrategyDeltaWord;
 import br.com.valentin.analaudos.entities.DocumentGraph;
 import br.com.valentin.analaudos.entities.ResearchSettings;
 
@@ -110,7 +111,7 @@ public class AnalaudosGraphBuilderProcess extends ProcessBasic implements IRunna
 		super.beforeRun();
 
 		if(!this.paramContent.isEmpty()){
-			this.contentAnalaudosDocument = this.analaudosGraph.createDocGraph(this.paramContent.getValue());
+			this.contentAnalaudosDocument = this.analaudosGraph.createDocGraph(this.paramContent.getValue(), new AnalaudosGraphStrategyDeltaWord());
 		}
 		
 		return true;

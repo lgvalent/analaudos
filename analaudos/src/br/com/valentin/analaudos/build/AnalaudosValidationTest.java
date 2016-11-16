@@ -77,9 +77,10 @@ public class AnalaudosValidationTest {
 		System.out.println(docGraph1.toDot(true));
 		System.out.println(docGraph2.toDot(true));
 		
-		AnalaudosDocument docBuilt = analGraph.createDocGraph(document1.getDocumentContent().getContentPlain());
+		AnalaudosDocument docBuilt = analGraph.createDocGraph(document1.getDocumentContent().getContentPlain(), new AnalaudosGraphStrategyDeltaWord());
 		System.out.println("BUILT:");
 		System.out.println(docBuilt.toDot(true));
+		System.out.println(docBuilt.toJson());
 		
 //		AnalaudosNode n1 = (AnalaudosNode) analGraph.vertexSet().toArray()[0];
 //		System.out.println("--->DegreeOf:"+ analGraph.outDegreeOf(n1));

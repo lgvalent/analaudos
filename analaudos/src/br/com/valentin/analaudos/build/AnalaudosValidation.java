@@ -35,7 +35,7 @@ public class AnalaudosValidation{
 
 		AnalaudosDocument docGraph = new AnalaudosDocument(json);
 
-		this.analaudosDocument = this.analaudosGraph.createDocGraph(text);
+		this.analaudosDocument = this.analaudosGraph.createDocGraph(text, new AnalaudosGraphStrategyDeltaWord());
 
 		log.debug("----------Starting validation --------------------");
 		this.foundedSet = new ArrayList<AnalaudosDocument.DocEdge>();

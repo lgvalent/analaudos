@@ -112,17 +112,19 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 		StringBuilder result = new StringBuilder();
 		DocNode temp = source;
 		while(temp != target){
-			if(source.index < target.index)
+			if(source.index < target.index){
 				temp = temp.after;
-			else
-				temp = temp.before;
+				
+				if(temp == target) break; // Right side reached, last right token may be with a ponctuation "Ultrassonografia pélvica tranvaginal." ipp=false;
+			}else
+				temp = temp.before; // Left side may not be with a ponctuation "... transvaginal. Bexiga...." 
 
 			if(temp == null) break;
 
 			// Doesn't match number like 2,3 or 2.3 as ponctuation
-			if(temp.label.matches(".*\\.([ a-zA-Z].*|$)"))
+			if(temp.label.matches("([ a-zA-Z].*)\\.")) //  ".*\\.([ a-zA-Z].*|$)"))
 				result.append('.');
-			if(temp.label.matches(".*,([ a-zA-Z].*|$)"))
+			if(temp.label.matches("([ a-zA-Z].*),"))
 				result.append(',');
 			if(temp.label.contains(";"))
 				result.append(';');
@@ -265,4 +267,25 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 		return sb.toString();
 	}
 
+	public String toJson(){
+		StringBuilder sb = new StringBuilder("{ \"nodes\": [");
+
+		int count = 0;
+		for(DocNode node: this.vertexSet()){
+			sb.append(count++>0?",":"").append("{\"id\":\"").append(node.id).append("\", \"fontcolor\":\"").append(node.fontColor).append("\",").append("\"label\":\"").append(node.label).append("\",").append("\"word\":\"").append(node.word).append("\"}");
+		}
+		sb.append("], \"edges\":[");
+		
+		count = 0;
+		for(DocEdge edge: this.edgeSet()){
+			DocNode source = (DocNode) edge.getSource();
+			DocNode target = (DocNode) edge.getTarget();
+
+			sb.append(count++>0?",":"").append("[\""+ source.id +"\", \"" + target.id + "\"]");
+		}
+
+		sb.append("]}");
+
+		return sb.toString();
+	}
 }

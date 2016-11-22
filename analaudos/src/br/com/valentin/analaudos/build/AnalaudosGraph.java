@@ -4,6 +4,7 @@ import java.io.StringWriter;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -150,8 +151,10 @@ public class AnalaudosGraph extends DirectedGraphBase<AnalaudosGraph.AnalaudosNo
 			/* NUMBER vertex allows multiple edges */
 			for(AnalaudosEdge analEdge_: this.getAllEdges(analNodeSource, analNodeTarget)){
 				/* Analyze recurrent link */
+				System.out.println("========>" + analNodeSource.word +"->"+ analNodeTarget.word +" Mean:" + analEdge_.wordDistance.getMean() + ", SD:"+ analEdge_.wordDistance.getStandardDeviation() + ", NodeWD:" + docEdge.wordDistance + ", RAW:" + Arrays.toString(analEdge_.wordDistance.getValues()));
 				if(analEdge_.wordDistance.getMean() == docEdge.wordDistance){
 					analEdge = analEdge_;
+					System.out.println("========> Usou o MESMO");
 				}
 			}
 		}

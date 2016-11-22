@@ -69,8 +69,17 @@ public class AnalaudosGraphBuilderProcess extends ProcessBasic implements IRunna
 		
 		filter.append("(timeStamp BETWEEN  '").append(CalendarUtils.formatToSQLDate(this.paramDateBegin.getValue())).append("' AND '").append(CalendarUtils.formatToSQLDate(this.paramDateEnd.getValue())).append("')");
 		
-		if(!this.paramTag.isEmpty())
-			filter.append(" AND (tag like '%").append(this.paramTag.getValue()).append("%')");
+		if(!this.paramTag.isEmpty()){
+			filter.append(" AND (");
+			String[] tags = this.paramTag.getValue().split(" ");
+			int count = 0;
+			for(String tag: tags){
+				if(count++>0)
+					filter.append(" OR ");
+				filter.append("(tag like '%").append(tag).append("%')");
+			}
+			filter.append(" )");
+		}
 
 		if(!this.paramDocumentId.isEmpty())
 			filter.append(" AND (documentContent = ").append(this.paramDocumentId.getValue()).append(")");

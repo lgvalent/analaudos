@@ -31,8 +31,8 @@
 			<p:button onclick="analaudos.reverseEdges(); return false;" value="Inverter" title="Inverte a direção das arestas"/>
 			<p:button onclick="analaudos.joinNodes(); return false;" value="Join" title="Junta os nós com mesmas identificação em um só nó"/>
 			<p:button onclick="analaudos.clearNodes(); return false;" value="Clear" title="Exclui todos os atuais nós e vértices"/>
-			<p:button onclick="analyzeGraphs(document.getElementById('areaActions'), document.getElementById('areaGraphDot'), false); return false;" value="Analizar múltiplos grafos" title="Lê cada linha do documento como um grafo JSON e gera as matrizes e o grafo de similaridade. A saída é gerada nos componentes logo abaixo."/>
-			<p:button onclick="analyzeGraphs(document.getElementById('areaActions'), document.getElementById('areaGraphDot'), true); return false;" value="Analizar múltiplos grafos (Normalizado)" title="Lê cada linha do documento como um grafo JSON e gera as matrizes e o grafo de similaridade. A saída é gerada nos componentes logo abaixo."/>
+			<p:button onclick="analyzeGraphs(document.getElementById('areaActions'), document.getElementById('areaGraphDot'), document.getElementById('areaGraphJson'), false); return false;" value="Analizar múltiplos grafos" title="Lê cada linha do documento como um grafo JSON e gera as matrizes e o grafo de similaridade. A saída é gerada nos componentes logo abaixo."/>
+			<p:button onclick="analyzeGraphs(document.getElementById('areaActions'), document.getElementById('areaGraphDot'), document.getElementById('areaGraphJson'), true); return false;" value="Analizar múltiplos grafos (Normalizado)" title="Lê cada linha do documento como um grafo JSON e gera as matrizes e o grafo de similaridade. A saída é gerada nos componentes logo abaixo."/>
 			<p:button onclick="highlightDelta(); return false;" value="Delta [0,1]" title="Lê cada linha do documento como um grafo JSON e gera as matrizes e o grafo de similaridade. A saída é gerada nos componentes logo abaixo."/>
 	 	</fieldset>
 		<fieldset>

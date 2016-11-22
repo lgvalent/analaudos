@@ -14,13 +14,15 @@ public class AnalaudosGraphStrategyDeltaWord implements AnalaudosGraphStrategy{
 			for(DocNode docNodeTarget: docGraph.vertexSet()){
 				double linkScore = linkResolve(docNodeSource, docNodeTarget, graph); 
 				if(linkScore > 0){
-					DocEdge docEdge = docGraph.addEdge(docNodeSource, docNodeTarget);
-					docEdge.wordDistance = docNodeTarget.index - docNodeSource.index;
-					docEdge.interceptedPonctuations = AnalaudosDocument.checkIntercepPonctuation(docNodeSource, docNodeTarget);
-					
-					docEdge.phraseDistance= AnalaudosDocument.checkPhraseDistance(docEdge.interceptedPonctuations);
-
-					docEdge.linkScore = linkScore;
+					String linkColor = "lime";
+					if(linkScore < 0.05)
+						linkColor = "red";
+					else if(linkScore < 0.1){
+						linkColor = "orangered";
+					} else if(linkScore < 0.2){
+						linkColor = "yellow";
+					}
+					createEdge(docGraph, docNodeSource, docNodeTarget, linkScore, linkColor);
 				}
 			}
 		}
@@ -36,7 +38,7 @@ public class AnalaudosGraphStrategyDeltaWord implements AnalaudosGraphStrategy{
 				while(leftDocNode != null || rightDocNode != null){
 					if(leftDocNode != null){
 						linkScore = linkResolve(docNodeSource, leftDocNode, graph);
-						if(0 > linkScore && linkScore > Double.NEGATIVE_INFINITY){
+						if(0 >= linkScore && linkScore > Double.NEGATIVE_INFINITY){
 							foundDocNode = leftDocNode;
 							break;
 						}else{
@@ -46,7 +48,7 @@ public class AnalaudosGraphStrategyDeltaWord implements AnalaudosGraphStrategy{
 
 					if(rightDocNode != null){
 						linkScore = linkResolve(docNodeSource, rightDocNode, graph);
-						if(0 > linkScore && linkScore > Double.NEGATIVE_INFINITY){
+						if(0 >= linkScore && linkScore > Double.NEGATIVE_INFINITY){
 							/* Break the right flow on end of sentence */
 							String ponctuations = AnalaudosDocument.checkIntercepPonctuation(docNodeSource, rightDocNode);
 							if(ponctuations.contains(".")){
@@ -63,11 +65,8 @@ public class AnalaudosGraphStrategyDeltaWord implements AnalaudosGraphStrategy{
 				
 				if(foundDocNode !=null){
 					log.debug("Linking: " + docNodeSource + "->" + foundDocNode + String.format("%.2f", linkScore));
-					DocEdge docEdge = docGraph.addEdge(docNodeSource, foundDocNode);
-					docEdge.wordDistance = foundDocNode.index - docNodeSource.index;
-					docEdge.interceptedPonctuations = AnalaudosDocument.checkIntercepPonctuation(docNodeSource, foundDocNode);
 					
-					docEdge.linkScore = linkScore;
+					createEdge(docGraph, docNodeSource, foundDocNode, linkScore, "blue");
 				}
 			}
 		}
@@ -81,7 +80,7 @@ public class AnalaudosGraphStrategyDeltaWord implements AnalaudosGraphStrategy{
 	 * @version 20160520: Uses wordDistance and standard deviation to resolve link
 	 */
 	private double linkResolve(DocNode docNodeSource, DocNode docNodeTarget, AnalaudosGraph graph) {
-		double result = 0.0f;
+		double result = Double.NEGATIVE_INFINITY;
 		StringBuilder sb = new StringBuilder(); 
 		sb.append('[').append(docNodeSource.index).append(':').append(docNodeTarget.index).append(']').append('\t').append(docNodeSource.word).append('\t').append("->").append(docNodeTarget.word);
 		AnalaudosNode analNodeSource = graph.retrieveNode(docNodeSource);
@@ -103,12 +102,12 @@ public class AnalaudosGraphStrategyDeltaWord implements AnalaudosGraphStrategy{
 				if(wordDistanceWeight > 0){
 					String ponctuation = AnalaudosDocument.checkIntercepPonctuation(docNodeSource, docNodeTarget);
 					double interceptPonctuation = analEdge.interceptedPonctuations.getMean() - ponctuation.length();
-					interceptPonctuationWeight = 1 - Math.abs(interceptPonctuation) / (analEdge.interceptedPonctuations.getStandardDeviation()*2);
+					double interceptPonctuationSD = analEdge.interceptedPonctuations.getStandardDeviation();
+					interceptPonctuationWeight = 1 - Math.abs(interceptPonctuation) / ((interceptPonctuationSD>0?interceptPonctuationSD:1)*2);
 					sb.append(" ip[len=").append(ponctuation.length()).append(":mean=").append(analEdge.interceptedPonctuations.getMean()).append(":weight=").append(interceptPonctuationWeight).append("]");
 				}
 				// interceptPonctuationWight may be NAN -> ?/0
-//				if(!Double.isNaN(interceptPonctuationWeight)) 
-//					result += interceptPonctuationWeight;;
+				result *= interceptPonctuationWeight;;
 				
 				sb.append(" result=").append(result);
 				
@@ -118,7 +117,6 @@ public class AnalaudosGraphStrategyDeltaWord implements AnalaudosGraphStrategy{
 					docNodeTarget.fontColor = analNodeTarget.fontColor;
 					docNodeTarget.penColor = analNodeTarget.penColor;
 					sb.append("[LINKED]");
-					
 				}
 				log.debug(sb.toString());
 
@@ -129,4 +127,22 @@ public class AnalaudosGraphStrategyDeltaWord implements AnalaudosGraphStrategy{
 		return result;
 	}
 
+	/**
+	 * @param docGraph
+	 * @param docNodeSource
+	 * @param docNodeTarget
+	 * @param linkScore
+	 */
+	private DocEdge createEdge(AnalaudosDocument docGraph, DocNode docNodeSource,	DocNode docNodeTarget, double linkScore, String color) {
+		DocEdge docEdge = docGraph.addEdge(docNodeSource, docNodeTarget);
+		docEdge.wordDistance = docNodeTarget.index - docNodeSource.index;
+		docEdge.interceptedPonctuations = AnalaudosDocument.checkIntercepPonctuation(docNodeSource, docNodeTarget);
+		
+		docEdge.phraseDistance= AnalaudosDocument.checkPhraseDistance(docEdge.interceptedPonctuations);
+
+		docEdge.linkScore = linkScore;
+		docEdge.penColor = color;
+		
+		return docEdge;
+	}
 }

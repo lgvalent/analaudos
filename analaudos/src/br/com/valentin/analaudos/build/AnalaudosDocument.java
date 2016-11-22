@@ -1,6 +1,7 @@
 package br.com.valentin.analaudos.build;
 
 import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -39,6 +40,15 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 			this.word = node.word.trim(); // 20160526: Some JSONs are keeping leading and trailing whitespaces 
 		}
 
+		public DocNode(DocNode node){
+			this.id =  node.id;
+			this.index =  Integer.parseInt(node.id.replaceAll("[A-Za-z]", ""));
+			this.fontColor = node.fontColor;
+			this.penColor = node.penColor;
+			this.label = node.label;
+			this.word = node.word.trim(); // 20160526: Some JSONs are keeping leading and trailing whitespaces 
+		}
+		
 		public String id;
 		public int index; // Use id to extract index: w10 -> 10
 		public String fontColor;
@@ -93,6 +103,68 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 		}
 	}
 	
+	public abstract class DeltaOperation{
+		public abstract DocEdge getValue(); 
+	}
+	
+	public class DeltaOperationInsert extends DeltaOperation{
+		public DeltaOperationInsert(DocEdge value) {
+			this.value = value;
+		} 
+		public DocEdge value;
+		@Override
+		public DocEdge getValue() {
+			return value;
+		}
+	}
+	
+	public class DeltaOperationDelete extends DeltaOperation{
+		public DeltaOperationDelete(DocEdge value) {
+			this.value = value;
+		} 
+		public DocEdge value;
+		@Override
+		public DocEdge getValue() {
+			return value;
+		}
+	}
+	
+	public class DeltaOperationNoop extends DeltaOperation{
+		public DeltaOperationNoop(DocEdge value) {
+			this.value = value;
+		} 
+		public DocEdge value;
+		@Override
+		public DocEdge getValue() {
+			return value;
+		}
+	}
+	
+	
+	public class DeltaOperationReplace extends DeltaOperation{
+		public DeltaOperationReplace(DocEdge from, DocEdge to) {
+			this.value = from;
+			this.value2 = to;
+		} 
+		public DocEdge value;
+		public DocEdge value2;
+		@Override
+		public DocEdge getValue() {
+			return value;
+		}
+		public DocEdge getValue2() {
+			return value2;
+		}
+	}
+	
+	public class DeltaResult{
+		public Integer cost = 0;
+		public List<DeltaOperation> operations = new ArrayList<AnalaudosDocument.DeltaOperation>();
+		public int getInsertsCount(){int result = 0; for(DeltaOperation op: operations) if(op instanceof DeltaOperationInsert) result++; return result;}
+		public int getDeletesCount(){int result = 0; for(DeltaOperation op: operations) if(op instanceof DeltaOperationDelete) result++; return result;}
+		public int getReplacesCount(){int result = 0; for(DeltaOperation op: operations) if(op instanceof DeltaOperationReplace) result++; return result;}
+	}
+
 	public String getLog() {return log;}
 	public void setLog(String log) {this.log = log;}
 
@@ -210,6 +282,124 @@ public class AnalaudosDocument extends DirectedGraphBase<AnalaudosDocument.DocNo
 		}
 	
 		return -1;
+	}
+	
+	public DeltaResult delta(AnalaudosDocument doc, boolean sameIds){
+		
+		DeltaResult result = new DeltaResult();
+		for(DocEdge pair1: this.edgeSet()){
+			boolean found = false;
+
+			for(DocEdge pair2: doc.edgeSet()){
+				if( ((!sameIds) && ((DocNode)pair1.getSource()).word.equals(((DocNode)pair2.getSource()).word) && ((DocNode)pair1.getTarget()).word.equals(((DocNode)pair2.getTarget()).word))
+				   || ((sameIds) && ((DocNode)pair1.getSource()).id.endsWith(((DocNode)pair2.getSource()).id) && ((DocNode)pair1.getTarget()).id.equals(((DocNode)pair2.getTarget()).id))){
+					found = true;
+					break;
+				}
+			}
+
+			if(!found) result.operations.add(new DeltaOperationDelete(pair1));
+		}
+
+		for(DocEdge pair1: doc.edgeSet()){
+			boolean found = false;
+
+			for(DocEdge pair2: this.edgeSet()){
+				if( ((!sameIds) && ((DocNode)pair1.getSource()).word.equals(((DocNode)pair2.getSource()).word) && ((DocNode)pair1.getTarget()).word.equals(((DocNode)pair2.getTarget()).word))
+				   || ((sameIds) && ((DocNode)pair1.getSource()).id.endsWith(((DocNode)pair2.getSource()).id) && ((DocNode)pair1.getTarget()).id.equals(((DocNode)pair2.getTarget()).id))){
+					found = true;
+					break;
+				}
+			}
+
+			if(!found) result.operations.add(new DeltaOperationInsert(pair1));
+		}
+
+		result.cost = result.operations.size();
+
+		return result;
+		
+	}
+	
+	public void deltaHighlight(DeltaResult deltaResult, boolean sameIds){
+		int i = -1;
+		for(DeltaOperation operation: deltaResult.operations){
+			i++;
+			if(operation instanceof DeltaOperationNoop){
+				operation.getValue().id += i;
+			} else if(operation instanceof DeltaOperationDelete){
+				operation.getValue().fontColor = "red";
+				operation.getValue().id += i+"(-)";
+			} else if(operation instanceof DeltaOperationInsert){
+				DocEdge edge = operation.getValue();
+				DocNode source = sameIds?this.findNodeById(((DocNode)edge.getSource()).id):this.findNodeByWord(((DocNode)edge.getSource()).word);
+				DocNode target = sameIds?this.findNodeById(((DocNode)edge.getTarget()).id):this.findNodeByWord(((DocNode)edge.getTarget()).word);
+			
+				if(source == null){
+					source = new DocNode((DocNode)edge.getSource());
+					source.penColor = "gray";
+					source.fontColor = "lime";
+					source.id += "delta";
+					this.addVertex(source);
+				}
+
+				if(target == null){
+					target = new DocNode((DocNode)edge.getTarget());
+					target.penColor = "gray";
+					target.fontColor = "lime";
+					target.id += "delta";
+					this.addVertex(target);
+				}
+
+				edge = this.addEdge(source, target);
+				edge.fontColor = "lime";
+				edge.id += i+"(+)";
+			} else if(operation instanceof DeltaOperationReplace){
+				DocEdge edge1 = operation.getValue();
+				edge1.fontColor ="red4";
+				edge1.id += i+"<->";
+			
+				DocEdge edge2 = ((DeltaOperationReplace) operation).getValue2();
+				DocNode source = sameIds?this.findNodeById(((DocNode)edge2.getSource()).id):this.findNodeByWord(((DocNode)edge2.getSource()).word);
+				DocNode target = sameIds?this.findNodeById(((DocNode)edge2.getTarget()).id):this.findNodeByWord(((DocNode)edge2.getTarget()).word);
+			
+				if(source == null){
+					source = new DocNode((DocNode)edge2.getSource());
+					target.penColor = "gray";
+					source.id += "delta";
+					this.addVertex(source);
+				}
+
+				if(target == null){
+					target = new DocNode((DocNode)edge2.getTarget());
+					target.penColor = "gray";
+					target.id += "delta";
+					this.addVertex(target);
+				}
+
+				edge2 = this.addEdge(source, target);
+				edge2.fontColor = "green";
+				edge2.id += i+"<+>";
+			}
+		}
+	}
+	
+	public DocNode findNodeById(String id){
+		for(DocNode node: this.vertexSet()){
+			if(node.id.equals(id))
+				return node;
+		}
+		
+		return null;
+	}
+
+	public DocNode findNodeByWord(String word){
+		for(DocNode node: this.vertexSet()){
+			if(node.word.equals(word))
+				return node;
+		}
+		
+		return null;
 	}
 
 	/**

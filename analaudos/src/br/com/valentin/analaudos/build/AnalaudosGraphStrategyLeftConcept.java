@@ -64,7 +64,7 @@ public class AnalaudosGraphStrategyLeftConcept implements AnalaudosGraphStrategy
 	 * @param docNodeTarget
 	 * @param linkScore
 	 */
-	private void createEdge(AnalaudosDocument docGraph, DocNode docNodeSource,	DocNode docNodeTarget, double linkScore, String color) {
+	private DocEdge createEdge(AnalaudosDocument docGraph, DocNode docNodeSource,	DocNode docNodeTarget, double linkScore, String color) {
 		DocEdge docEdge = docGraph.addEdge(docNodeSource, docNodeTarget);
 		docEdge.wordDistance = docNodeTarget.index - docNodeSource.index;
 		docEdge.interceptedPonctuations = AnalaudosDocument.checkIntercepPonctuation(docNodeSource, docNodeTarget);
@@ -73,6 +73,8 @@ public class AnalaudosGraphStrategyLeftConcept implements AnalaudosGraphStrategy
 
 		docEdge.linkScore = linkScore;
 		docEdge.penColor = color;
+		
+		return docEdge;
 	}
 
 	/**

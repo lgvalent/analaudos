@@ -1,21 +1,44 @@
 package br.com.valentin.analaudos.build;
 
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Calendar;
+
 import javax.swing.JFrame;
+
+import junit.framework.Assert;
 
 import org.jgraph.JGraph;
 import org.jgraph.graph.GraphModel;
 import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.ext.JGraphXAdapter;
+import org.junit.Test;
 
+import br.com.orionsoft.monstrengo.core.exception.BusinessException;
+import br.com.orionsoft.monstrengo.core.test.ApplicationBasicTest;
+import br.com.orionsoft.monstrengo.core.test.ProcessBasicTest;
+import br.com.orionsoft.monstrengo.core.util.CalendarUtils;
+import br.com.orionsoft.monstrengo.crud.services.UtilsCrud;
+import br.com.valentin.analaudos.build.AnalaudosDocument.DeltaResult;
 import br.com.valentin.analaudos.entities.DocumentContent;
 import br.com.valentin.analaudos.entities.DocumentGraph;
+import br.com.valentin.analaudos.process.AnalaudosGraphBuilderProcess;
 
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.swing.mxGraphComponent;
 
-public class AnalaudosBuilderTest {
+public class AnalaudosBuilderTest extends ProcessBasicTest{
+	@Override
+	public void setUp() throws Exception, BusinessException {
+		ApplicationBasicTest.APPLICATION_CONTEXT_PATH =  "./WebContent/WEB-INF/applicationContext.xml";
+		super.setUp();
+	}
+	
+	public static final String dotsDir = "/home/lucio/Dropbox/IME/MedSquare/Analaudo/dots/";
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static void showGraph(Graph g) {
 		// http://jgrapht.org/visualizations.html
@@ -46,6 +69,87 @@ public class AnalaudosBuilderTest {
 		frame.setVisible(true);
 	}
 
+	public void executeTest(String tag, int tagDocsCount, long docContentId, long docGoldGraphId) throws BusinessException, IOException{
+		AnalaudosGraphBuilderProcess process = (AnalaudosGraphBuilderProcess) processManager.createProcessByName(AnalaudosGraphBuilderProcess.PROCESS_NAME, getAdminSession());
+		
+		process.getParamDateBegin().setValue(CalendarUtils.getCalendar(2016, Calendar.MAY, 01));
+		process.getParamDateEnd().setValue(CalendarUtils.getCalendar(2016, Calendar.DECEMBER, 31));
+		process.getParamTag().setValue(tag);
+		process.runListDocGraph();
+		Assert.assertEquals(tagDocsCount, process.getDocumentGraphList().size());
+		if(process.runBuildGraph()){
+			System.out.println("Analaudos GRAPH:");
+			System.out.println(process.getAnalaudosGraph().toDot(true));
+			
+			process.getParamContent().setValue(UtilsCrud.objectRetrieve(processManager.getServiceManager(), DocumentContent.class, docContentId, null).getContentPlain());
+			
+			process.runCreateDocGraph();
+			
+			System.out.println("DOC GRAPH:");
+			System.out.println(process.getContentAnalaudosDocument().toDot(true));
+			
+			
+			saveFile(process, docContentId, docGoldGraphId);
+		}
+
+	}
+	
+	@Test
+	public void testDeltaWordStrategy() throws BusinessException, IOException{
+		executeTest("doc6", 3, 1, 166);
+		executeTest("doc6", 3, 6, 171);
+		executeTest("doc1", 3, 1, 166);
+		executeTest("doc1", 3, 6, 171);
+		executeTest("doc1 doc6", 6, 6, 171);
+		executeTest("doc1 doc6", 6, 1, 166);
+		executeTest("andre", 10, 1, 166);
+		executeTest("andre", 10, 6, 171);
+		
+	}
+	
+	public void saveFile(AnalaudosGraphBuilderProcess process, long docContentId, long docGoldGraphId) throws IOException, BusinessException{
+		String fileName = dotsDir + "Content_" + docContentId + "_GraphsTag_" + process.getParamTag().getValue().replace(' ', '_') + "_goldTest_" + docGoldGraphId;
+		String fileNameAnalaudos = fileName + "_ANALAUDOS.dot";
+		String fileNameBuilt = fileName + "_BUILT.dot";
+		String fileNameLog = fileName + ".log";
+
+		File file = new File(fileNameAnalaudos);
+		FileWriter fw = new FileWriter(file);
+		fw.write(process.getAnalaudosGraph().toDot(true));
+		fw.flush();
+		fw.close();
+
+		file = new File(fileNameBuilt);
+		fw = new FileWriter(file);
+		fw.write(process.getContentAnalaudosDocument().toDot(true));
+		fw.flush();
+		fw.close();
+		
+		DocumentGraph docGoldGraph = UtilsCrud.objectRetrieve(processManager.getServiceManager(), DocumentGraph.class, docGoldGraphId, null);
+		AnalaudosDocument graphGold = new AnalaudosDocument(docGoldGraph.getGraphJson());
+		DeltaResult deltaResult =  process.getContentAnalaudosDocument().delta(graphGold, true);
+		String fileNameDelta = fileName + "_DELTA_" + deltaResult.cost + ".dot";
+		process.getContentAnalaudosDocument().deltaHighlight(deltaResult, true);
+		file = new File(fileNameDelta);
+		fw = new FileWriter(file);
+		fw.write(process.getContentAnalaudosDocument().toDot(true));
+		fw.flush();
+		fw.close();
+		
+		file = new File(fileNameLog);
+		fw = new FileWriter(file);
+		fw.write(process.getParamContent().getValue());
+		fw.write("\n");
+		fw.write(process.getContentAnalaudosDocument().getLog());
+		fw.flush();
+		fw.close();
+		
+		Runtime runtime = Runtime.getRuntime();
+		runtime.exec("dot -Tsvg " + fileNameAnalaudos + " -o"+ fileNameAnalaudos + ".svg");
+		runtime.exec("dot -Tsvg " + fileNameBuilt + " -o"+ fileNameBuilt + ".svg");
+		runtime.exec("dot -Tsvg " + fileNameDelta + " -o"+ fileNameDelta + ".svg");
+	}
+	
 	public static void main(String[] args) {
 		
 		
@@ -77,14 +181,14 @@ public class AnalaudosBuilderTest {
 		System.out.println(docGraph1.toDot(true));
 		System.out.println(docGraph2.toDot(true));
 		
-//		AnalaudosDocument docBuilt1 = analGraph.createDocGraph(document1.getDocumentContent().getContentPlain(), new AnalaudosGraphStrategyDeltaWord());
-//		System.out.println("BUILT: DeltaWordStrategy");
-//		System.out.println(docBuilt1.toDot(true));
+		AnalaudosDocument docBuilt1 = analGraph.createDocGraph(document1.getDocumentContent().getContentPlain(), new AnalaudosGraphStrategyDeltaWord());
+		System.out.println("BUILT: DeltaWordStrategy");
+		System.out.println(docBuilt1.toDot(true));
 		
 		
-		AnalaudosDocument docBuilt2 = analGraph.createDocGraph(document1.getDocumentContent().getContentPlain(), new AnalaudosGraphStrategyLeftConcept());
-		System.out.println("BUILT: LeftConceptStrategy");
-		System.out.println(docBuilt2.toDot(true));
+//		AnalaudosDocument docBuilt2 = analGraph.createDocGraph(document1.getDocumentContent().getContentPlain(), new AnalaudosGraphStrategyLeftConcept());
+//		System.out.println("BUILT: LeftConceptStrategy");
+//		System.out.println(docBuilt2.toDot(true));
 		
 //		AnalaudosNode n1 = (AnalaudosNode) analGraph.vertexSet().toArray()[0];
 //		System.out.println("--->DegreeOf:"+ analGraph.outDegreeOf(n1));
@@ -143,4 +247,27 @@ public class AnalaudosBuilderTest {
 
 		return doc;
 	}
+
+	public static DocumentGraph prepareDocumentGraph6_1(){
+		DocumentContent con = new DocumentContent();
+		con.setContent("ULTRASSONOGRAFIA PÉLVICA TRANSVAGINAL. ÚTERO: Apresentando-se em anteversoflexão e mediano. Os seus contornos são regulares e a ecotextura é homogênea. Observa-se estratificação miometrial preservada. Relação corpo-colo normal para a idade. Dimensões: 8,6 x 4,5 x 5,5 cm. Volume estimado 114,7 cm³ O eco endometrial foi bem visibilizado, medindo 14 mm de espessura. Colo uterino de aspecto habitual. Canal endocervical sem alterações ecográficas. OVARIO DIREITO: tópico, contornos regulares e ecotextura habitual. Dimensões: 2,7 x 2,74 x 2,2 cm. Volume estimado: 7,4 cm³. OVÁRIO ESQUERDO: tópico, contornos regulares e ecotextura habitual. Dimensões: 2,7 x 1,6 x 1,6 cm. Volume estimado: 3,4 cm³. FUNDO DE SACO DE DOUGLAS: Sem coleções anormais. IMPRESSÃO DIAGNÓSTICA: - Útero de volume aumenrtado.");
+
+		DocumentGraph doc = new DocumentGraph();
+		doc.setId(93);
+		doc.setAuthor("d1876eb6-5e50-4511-b46d-c50550c56ceb");
+		//		doc.setTimeStamp(timeStamp);
+		//		doc.setSuggestions(suggestions);
+		//		doc.setGraduationYear(graduationYear);
+		//		doc.setResidenceYear(residenceYear);
+		//		doc.setSpecialistYear(specialistYear);
+		//		doc.setMasterYear(masterYear);
+		//		doc.setDoctorYear(doctorYear);
+		doc.setActions("0:Analaudos.init(); 7:Analaudos.addText(); 10:selectSource(w1); 5375:createEdge(w1,w0); 5930:selectSource(w2); 6475:createEdge(w2,w0); 7244:selectSource(w3); 11135:createEdge(w3,w0); 12273:selectSource(w4); 13673:unselectSource(w4); 15705:selectSource(w6); 16938:createEdge(w6,w3); 17913:selectSource(w8); 18627:createEdge(w8,w3); 24404:selectSource(w11); 25543:createEdge(w11,w3); 26536:selectSource(w13); 27878:createEdge(w13,w11); 28657:selectSource(w16); 30292:createEdge(w16,w3); 31431:selectSource(w18); 32312:createEdge(w18,w16); 34670:selectSource(w20); 39310:createEdge(w20,w3); 40055:selectSource(w21); 40636:createEdge(w21,w20); 41248:selectSource(w22); 42517:createEdge(w22,w20); 44254:selectSource(w23); 45982:createEdge(w23,w24); 46978:selectSource(w25); 47621:createEdge(w25,w24); 48228:selectSource(w24); 51517:createEdge(w24,w3); 54242:selectSource(w29); 55087:createEdge(w29,w3); 56178:selectSource(w30); 57410:createEdge(w30,w29); 58379:selectSource(w32); 59872:createEdge(w32,w34); 62620:selectSource(w32); 63608:removeEdge(w32,w34); 64761:selectSource(w32); 65741:createEdge(w32,w29); 66643:selectSource(w34); 67358:createEdge(w34,w29); 67952:selectSource(w35); 68798:createEdge(w35,w34); 69495:selectSource(w35); 70775:createEdge(w35,w32); 71986:selectSource(w35); 73110:createEdge(w35,w30); 74078:selectSource(w36); 77951:createEdge(w36,w3); 79259:selectSource(w38); 80073:createEdge(w38,w36); 81199:selectSource(w39); 81790:createEdge(w39,w38); 94354:selectSource(w41); 95898:createEdge(w41,w3); 96936:selectSource(w42); 98053:createEdge(w42,w41); 98720:selectSource(w45); 99717:createEdge(w45,w41); 100619:selectSource(w44); 101493:createEdge(w44,w45); 102814:selectSource(w47); 105876:createEdge(w47,w46); 106449:selectSource(w46); 107565:createEdge(w46,w41); 108785:selectSource(w48); 110093:createEdge(w48,w47); 113262:selectSource(w46); 114417:removeEdge(w46,w41); 115545:selectSource(w50); 116410:createEdge(w50,w41); 117919:selectSource(w46); 119022:createEdge(w46,w50); 132275:selectSource(w47); 132965:removeEdge(w47,w46); 133797:selectSource(w46); 134782:removeEdge(w46,w50); 136281:selectSource(w47); 137561:createEdge(w47,w50); 240766:selectSource(w51); 243294:createEdge(w51,w3); 244547:selectSource(w52); 245419:createEdge(w52,w51); 247057:selectSource(w54); 248021:createEdge(w54,w51); 248773:selectSource(w55); 250073:createEdge(w55,w54); 253073:selectSource(w56); 254443:createEdge(w56,w3); 255304:selectSource(w57); 255984:createEdge(w57,w56); 398488:selectSource(w58); 399007:createEdge(w58,w59); 399592:selectSource(w59); 400838:createEdge(w59,w56); 402794:selectSource(w60); 404396:createEdge(w60,w59); 405656:selectSource(w61); 407981:createEdge(w61,w0); 409155:selectSource(w62); 409929:createEdge(w62,w61); 449453:selectSource(w63); 451340:createEdge(w63,w61); 452409:selectSource(w64); 453296:createEdge(w64,w61); 454252:selectSource(w65); 454865:createEdge(w65,w64); 455792:selectSource(w67); 456761:createEdge(w67,w61); 457632:selectSource(w68); 458176:createEdge(w68,w67); 458865:selectSource(w69); 459899:createEdge(w69,w61); 460810:selectSource(w70); 461812:createEdge(w70,w69); 463094:selectSource(w72); 464661:createEdge(w72,w69); 465680:selectSource(w74); 466404:createEdge(w74,w69); 466945:selectSource(w75); 467698:createEdge(w75,w74); 468336:selectSource(w75); 469128:createEdge(w75,w70); 470011:selectSource(w75); 471103:createEdge(w75,w72); 472392:selectSource(w76); 473379:createEdge(w76,w61); 475015:selectSource(w78); 475993:createEdge(w78,w76); 476920:selectSource(w79); 478052:createEdge(w79,w78); 483164:selectSource(w80); 485549:createEdge(w80,w0); 486921:selectSource(w81); 487689:createEdge(w81,w80); 489581:selectSource(w82); 490397:createEdge(w82,w80); 491636:selectSource(w83); 492743:createEdge(w83,w80); 494101:selectSource(w84); 495185:createEdge(w84,w83); 496047:selectSource(w86); 496734:createEdge(w86,w80); 497664:selectSource(w87); 498492:createEdge(w87,w86); 499681:selectSource(w88); 500553:createEdge(w88,w80); 501398:selectSource(w89); 501996:createEdge(w89,w88); 504181:selectSource(w91); 505618:createEdge(w91,w88); 506333:selectSource(w93); 506909:createEdge(w93,w88); 507472:selectSource(w94); 508260:createEdge(w94,w93); 508891:selectSource(w94); 509786:createEdge(w94,w89); 510669:selectSource(w94); 511908:createEdge(w94,w91); 513204:selectSource(w95); 514502:createEdge(w95,w80); 516193:selectSource(w97); 517412:createEdge(w97,w95); 518357:selectSource(w98); 519826:createEdge(w98,w97); 520913:selectSource(w99); 527870:createEdge(w99,w0); 529692:selectSource(w101); 530714:createEdge(w101,w99); 531677:selectSource(w103); 532574:createEdge(w103,w101); 534214:selectSource(w104); 536177:createEdge(w104,w105); 536983:selectSource(w106); 537522:createEdge(w106,w105); 538080:selectSource(w105); 538768:createEdge(w105,w99); 540194:selectSource(w107); 546130:createEdge(w107,w0); 548163:selectSource(w108); 549148:createEdge(w108,w107); 550349:selectSource(w110); 551546:createEdge(w110,w108); 552596:selectSource(w112); 553340:createEdge(w112,w110); 554163:selectSource(w113); 554890:createEdge(w113,w112)");
+		doc.setGraphJson("{\"nodes\":[{\"id\":\"w0\",\"fontColor\":\"blue\" , \"label\":\"ULTRASSONOGRAFIA\", \"word\":\"ultrassonografia\"},{\"id\":\"w1\",\"fontColor\":\"#008000\" , \"label\":\"PÉLVICA\", \"word\":\"pelvica\"},{\"id\":\"w2\",\"fontColor\":\"#008000\" , \"label\":\"TRANSVAGINAL.\", \"word\":\"transvaginal\"},{\"id\":\"w3\",\"fontColor\":\"blue\" , \"label\":\"ÚTERO:\", \"word\":\"utero\"},{\"id\":\"w4\",\"fontColor\":\"#000000\" , \"label\":\"Apresentando-se\", \"word\":\"apresentando-se\"},{\"id\":\"w5\", \"label\":\"em\", \"word\":\"em\"},{\"id\":\"w6\",\"fontColor\":\"#008000\" , \"label\":\"anteversoflexão\", \"word\":\"anteversoflexao\"},{\"id\":\"w7\", \"label\":\"e\", \"word\":\"e\"},{\"id\":\"w8\",\"fontColor\":\"#008000\" , \"label\":\"mediano.\", \"word\":\"mediano\"},{\"id\":\"w9\", \"label\":\"Os\", \"word\":\"os\"},{\"id\":\"w10\", \"label\":\"seus\", \"word\":\"seus\"},{\"id\":\"w11\",\"fontColor\":\"blue\" , \"label\":\"contornos\", \"word\":\"contornos\"},{\"id\":\"w12\", \"label\":\"são\", \"word\":\"sao\"},{\"id\":\"w13\",\"fontColor\":\"#008000\" , \"label\":\"regulares\", \"word\":\"regulares\"},{\"id\":\"w14\", \"label\":\"e\", \"word\":\"e\"},{\"id\":\"w15\", \"label\":\"a\", \"word\":\"a\"},{\"id\":\"w16\",\"fontColor\":\"blue\" , \"label\":\"ecotextura\", \"word\":\"ecotextura\"},{\"id\":\"w17\", \"label\":\"é\", \"word\":\"e\"},{\"id\":\"w18\",\"fontColor\":\"#008000\" , \"label\":\"homogênea.\", \"word\":\"homogenea\"},{\"id\":\"w19\", \"label\":\"Observa-se\", \"word\":\"observa-se\"},{\"id\":\"w20\",\"fontColor\":\"blue\" , \"label\":\"estratificação\", \"word\":\"estratificacao\"},{\"id\":\"w21\",\"fontColor\":\"#008000\" , \"label\":\"miometrial\", \"word\":\"miometrial\"},{\"id\":\"w22\",\"fontColor\":\"#008000\" , \"label\":\"preservada.\", \"word\":\"preservada\"},{\"id\":\"w23\",\"fontColor\":\"#008000\" , \"label\":\"Relação\", \"word\":\"relacao\"},{\"id\":\"w24\",\"fontColor\":\"blue\" , \"label\":\"corpo-colo\", \"word\":\"corpo-colo\"},{\"id\":\"w25\",\"fontColor\":\"#008000\" , \"label\":\"normal\", \"word\":\"normal\"},{\"id\":\"w26\", \"label\":\"para\", \"word\":\"para\"},{\"id\":\"w27\", \"label\":\"a\", \"word\":\"a\"},{\"id\":\"w28\", \"label\":\"idade.\", \"word\":\"idade\"},{\"id\":\"w29\",\"fontColor\":\"blue\" , \"label\":\"Dimensões:\", \"word\":\"dimensoes\"},{\"id\":\"w30\",\"fontColor\":\"blue\" , \"label\":\"8,6\", \"word\":\"8,6\"},{\"id\":\"w31\", \"label\":\"x\", \"word\":\"x\"},{\"id\":\"w32\",\"fontColor\":\"blue\" , \"label\":\"4,5\", \"word\":\"4,5\"},{\"id\":\"w33\", \"label\":\"x\", \"word\":\"x\"},{\"id\":\"w34\",\"fontColor\":\"blue\" , \"label\":\"5,5\", \"word\":\"5,5\"},{\"id\":\"w35\",\"fontColor\":\"#008000\" , \"label\":\"cm.\", \"word\":\"cm\"},{\"id\":\"w36\",\"fontColor\":\"blue\" , \"label\":\"Volume\", \"word\":\"volume\"},{\"id\":\"w37\", \"label\":\"estimado\", \"word\":\"estimado\"},{\"id\":\"w38\",\"fontColor\":\"blue\" , \"label\":\"114,7\", \"word\":\"114,7\"},{\"id\":\"w39\",\"fontColor\":\"#008000\" , \"label\":\"cm³\", \"word\":\"cm³\"},{\"id\":\"w40\", \"label\":\"O\", \"word\":\"o\"},{\"id\":\"w41\",\"fontColor\":\"blue\" , \"label\":\"eco\", \"word\":\"eco\"},{\"id\":\"w42\",\"fontColor\":\"#008000\" , \"label\":\"endometrial\", \"word\":\"endometrial\"},{\"id\":\"w43\", \"label\":\"foi\", \"word\":\"foi\"},{\"id\":\"w44\",\"fontColor\":\"#008000\" , \"label\":\"bem\", \"word\":\"bem\"},{\"id\":\"w45\",\"fontColor\":\"blue\" , \"label\":\"visibilizado,\", \"word\":\"visibilizado\"},{\"id\":\"w46\",\"fontColor\":\"#000000\" , \"label\":\"medindo\", \"word\":\"medindo\"},{\"id\":\"w47\",\"fontColor\":\"blue\" , \"label\":\"14\", \"word\":\"14\"},{\"id\":\"w48\",\"fontColor\":\"#008000\" , \"label\":\"mm\", \"word\":\"mm\"},{\"id\":\"w49\", \"label\":\"de\", \"word\":\"de\"},{\"id\":\"w50\",\"fontColor\":\"blue\" , \"label\":\"espessura.\", \"word\":\"espessura\"},{\"id\":\"w51\",\"fontColor\":\"blue\" , \"label\":\"Colo\", \"word\":\"colo\"},{\"id\":\"w52\",\"fontColor\":\"#008000\" , \"label\":\"uterino\", \"word\":\"uterino\"},{\"id\":\"w53\", \"label\":\"de\", \"word\":\"de\"},{\"id\":\"w54\",\"fontColor\":\"blue\" , \"label\":\"aspecto\", \"word\":\"aspecto\"},{\"id\":\"w55\",\"fontColor\":\"#008000\" , \"label\":\"habitual.\", \"word\":\"habitual\"},{\"id\":\"w56\",\"fontColor\":\"blue\" , \"label\":\"Canal\", \"word\":\"canal\"},{\"id\":\"w57\",\"fontColor\":\"#008000\" , \"label\":\"endocervical\", \"word\":\"endocervical\"},{\"id\":\"w58\",\"fontColor\":\"#008000\" , \"label\":\"sem\", \"word\":\"sem\"},{\"id\":\"w59\",\"fontColor\":\"blue\" , \"label\":\"alterações\", \"word\":\"alteracoes\"},{\"id\":\"w60\",\"fontColor\":\"#008000\" , \"label\":\"ecográficas.\", \"word\":\"ecograficas\"},{\"id\":\"w61\",\"fontColor\":\"blue\" , \"label\":\"OVARIO\", \"word\":\"ovario\"},{\"id\":\"w62\",\"fontColor\":\"#008000\" , \"label\":\"DIREITO:\", \"word\":\"direito\"},{\"id\":\"w63\",\"fontColor\":\"#008000\" , \"label\":\"tópico,\", \"word\":\"topico\"},{\"id\":\"w64\",\"fontColor\":\"blue\" , \"label\":\"contornos\", \"word\":\"contornos\"},{\"id\":\"w65\",\"fontColor\":\"#008000\" , \"label\":\"regulares\", \"word\":\"regulares\"},{\"id\":\"w66\", \"label\":\"e\", \"word\":\"e\"},{\"id\":\"w67\",\"fontColor\":\"blue\" , \"label\":\"ecotextura\", \"word\":\"ecotextura\"},{\"id\":\"w68\",\"fontColor\":\"#008000\" , \"label\":\"habitual.\", \"word\":\"habitual\"},{\"id\":\"w69\",\"fontColor\":\"blue\" , \"label\":\"Dimensões:\", \"word\":\"dimensoes\"},{\"id\":\"w70\",\"fontColor\":\"blue\" , \"label\":\"2,7\", \"word\":\"2,7\"},{\"id\":\"w71\", \"label\":\"x\", \"word\":\"x\"},{\"id\":\"w72\",\"fontColor\":\"blue\" , \"label\":\"2,74\", \"word\":\"2,74\"},{\"id\":\"w73\", \"label\":\"x\", \"word\":\"x\"},{\"id\":\"w74\",\"fontColor\":\"blue\" , \"label\":\"2,2\", \"word\":\"2,2\"},{\"id\":\"w75\",\"fontColor\":\"#008000\" , \"label\":\"cm.\", \"word\":\"cm\"},{\"id\":\"w76\",\"fontColor\":\"blue\" , \"label\":\"Volume\", \"word\":\"volume\"},{\"id\":\"w77\", \"label\":\"estimado:\", \"word\":\"estimado\"},{\"id\":\"w78\",\"fontColor\":\"blue\" , \"label\":\"7,4\", \"word\":\"7,4\"},{\"id\":\"w79\",\"fontColor\":\"#008000\" , \"label\":\"cm³.\", \"word\":\"cm³\"},{\"id\":\"w80\",\"fontColor\":\"blue\" , \"label\":\"OVÁRIO\", \"word\":\"ovario\"},{\"id\":\"w81\",\"fontColor\":\"#008000\" , \"label\":\"ESQUERDO:\", \"word\":\"esquerdo\"},{\"id\":\"w82\",\"fontColor\":\"#008000\" , \"label\":\"tópico,\", \"word\":\"topico\"},{\"id\":\"w83\",\"fontColor\":\"blue\" , \"label\":\"contornos\", \"word\":\"contornos\"},{\"id\":\"w84\",\"fontColor\":\"#008000\" , \"label\":\"regulares\", \"word\":\"regulares\"},{\"id\":\"w85\", \"label\":\"e\", \"word\":\"e\"},{\"id\":\"w86\",\"fontColor\":\"blue\" , \"label\":\"ecotextura\", \"word\":\"ecotextura\"},{\"id\":\"w87\",\"fontColor\":\"#008000\" , \"label\":\"habitual.\", \"word\":\"habitual\"},{\"id\":\"w88\",\"fontColor\":\"blue\" , \"label\":\"Dimensões:\", \"word\":\"dimensoes\"},{\"id\":\"w89\",\"fontColor\":\"blue\" , \"label\":\"2,7\", \"word\":\"2,7\"},{\"id\":\"w90\", \"label\":\"x\", \"word\":\"x\"},{\"id\":\"w91\",\"fontColor\":\"blue\" , \"label\":\"1,6\", \"word\":\"1,6\"},{\"id\":\"w92\", \"label\":\"x\", \"word\":\"x\"},{\"id\":\"w93\",\"fontColor\":\"blue\" , \"label\":\"1,6\", \"word\":\"1,6\"},{\"id\":\"w94\",\"fontColor\":\"#008000\" , \"label\":\"cm.\", \"word\":\"cm\"},{\"id\":\"w95\",\"fontColor\":\"blue\" , \"label\":\"Volume\", \"word\":\"volume\"},{\"id\":\"w96\", \"label\":\"estimado:\", \"word\":\"estimado\"},{\"id\":\"w97\",\"fontColor\":\"blue\" , \"label\":\"3,4\", \"word\":\"3,4\"},{\"id\":\"w98\",\"fontColor\":\"#008000\" , \"label\":\"cm³.\", \"word\":\"cm³\"},{\"id\":\"w99\",\"fontColor\":\"blue\" , \"label\":\"FUNDO\", \"word\":\"fundo\"},{\"id\":\"w100\", \"label\":\"DE\", \"word\":\"de\"},{\"id\":\"w101\",\"fontColor\":\"blue\" , \"label\":\"SACO\", \"word\":\"saco\"},{\"id\":\"w102\", \"label\":\"DE\", \"word\":\"de\"},{\"id\":\"w103\",\"fontColor\":\"#008000\" , \"label\":\"DOUGLAS:\", \"word\":\"douglas\"},{\"id\":\"w104\",\"fontColor\":\"#008000\" , \"label\":\"Sem\", \"word\":\"sem\"},{\"id\":\"w105\",\"fontColor\":\"blue\" , \"label\":\"coleções\", \"word\":\"colecoes\"},{\"id\":\"w106\",\"fontColor\":\"#008000\" , \"label\":\"anormais.\", \"word\":\"anormais\"},{\"id\":\"w107\",\"fontColor\":\"blue\" , \"label\":\"IMPRESSÃO\", \"word\":\"impressao\"},{\"id\":\"w108\",\"fontColor\":\"blue\" , \"label\":\"DIAGNÓSTICA:\", \"word\":\"diagnostica\"},{\"id\":\"w109\", \"label\":\"-\", \"word\":\"-\"},{\"id\":\"w110\",\"fontColor\":\"blue\" , \"label\":\"Útero\", \"word\":\"utero\"},{\"id\":\"w111\", \"label\":\"de\", \"word\":\"de\"},{\"id\":\"w112\",\"fontColor\":\"blue\" , \"label\":\"volume\", \"word\":\"volume\"},{\"id\":\"w113\",\"fontColor\":\"#008000\" , \"label\":\"aumenrtado\", \"word\":\"aumenrtado\"}], \"edges\":[[\"w1\", \"w0\"],[\"w2\", \"w0\"],[\"w3\", \"w0\"],[\"w6\", \"w3\"],[\"w8\", \"w3\"],[\"w11\", \"w3\"],[\"w13\", \"w11\"],[\"w16\", \"w3\"],[\"w18\", \"w16\"],[\"w20\", \"w3\"],[\"w21\", \"w20\"],[\"w22\", \"w20\"],[\"w23\", \"w24\"],[\"w25\", \"w24\"],[\"w24\", \"w3\"],[\"w29\", \"w3\"],[\"w30\", \"w29\"],[\"w32\", \"w29\"],[\"w34\", \"w29\"],[\"w35\", \"w34\"],[\"w35\", \"w32\"],[\"w35\", \"w30\"],[\"w36\", \"w3\"],[\"w38\", \"w36\"],[\"w39\", \"w38\"],[\"w41\", \"w3\"],[\"w42\", \"w41\"],[\"w45\", \"w41\"],[\"w44\", \"w45\"],[\"w48\", \"w47\"],[\"w50\", \"w41\"],[\"w47\", \"w50\"],[\"w51\", \"w3\"],[\"w52\", \"w51\"],[\"w54\", \"w51\"],[\"w55\", \"w54\"],[\"w56\", \"w3\"],[\"w57\", \"w56\"],[\"w58\", \"w59\"],[\"w59\", \"w56\"],[\"w60\", \"w59\"],[\"w61\", \"w0\"],[\"w62\", \"w61\"],[\"w63\", \"w61\"],[\"w64\", \"w61\"],[\"w65\", \"w64\"],[\"w67\", \"w61\"],[\"w68\", \"w67\"],[\"w69\", \"w61\"],[\"w70\", \"w69\"],[\"w72\", \"w69\"],[\"w74\", \"w69\"],[\"w75\", \"w74\"],[\"w75\", \"w70\"],[\"w75\", \"w72\"],[\"w76\", \"w61\"],[\"w78\", \"w76\"],[\"w79\", \"w78\"],[\"w80\", \"w0\"],[\"w81\", \"w80\"],[\"w82\", \"w80\"],[\"w83\", \"w80\"],[\"w84\", \"w83\"],[\"w86\", \"w80\"],[\"w87\", \"w86\"],[\"w88\", \"w80\"],[\"w89\", \"w88\"],[\"w91\", \"w88\"],[\"w93\", \"w88\"],[\"w94\", \"w93\"],[\"w94\", \"w89\"],[\"w94\", \"w91\"],[\"w95\", \"w80\"],[\"w97\", \"w95\"],[\"w98\", \"w97\"],[\"w99\", \"w0\"],[\"w101\", \"w99\"],[\"w103\", \"w101\"],[\"w104\", \"w105\"],[\"w106\", \"w105\"],[\"w105\", \"w99\"],[\"w107\", \"w0\"],[\"w108\", \"w107\"],[\"w110\", \"w108\"],[\"w112\", \"w110\"],[\"w113\", \"w112\"]], \"version\":\"0.2\"}");
+		//		doc.setGraphDot(source);
+		doc.setDocumentContent(con);
+
+		return doc;
+	}
+
 }
